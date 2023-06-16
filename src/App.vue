@@ -5,6 +5,7 @@
         <BaseAvatar />
         <span>Beatrice Franz</span>
       </div>
+      <div class="divider-soft"/>
       <div class="base-menu">
         <RouterLink class="base-links"  v-for="[name, link] in names" :key="name" :to="link">
           {{ name }}
@@ -38,7 +39,7 @@ const names: [string, string][] = [
   bottom: 0;
   width: 280px;
   background-color: white;
-  border-right: 3px solid #e6e6e6;
+  border-right: 1px solid #e6e6e6;
 }
 
 #main-section {
@@ -55,7 +56,7 @@ const names: [string, string][] = [
 .avatar-container {
   display: flex;
   justify-content: center;
-  margin: 48px 0;
+  margin: 20px 0;
 }
 
 
@@ -65,6 +66,7 @@ const names: [string, string][] = [
   flex-direction: column;
   padding-left: 32px;
   padding-right: 28px;
+  padding-top: 28px;
   gap: 10px
 }
 

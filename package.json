@@ -11,6 +11,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore"
   },
   "dependencies": {
+    "@floating-ui/vue": "^1.0.1",
     "@fluentui/web-components": "^2.5.15",
     "@microsoft/fast-element": "^1.12.0",
     "date-fns": "^2.30.0",

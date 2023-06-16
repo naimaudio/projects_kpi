@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     
-    <span>History</span>
+    <h1 class="title">History</h1>
   </div>
 </template>
 

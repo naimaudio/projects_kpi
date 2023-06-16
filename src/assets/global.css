@@ -20,6 +20,7 @@
 .column-flex {
     display: flex;
     flex-direction: column;
+    gap: 14px;
     align-items: flex-start;
 }
 
@@ -27,4 +28,21 @@
     display: flex;
     gap: 14px;
     align-items: center;
+}
+
+.divider {
+    border-bottom: 1px #d1d1d1 solid;
+    width: 100%;
+    margin: 10px 0;
+  }
+
+.divider-soft {
+    border-bottom: 1px #e6e6e6 solid;
+    width: 100%;
+    margin: 10px 0;
+
+}
+
+.inline {
+    display: flex;
 }

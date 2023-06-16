@@ -5,7 +5,7 @@
       <span>Please fill in the schedules for the week :</span>
       <div class="column-container">
         <div class="raw-container" v-for="week in weeks" :key="week.number">
-          <BaseButton @click="() => router.push({path: `/declare/${week.number}-2023`})">{{week.number}}</BaseButton> 
+          <BaseButton @click="() => router.push({path: `/declare/${week.number}/2023`})">{{week.number}}</BaseButton> 
           <span> {{ weekNumberToString(week.number, 2023) }}</span>
         </div>
       </div>
@@ -18,7 +18,9 @@ import { weekNumberToString } from '@/utilities/main';
 import { useRouter } from "vue-router";
 import BaseButton from '@/components/BaseButton.vue';
 const router = useRouter()
-export interface Week {
+
+
+interface Week {
   number: number
 }
 
