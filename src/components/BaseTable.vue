@@ -22,6 +22,7 @@
 <script setup lang="ts" generic="T extends {id: string | number; favorite: boolean}">
 import { computed } from 'vue';
 import StarOutline from '@/components/icons/StarOutline.vue'
+import type { Header } from '@/typing';
 const props = defineProps<{
     headers: Header[]
     items: T[]

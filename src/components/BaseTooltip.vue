@@ -10,8 +10,8 @@ import InfoOutline from '@/components/icons/InfoOutline.vue'
 import {useFloating} from '@floating-ui/vue';
 import { ref } from 'vue';
 const mouseover = ref<boolean>(false)
-const infoIcon =ref(null)
-const tooltip = ref(null)
+const infoIcon =ref<Element|null>(null)
+const tooltip = ref<HTMLElement|null>( null)
 const {floatingStyles} = useFloating(infoIcon, tooltip, {
   placement: 'bottom-end',
 
