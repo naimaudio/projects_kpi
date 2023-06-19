@@ -16,9 +16,10 @@
               </div>
             </BaseTooltip>
           </div>
-          <fluent-select v-model="methodSelected" >
-            <fluent-option value="daily">Daily</fluent-option>
-            <fluent-option value="weekly">Weekly</fluent-option>
+          <fluent-select v-model="methodSelected">
+            <fluent-option v-for="inputMethodKey in inputMethodKeys" :key="inputMethodKey" :value="inputMethodKey">
+              {{ inputMethods[inputMethodKey] }}
+            </fluent-option>
           </fluent-select>
         </div>
       </div>
@@ -30,7 +31,7 @@
             <div></div>
             <span>Hours</span>
           </div>
-          <div v-for="project in projects" :key="project.name" class="table-raw-container">
+          <div v-for="project in ongoingDeclaration" :key="project.name" class="table-raw-container">
             <div class="raw-container">
               <DeleteOutline clickable/>
               <span class="prefix align-center">{{ project.name }}</span>
@@ -69,10 +70,8 @@
         <div class="table-vertical">
           <div class="table-legend">
             <span class="table-cell"></span>
-            <span class="table-cell">P1</span>
-            <span class="table-cell">P2</span>
-            <span class="table-cell">P3</span>
-          </div>     
+            <span class="table-cell" v-for="declaration in elementaryDeclaration" :key="declaration.name">{{declaration.name}}</span>
+          </div>
           <div class="table-column" v-for="day in workDayKeys" :key="day">
             <span class="table-cell">{{workDays[day]}}</span>
             <span class="table-cell" v-for="declaration in dailyHoursSpend[day]" :key="declaration.name">
@@ -104,17 +103,15 @@ import DeleteOutline from "@/components/icons/DeleteOutline.vue"
 import AddOutline from '@/components/icons/AddOutline.vue';
 import { weekNumberToString } from '@/utilities/main';
 import BaseTooltip from '@/components/BaseTooltip.vue'
+import { inputMethods, inputMethodKeys, type DeclarationInput } from '@/typing'
+import { useProjectStore } from '@/stores/projects';
 
 const router = useRouter()
 const route = useRoute()
 
 
-interface Declaration {
-  name: string,
-  hours: string
-}
 
-type DailyDeclaration = Record<days, Declaration[]>
+type DailyDeclaration = Record<days, DeclarationInput[]>
 const workDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"] as const
 type days = typeof workDayKeys[number]
 
@@ -125,93 +122,31 @@ const workDays: Record<days,string> = {
   "thursday": "Thursday", 
   "friday": "Friday"
 }
-const projects = ref<Declaration[]>([
-  {
-    name: 'P1',
-    hours: '0'
-  },
-  {
-    name: 'P2',
-    hours: '0'
-  },
-  {
-    name: 'Days off',
-    hours: '0'
-  }
-])
+
+
+const projectStore = useProjectStore()
+
+const elementaryDeclaration = computed<DeclarationInput[]>(()=> {
+  return projectStore.displayableProjects.reduce<DeclarationInput[]>(
+    (declarations, project) => 
+    { 
+      if (project.favorite){
+        declarations.push({"name": project.name, "hours": '0'})
+      }
+      return declarations
+    }, [])})
+
+const ongoingDeclaration = ref<DeclarationInput[]>(
+  elementaryDeclaration.value
+)
 
 const dailyHoursSpend = ref<DailyDeclaration>(
   {
-    monday: [
-      {
-        name: 'P1',
-        hours: '0'
-      },
-      {
-        name: 'P2',
-        hours: '0'
-      },
-      {
-        name: 'Days off',
-        hours: '0'
-      }
-    ],
-    tuesday: [
-      {
-        name: 'P1',
-        hours: '0'
-      },
-      {
-        name: 'P2',
-        hours: '0'
-      },
-      {
-        name: 'Days off',
-        hours: '0'
-      }
-    ],
-    wednesday: [
-      {
-        name: 'P1',
-        hours: '0'
-      },
-      {
-        name: 'P2',
-        hours: '0'
-      },
-      {
-        name: 'Days off',
-        hours: '0'
-      }
-    ],
-    thursday: [
-      {
-        name: 'P1',
-        hours: '0'
-      },
-      {
-        name: 'P2',
-        hours: '0'
-      },
-      {
-        name: 'Days off',
-        hours: '7'
-      }
-    ],
-    friday: [
-      {
-        name: 'P1',
-        hours: '4'
-      },
-      {
-        name: 'P2',
-        hours: '1'
-      },
-      {
-        name: 'Days off',
-        hours: '0'
-      }
-    ]
+    monday: elementaryDeclaration.value,
+    tuesday: elementaryDeclaration.value,
+    wednesday: elementaryDeclaration.value,
+    thursday: elementaryDeclaration.value,
+    friday: elementaryDeclaration.value
   }
 )
 
@@ -221,7 +156,7 @@ const dailyHoursSpend = ref<DailyDeclaration>(
 const methodSelected = ref<'weekly' | 'daily'>('weekly')
 const sumProjectHours = computed<number>(() => {
   let total: number = 0
-  projects.value.forEach(declaration => {
+  ongoingDeclaration.value.forEach(declaration => {
     total += Number(declaration.hours)
   }); 
   return total

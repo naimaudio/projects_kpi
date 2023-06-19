@@ -25,8 +25,7 @@ import BaseAvatar from './components/BaseAvatar.vue';
 const names: [string, string][] = [
   ['Declare hours', '/declare'],
   ['Declaration history', '/history'],
-  ['Projects', '/projects'],
-  ['Test', '/test']
+  ['Projects', '/projects']
 ]
 </script>
 <style scoped>

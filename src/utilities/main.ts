@@ -1,5 +1,6 @@
 
 const now = new Date()
+import type { Project, RawProject } from '@/typing/project'
 import {parse, format} from 'date-fns'
 
 export const weekNumberToString = (weekNumber: number, year: number) => {
@@ -19,4 +20,15 @@ export const weekNumberToString = (weekNumber: number, year: number) => {
     const formatedLastDay:string = format(lastDay, "MMMM d, yyyy")
     return `${formatedFirstDay} to the ${formatedLastDay}`
   }
+}
+
+export const rawProjectToProject: (project:RawProject) => Project = (project: RawProject) => {
+  const displayableProject: Project = {
+    id: project.id,
+    manager: project?.manager,
+    favorite: true,
+    name: project.name,
+    time_spend: 0
+  }
+  return displayableProject
 }
