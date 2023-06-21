@@ -3,7 +3,7 @@ import type { Project, RawProject } from "../typing/project"
 import { ref } from "vue";
 import { rawProjectToProject } from "@/utilities/main";
 
-export const useProjectStore = defineStore('main', () => {
+export const useProjectStore = defineStore('project', () => {
   const projects = ref<RawProject[]>([{
     id: "FCA",
     name: "Management",
