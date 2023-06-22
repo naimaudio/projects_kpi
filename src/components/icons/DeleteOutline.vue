@@ -24,13 +24,5 @@ const props = withDefaults(defineProps<Props>(),
   background-color: #e6e6e6;
   cursor: pointer;
 }
-.svg-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 100%;
-}
+
 </style>

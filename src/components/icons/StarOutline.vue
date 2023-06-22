@@ -29,14 +29,5 @@ const props = withDefaults(defineProps<Props>(),
 .clickable:hover {
   cursor: pointer;
 }
-.svg-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 100%;
-  user-select: none;
-}
+
 </style>
