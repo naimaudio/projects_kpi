@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import type { Project, RawProject } from "../typing/project"
+import type { RawProject } from "../typing/project"
 import { ref } from "vue";
-import { rawProjectToProject } from "@/utilities/main";
 
 export const useProjectStore = defineStore('project', () => {
   const projects = ref<RawProject[]>([{
@@ -13,7 +12,7 @@ export const useProjectStore = defineStore('project', () => {
   },
   {
     id: "FCC",
-    name: "Conformity/Regulation",
+    name: "Conformity",
     division: ["HOME", "MOTORITIES", "PRO"],
     sub_category: "ETC"
   },
@@ -27,6 +26,5 @@ export const useProjectStore = defineStore('project', () => {
     projects.value.push(project)
   }
 
-  const displayableProjects = ref<Project[]>(projects.value.map(( project ) => rawProjectToProject(project)))
-  return {projects, displayableProjects, addProject}
+  return {projects, addProject}
 })

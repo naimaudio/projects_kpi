@@ -23,34 +23,15 @@
           </fluent-select>
         </div>
       </div>
+      <!-- WEEKLY METHOD -->
       <div class="declaration-container column-flex" v-if="methodSelected === 'weekly'">
         <span class="prefix sub-title">Week {{ route.params.week }}</span>
         <span class="prefix">Please input your hours for {{ weekNumberToString(route.params.week, route.params.year) }} </span>
         <div class="declaration-inputs prefix">
-          <div class="table-raw-container table-header">
-            <div></div>
-            <span>Hours</span>
-          </div>
-          <div v-for="project in ongoingDeclaration" :key="project.name" class="table-raw-container">
-            <div class="raw-container">
-              <DeleteOutline clickable/>
-              <span class="prefix align-center">{{ project.name }}</span>
-            </div>
-            <div style="width: 100px;">
-              <fluent-number-field v-model="project.hours" :min="0" :max="35"/>
-            </div>
-          </div>
-          <div class="inline ">
-            <AddOutline clickable/>
-            <span class="prefix align-center italic">add a project to favorites</span>
-          </div>
-          <div class="divider"/>
-          <div class="table-raw-container">
-            <span class="prefix align-center">Total</span>
-            <div class="prefix"> 
-              <span :class="{'error-validation': sumProjectHours > 35 }">{{sumProjectHours}}</span>
-              <span> / 35</span></div>
-          </div>
+          <HoursForm :modelValue="ongoingDeclaration" @update:modelValue="(index, value) => ongoingDeclaration[index].hours = value" @remove="(projectId, index) => {
+            userStore.setFavorite(projectId, false)
+            ongoingDeclaration.splice(index, 1)
+          }"/>
           <div class="table-raw-gap"/>
           <div class="table-raw-container-2">
             <span class="prefix">Commentary (optional)</span>
@@ -63,6 +44,7 @@
           </div>
         </div>
       </div>
+      <!-- DAILY METHOD -->
       <div class="declaration-container column-flex" v-else>
         <span class="prefix sub-title">Week {{ route.params.week }}</span>
         <span class="prefix">Please input your hours for {{ weekNumberToString(route.params.week, route.params.year) }} </span>
@@ -70,11 +52,14 @@
         <div class="table-vertical">
           <div class="table-legend">
             <span class="table-cell"></span>
-            <span class="table-cell" v-for="declaration in elementaryDeclaration" :key="declaration.name">{{declaration.name}}</span>
+            <span class="table-cell" v-for="declaration in userStore.getElementaryDeclaration" :key="declaration.name">{{declaration.name}}</span>
           </div>
-          <div class="table-column" v-for="day in workDayKeys" :key="day">
+          <div class="table-column" v-for="day in workDayKeys" :key="day" @click="(event:MouseEvent) => {
+            router.push({name: 'dayDeclaration', params: {...route.params, day: day}, query: route.query})
+            event.stopPropagation()
+          }">
             <span class="table-cell">{{workDays[day]}}</span>
-            <span class="table-cell" v-for="declaration in dailyHoursSpend[day]" :key="declaration.name">
+            <span class="table-cell" v-for="declaration in userStore.dailyHoursSpend[day]" :key="declaration.name">
               {{ declaration.hours }}
             </span>
           </div>
@@ -91,69 +76,44 @@
         </div>
       </div>
     </div>
+    <RouterView/>
+        
   </div>
   
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import arrowPrevious from "@/assets/icons/arrow-previous.svg"
 import { useRoute, useRouter } from "vue-router";
-import DeleteOutline from "@/components/icons/DeleteOutline.vue"
-import AddOutline from '@/components/icons/AddOutline.vue';
+import HoursForm from '@/components/input_hours/HoursForm.vue';
 import { weekNumberToString } from '@/utilities/main';
 import BaseTooltip from '@/components/BaseTooltip.vue'
-import { inputMethods, inputMethodKeys, type DeclarationInput } from '@/typing'
+import { inputMethods, inputMethodKeys, type DeclarationInput, type InputMethod, workDayKeys, workDays } from '@/typing'
 import { useProjectStore } from '@/stores/projects';
+import { useUserStore } from '@/stores/user';
 
 const router = useRouter()
 const route = useRoute()
-
-
-
-type DailyDeclaration = Record<days, DeclarationInput[]>
-const workDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"] as const
-type days = typeof workDayKeys[number]
-
-const workDays: Record<days,string> = {
-  "monday": "Monday", 
-  "tuesday": "Tuesday", 
-  "wednesday":"Wednesday", 
-  "thursday": "Thursday", 
-  "friday": "Friday"
-}
+const userStore = useUserStore()
 
 
 const projectStore = useProjectStore()
 
-const elementaryDeclaration = computed<DeclarationInput[]>(()=> {
-  return projectStore.displayableProjects.reduce<DeclarationInput[]>(
-    (declarations, project) => 
-    { 
-      if (project.favorite){
-        declarations.push({"name": project.name, "hours": '0'})
-      }
-      return declarations
-    }, [])})
 
 const ongoingDeclaration = ref<DeclarationInput[]>(
-  elementaryDeclaration.value
+  userStore.getElementaryDeclaration
 )
 
-const dailyHoursSpend = ref<DailyDeclaration>(
-  {
-    monday: elementaryDeclaration.value,
-    tuesday: elementaryDeclaration.value,
-    wednesday: elementaryDeclaration.value,
-    thursday: elementaryDeclaration.value,
-    friday: elementaryDeclaration.value
-  }
+const methodSelected = ref<InputMethod>( 
+  inputMethodKeys.includes(route.query["method"]) ? route.query["method"] :
+    userStore.$state.preferences.preferedMethod
 )
 
+watch(methodSelected, (method)=>{
+  router.push({ path: route.path, query: {method: method}})
+})
 
-
-
-const methodSelected = ref<'weekly' | 'daily'>('weekly')
 const sumProjectHours = computed<number>(() => {
   let total: number = 0
   ongoingDeclaration.value.forEach(declaration => {
@@ -225,10 +185,6 @@ const sumProjectHours = computed<number>(() => {
   flex-direction: column;
   gap: 6px;
   width: 100%
-}
-
-.prefix {
-  padding-left: 12px;
 }
 
 .align-center {

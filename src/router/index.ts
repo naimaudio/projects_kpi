@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DeclarationView from "@/views/declaration/DeclarationView.vue"
+import DeclarationView from "@/views/DeclarationView.vue"
 import ProjectsView from "@/views/ProjectsView.vue"
 import HistoryView from "@/views/HistoryView.vue"
-import TestView from "@/views/testView.vue"
-import HoursInputView from '@/views/declaration/HoursInputView.vue'
+import ModalHoursView from '@/views/declaration/ModalHoursView.vue'
+import HoursView from '@/views/declaration/HoursView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,7 +16,12 @@ const router = createRouter({
     {
       path: '/declare/:week/:year',
       name: 'declarationDate',
-      component: HoursInputView,
+      component: HoursView,
+      children: [{
+        path: ':day',
+        name: 'dayDeclaration',
+        component: ModalHoursView
+      }]
     },
     {
       path: '/history',

@@ -18,8 +18,9 @@ export const inputMethods: Record<InputMethod, string> = {
 }
 
 export interface DeclarationInput {
+    projectId: string,
     name: string,
-    hours: string
+    hours: number
 }
 
 export interface Declaration {
@@ -35,4 +36,18 @@ export interface User {
     id: number
     username: string
     email: string
+}
+
+export type DailyDeclaration = Record<days, DeclarationInput[]>
+
+  
+export const workDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"] as const
+export type days = typeof workDayKeys[number]
+
+export const workDays: Record<days,string> = {
+  "monday": "Monday", 
+  "tuesday": "Tuesday", 
+  "wednesday":"Wednesday", 
+  "thursday": "Thursday", 
+  "friday": "Friday"
 }

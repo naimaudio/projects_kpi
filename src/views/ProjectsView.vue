@@ -3,15 +3,14 @@
     <h1 class="title">Projects</h1>
     <div class="divider"></div>
     <div>
-      <BaseTable :headers="headers" :items="projectStore.displayableProjects" @change="change"/>
+      <BaseTable :headers="headers" :items="userStore.getUserProjects" @change="change" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import BaseTable from '@/components/BaseTable.vue';
-import { computed } from 'vue';
-import { useProjectStore } from "@/stores/projects"
+import { useUserStore } from '@/stores/user';
 import type { Header } from '@/typing';
 import type { Project } from '@/typing/project';
 
@@ -22,9 +21,11 @@ const headers: Header[] = [{name: 'Id', id: 'id', filterable: false},
   {name: 'Fav', id: 'favorite', filterable: false}]
 
 
-const projectStore = useProjectStore()
-
+const userStore = useUserStore()
 function change<K extends keyof Project>(index: number, field: K, value: Project[K]){
-  projectStore.displayableProjects[index][field] = value
+
+  if (field === 'favorite') {
+    userStore.setFavorite(userStore.getUserProjects[index].id, value)
+  }
 }
 </script>
