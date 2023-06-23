@@ -1,5 +1,5 @@
 export interface Project {
-    id: string
+    id: number
     name: string
     manager?: string
     time_spend: number
@@ -16,7 +16,7 @@ export enum Classification {
 export type ExpansionRenewal = "EXPANSION" | "RENEWAL"
   
 export interface RawProject {
-      id: string
+      id: number
       division: Division[]
       sub_category: SubCategory
       classification?: Classification

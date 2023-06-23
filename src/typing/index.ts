@@ -18,7 +18,7 @@ export const inputMethods: Record<InputMethod, string> = {
 }
 
 export interface DeclarationInput {
-    projectId: string,
+    projectId: number,
     name: string,
     hours: number
 }

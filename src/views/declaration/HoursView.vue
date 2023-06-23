@@ -28,10 +28,18 @@
         <span class="prefix sub-title">Week {{ route.params.week }}</span>
         <span class="prefix">Please input your hours for {{ weekNumberToString(route.params.week, route.params.year) }} </span>
         <div class="declaration-inputs prefix">
-          <HoursForm :modelValue="ongoingDeclaration" @update:modelValue="(index, value) => ongoingDeclaration[index].hours = value" @remove="(projectId, index) => {
+          <HoursForm deletable :modelValue="ongoingDeclaration" @update:modelValue="(index, value) => ongoingDeclaration[index].hours = value" @remove="(projectId, index) => {
             userStore.setFavorite(projectId, false)
             ongoingDeclaration.splice(index, 1)
           }"/>
+          <div class="divider"/>
+          <div class="table-raw-container">
+            <span class="prefix align-center">Total</span>
+            <div class="prefix"> 
+              <span :class="{'error-validation': sumProjectHours > 35 }">{{sumProjectHours}}</span>
+              <span> / 35</span>
+            </div>
+          </div>
           <div class="table-raw-gap"/>
           <div class="table-raw-container-2">
             <span class="prefix">Commentary (optional)</span>
@@ -40,7 +48,7 @@
           <div class="table-raw-gap"/>
           <div class="footer-buttons">
             <fluent-button> Save draft</fluent-button>
-            <fluent-button appearance="accent" :disabled="sumProjectHours != 35">Validate</fluent-button>
+            <fluent-button appearance="accent" :disabled="sumProjectHours != 35" @click="validateDeclaration">Validate</fluent-button>
           </div>
         </div>
       </div>
@@ -52,7 +60,11 @@
         <div class="table-vertical">
           <div class="table-legend">
             <span class="table-cell"></span>
-            <span class="table-cell" v-for="declaration in userStore.getElementaryDeclaration" :key="declaration.name">{{declaration.name}}</span>
+            <span class="table-cell" v-for="(declaration, index) in userStore.getElementaryDeclaration" :key="declaration.projectId">
+              <DeleteOutline clickable @click="() => { 
+                userStore.setFavorite(declaration.projectId, false)
+                ongoingDeclaration.splice(index, 1)}"/>
+              <span>{{declaration.name}}</span></span>
           </div>
           <div class="table-column" v-for="day in workDayKeys" :key="day" @click="(event:MouseEvent) => {
             router.push({name: 'dayDeclaration', params: {...route.params, day: day}, query: route.query})
@@ -64,6 +76,14 @@
             </span>
           </div>
         </div>
+        <div class="divider"/>
+        <div class="table-raw-container">
+          <span class="prefix align-center">Total</span>
+          <div class="prefix"> 
+            <span :class="{'error-validation': sumProjectHours > 35 }">{{sumProjectHours}}</span>
+            <span> / 35</span>
+          </div>
+        </div>
         <div class="table-raw-gap"/>
         <div class="table-raw-container-2">
           <span class="prefix">Commentary (optional)</span>
@@ -72,7 +92,7 @@
         <div class="table-raw-gap"/>
         <div class="footer-buttons">
           <fluent-button> Save draft</fluent-button>
-          <fluent-button appearance="accent" :disabled="sumProjectHours != 35">Validate</fluent-button>
+          <fluent-button appearance="accent" :disabled="sumProjectHours != 35" @click="validateDeclaration">Validate</fluent-button>
         </div>
       </div>
     </div>
@@ -92,6 +112,7 @@ import BaseTooltip from '@/components/BaseTooltip.vue'
 import { inputMethods, inputMethodKeys, type DeclarationInput, type InputMethod, workDayKeys, workDays } from '@/typing'
 import { useProjectStore } from '@/stores/projects';
 import { useUserStore } from '@/stores/user';
+import DeleteOutline from '@/components/icons/DeleteOutline.vue';
 
 const router = useRouter()
 const route = useRoute()
@@ -105,10 +126,15 @@ const ongoingDeclaration = ref<DeclarationInput[]>(
   userStore.getElementaryDeclaration
 )
 
-const methodSelected = ref<InputMethod>( 
-  inputMethodKeys.includes(route.query["method"]) ? route.query["method"] :
-    userStore.$state.preferences.preferedMethod
+const methodSelected = ref<InputMethod>(
+  'weekly'
 )
+// if (inputMethodKeys.includes(route.query["method"])){
+//     return route.query["method"]
+//   }
+//   else {  return  userStore.$state.preferences.preferedMethod
+// }
+
 
 watch(methodSelected, (method)=>{
   router.push({ path: route.path, query: {method: method}})
@@ -116,11 +142,51 @@ watch(methodSelected, (method)=>{
 
 const sumProjectHours = computed<number>(() => {
   let total: number = 0
-  ongoingDeclaration.value.forEach(declaration => {
-    total += Number(declaration.hours)
-  }); 
+  if(methodSelected.value === 'weekly') {
+    ongoingDeclaration.value.forEach(declaration => {
+      total += Number(declaration.hours)
+    }); 
+  }
+  else if (methodSelected.value === 'daily'){
+    total = userStore.getDailyDeclarationTotal
+  }
   return total
 })
+
+interface RegisterHours {
+  worked_hours: number
+  project_id: number
+  user_id: number
+}
+
+function validateDeclaration(){
+  // let register:RegisterHours = {
+  //   worked_hours: ongoingDeclaration.value
+  // } 
+  let sendedDeclaration: DeclarationInput[] | undefined
+  if (methodSelected.value === 'daily'){
+    sendedDeclaration = userStore.getDailyDeclarationToWeekly
+  }
+  else if (methodSelected.value === 'weekly') {
+    sendedDeclaration = ongoingDeclaration.value
+  }
+  else {
+    throw Error('no input method Selected')
+  }
+  sendedDeclaration.forEach((declaration) => {
+    fetch('http://192.168.14.30:8080/register-hours/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "worked_hours": declaration.hours,
+        "project_id": declaration.projectId,
+        "user_id": 3
+      })
+    })
+  })
+}
 </script>
 
 <style scoped>
@@ -197,7 +263,6 @@ const sumProjectHours = computed<number>(() => {
   align-self: flex-end;
   gap: 14px
 }
-
 .error-validation {
   color: red;
   font-weight: 600;
@@ -214,7 +279,7 @@ fluent-select {
 
 .table-vertical {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 2fr repeat(5, 1fr);
   grid-template-rows: 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
@@ -243,5 +308,6 @@ fluent-select {
   min-height: 44px;
   display: flex;
   align-items: center;
+  gap: 4px;
 }
 </style>

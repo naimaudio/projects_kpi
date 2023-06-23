@@ -6,24 +6,16 @@
     </div>
     <div v-for="declaration, index in props.modelValue" :key="declaration.name" class="table-raw-container">
       <div class="raw-container">
-        <DeleteOutline clickable @click="emit('remove', declaration.projectId, index)"/>
+        <DeleteOutline v-if="deletable" clickable @click="emit('remove', declaration.projectId, index)"/>
         <span class="prefix align-center">{{ declaration.name }}</span>
       </div>
       <div style="width: 100px;">
-        <fluent-number-field :valueAsNumber="declaration.hours" @change="(event: ChangeEvent) => emit('update:modelValue', index, event.target.value)" :min="0" :max="35"/>
+        <fluent-number-field :valueAsNumber="declaration.hours" @change="(event: ChangeEvent) => emit('update:modelValue', index, Number(event.target.value))" :min="0" :max="35"/>
       </div>
     </div>
     <div class="inline ">
       <AddOutline clickable/>
       <span class="prefix align-center italic">add a project to favorites</span>
-    </div>
-    <div class="divider"/>
-    <div class="table-raw-container">
-      <span class="prefix align-center">Total</span>
-      <div class="prefix"> 
-        <span :class="{'error-validation': sumProjectHours > 35 }">{{sumProjectHours}}</span>
-        <span> / 35</span>
-      </div>
     </div>
   </div>
 </template>
@@ -34,9 +26,13 @@ import DeleteOutline from "@/components/icons/DeleteOutline.vue"
 import AddOutline from '@/components/icons/AddOutline.vue';
 import { computed } from 'vue';
 
-const props = defineProps<{
-    modelValue: DeclarationInput[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: DeclarationInput[],
+    deletable?: boolean
+}>(), {
+    deletable: false
+  })
 const sumProjectHours = computed<number>(() => {
   let total: number = 0
   props.modelValue.forEach(declaration => {
@@ -46,12 +42,12 @@ const sumProjectHours = computed<number>(() => {
 })
 const emit = defineEmits<{
     (e: "update:modelValue", index: number, value: number): void
-    (e: "remove", projectId: string, index: number): void
+    (e: "remove", projectId: number, index: number): void
 }>()
 
 
 interface ChangeEvent {
-  target: {value: number}
+  target: {value: string}
 
 }
 </script>

@@ -1,21 +1,21 @@
 import { defineStore } from "pinia";
 import type { DailyDeclaration, DeclarationInput, Preferences } from "../typing/index"
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useProjectStore } from "./projects";
 import { cloneDeep } from 'lodash'
 import type { Project } from "@/typing/project";
 export const useUserStore = defineStore('user', () => {
   const preferences = ref<Preferences>({
-    preferedMethod: "daily"
+    preferedMethod: "weekly"
   })
   const projectStore = useProjectStore()
-  const favorites = ref<Set<string>>(new Set(["FH2101"]))
+  const favorites = ref<Set<number>>(new Set([41, 23]))
   const getElementaryDeclaration = computed<DeclarationInput[]>(()=> {
     return projectStore.projects.reduce<DeclarationInput[]>(
       (declarations, project) => 
       { 
         if (favorites.value.has(project.id)){
-          declarations.push({"name": project.name, "hours": 1, 'projectId': project.id})
+          declarations.push({"name": project.name, "hours": 0, 'projectId': project.id})
         }
         return declarations
       }, [])})
@@ -28,10 +28,54 @@ export const useUserStore = defineStore('user', () => {
     friday: cloneDeep(getElementaryDeclaration.value)
   })
 
-  function isFavorite(projectId: string) {
+  const getDailyDeclarationTotal = computed<number>(() => {
+    let total = 0
+    total += dailyHoursSpend.value.monday.reduce<number>((sum, declaration) => {
+      return sum + declaration.hours
+    }, 0)
+    total += dailyHoursSpend.value.tuesday.reduce<number>((sum, declaration) => {
+      return sum + declaration.hours
+    }, 0)
+    total += dailyHoursSpend.value.wednesday.reduce<number>((sum, declaration) => {
+      return sum + declaration.hours
+    }, 0)
+    total += dailyHoursSpend.value.thursday.reduce<number>((sum, declaration) => {
+      return sum + declaration.hours
+    }, 0)
+    total += dailyHoursSpend.value.friday.reduce<number>((sum, declaration) => {
+      return sum + declaration.hours
+    }, 0)
+    return total
+  })
+
+  const getDailyDeclarationToWeekly = computed<DeclarationInput[]>(() => {
+    const declarationInput:DeclarationInput[] = cloneDeep(getElementaryDeclaration.value)
+    dailyHoursSpend.value.monday.forEach((declaration, index) => {
+      declarationInput[index].hours += declaration.hours
+    }, 0)
+    dailyHoursSpend.value.tuesday.forEach((declaration, index) => {
+      declarationInput[index].hours += declaration.hours
+    }, 0)
+    dailyHoursSpend.value.wednesday.forEach((declaration, index) => {
+      declarationInput[index].hours += declaration.hours
+    }, 0)
+    dailyHoursSpend.value.thursday.forEach((declaration, index) => {
+      declarationInput[index].hours += declaration.hours
+    }, 0)
+    dailyHoursSpend.value.friday.forEach((declaration, index) => {
+      declarationInput[index].hours += declaration.hours
+    }, 0)
+    return declarationInput
+  })
+
+
+
+
+
+  function isFavorite(projectId: number) {
     return favorites.value.has(projectId)
   }
-  function setFavorite(projectId: string, value: boolean) {
+  function setFavorite(projectId: number, value: boolean) {
     if (value){
       favorites.value.add(projectId)
       const newFavoriteProject = projectStore.projects.find(project => project.id === projectId)
@@ -76,5 +120,5 @@ export const useUserStore = defineStore('user', () => {
     )
   )
 
-  return {preferences, favorites, getUserProjects, dailyHoursSpend, getElementaryDeclaration, isFavorite, setFavorite}
+  return {preferences, favorites, getUserProjects, dailyHoursSpend, getElementaryDeclaration, getDailyDeclarationTotal, getDailyDeclarationToWeekly, isFavorite, setFavorite}
 })

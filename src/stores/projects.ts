@@ -4,20 +4,20 @@ import { ref } from "vue";
 
 export const useProjectStore = defineStore('project', () => {
   const projects = ref<RawProject[]>([{
-    id: "FCA",
+    id: 38,
     name: "Management",
     division: ["HOME", "MOTORITIES", "PRO"],
     manager: "Beatrice",
     sub_category: "ETC"
   },
   {
-    id: "FCC",
+    id: 41,
     name: "Conformity",
     division: ["HOME", "MOTORITIES", "PRO"],
     sub_category: "ETC"
   },
   {
-    id: "FH2101",
+    id: 2,
     name: "integration OUTDOOR Access",
     division: ["HOME"],
     sub_category: "H_CI"
