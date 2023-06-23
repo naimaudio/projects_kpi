@@ -1,7 +1,6 @@
-
 export interface Header {
-    name: string,
-    id: string,
+    name: string
+    id: string
     filterable: boolean
 }
 
@@ -10,16 +9,16 @@ export interface Preferences {
 }
 
 export const inputMethodKeys = ["daily", "weekly"] as const
-export type InputMethod = typeof inputMethodKeys[number]
+export type InputMethod = (typeof inputMethodKeys)[number]
 
 export const inputMethods: Record<InputMethod, string> = {
-  "daily": "Daily",
-  "weekly": "Weekly"
+    daily: "Daily",
+    weekly: "Weekly",
 }
 
 export interface DeclarationInput {
-    projectId: number,
-    name: string,
+    projectId: number
+    name: string
     hours: number
 }
 
@@ -40,14 +39,13 @@ export interface User {
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>
 
-  
 export const workDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"] as const
-export type days = typeof workDayKeys[number]
+export type days = (typeof workDayKeys)[number]
 
-export const workDays: Record<days,string> = {
-  "monday": "Monday", 
-  "tuesday": "Tuesday", 
-  "wednesday":"Wednesday", 
-  "thursday": "Thursday", 
-  "friday": "Friday"
+export const workDays: Record<days, string> = {
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
 }
