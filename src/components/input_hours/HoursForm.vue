@@ -11,50 +11,42 @@
             </div>
             <div style="width: 100px">
                 <fluent-number-field
-                    :value-as-number="declaration.hours"
+                    :value="String(declaration.hours)"
                     :min="0"
                     :max="35"
                     @change="(event: ChangeEvent) => emit('update:modelValue', index, Number(event.target.value))"
                 />
             </div>
         </div>
-        <div class="inline">
-            <AddOutline clickable />
-            <span class="prefix align-center italic">add a project to favorites</span>
-        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import type { DeclarationInput } from "@/typing"
-import DeleteOutline from "@/components/icons/DeleteOutline.vue"
-import AddOutline from "@/components/icons/AddOutline.vue"
-import { computed } from "vue"
+import type { ChangeEvent, DeclarationInput } from "@/typing";
+import DeleteOutline from "@/components/icons/DeleteOutline.vue";
+import AddOutline from "@/components/icons/AddOutline.vue";
+import { computed } from "vue";
 
 const props = withDefaults(
     defineProps<{
-        modelValue: DeclarationInput[]
-        deletable?: boolean
+        modelValue: DeclarationInput[];
+        deletable?: boolean;
     }>(),
     {
         deletable: false,
     }
-)
+);
 const sumProjectHours = computed<number>(() => {
-    let total: number = 0
+    let total: number = 0;
     props.modelValue.forEach((declaration) => {
-        total += Number(declaration.hours)
-    })
-    return total
-})
+        total += Number(declaration.hours);
+    });
+    return total;
+});
 const emit = defineEmits<{
-    (e: "update:modelValue", index: number, value: number): void
-    (e: "remove", projectId: number, index: number): void
-}>()
-
-interface ChangeEvent {
-    target: { value: string }
-}
+    (e: "update:modelValue", index: number, value: number): void;
+    (e: "remove", projectId: number, index: number): void;
+}>();
 </script>
 
 <style scoped>

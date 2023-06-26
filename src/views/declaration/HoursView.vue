@@ -40,11 +40,22 @@
                         @update:modelValue="(index, value) => (ongoingDeclaration[index].hours = value)"
                         @remove="
                             (projectId, index) => {
-                                userStore.setFavorite(projectId, false)
-                                ongoingDeclaration.splice(index, 1)
+                                userStore.setFavorite(projectId, false);
                             }
                         "
                     />
+                    <div class="icon-with-text">
+                        <AddOutline
+                            clickable
+                            @click="
+                                (event) => {
+                                    event.stopPropagation();
+                                    addFavoritesModal = true;
+                                }
+                            "
+                        />
+                        <span class="prefix align-center italic">add a project to favorites</span>
+                    </div>
                     <div class="divider" />
                     <div class="table-raw-container">
                         <span class="prefix align-center">Total</span>
@@ -89,8 +100,7 @@
                                 clickable
                                 @click="
                                     () => {
-                                        userStore.setFavorite(declaration.projectId, false)
-                                        ongoingDeclaration.splice(index, 1)
+                                        userStore.setFavorite(declaration.projectId, false);
                                     }
                                 "
                             />
@@ -116,6 +126,18 @@
                         </span>
                     </div>
                 </div>
+                <div class="icon-with-text">
+                    <AddOutline
+                        clickable
+                        @click="
+                            (event) => {
+                                event.stopPropagation();
+                                addFavoritesModal = true;
+                            }
+                        "
+                    />
+                    <span class="prefix align-center italic">add a project to favorites</span>
+                </div>
                 <div class="divider" />
                 <div class="table-raw-container">
                     <span class="prefix align-center">Total</span>
@@ -140,68 +162,81 @@
         </div>
         <RouterView />
     </div>
+    <ModalAddFavorites v-if="addFavoritesModal" @close="addFavoritesModal = false" />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
-import arrowPrevious from "@/assets/icons/arrow-previous.svg"
-import { useRoute, useRouter } from "vue-router"
-import HoursForm from "@/components/input_hours/HoursForm.vue"
-import { weekNumberToString } from "@/utilities/main"
-import BaseTooltip from "@/components/BaseTooltip.vue"
-import { inputMethods, inputMethodKeys, type DeclarationInput, type InputMethod, workDayKeys, workDays } from "@/typing"
-import { useProjectStore } from "@/stores/projects"
-import { useUserStore } from "@/stores/user"
-import DeleteOutline from "@/components/icons/DeleteOutline.vue"
+import { computed, ref, watch } from "vue";
+import arrowPrevious from "@/assets/icons/arrow-previous.svg";
+import { useRoute, useRouter } from "vue-router";
+import HoursForm from "@/components/input_hours/HoursForm.vue";
+import { weekNumberToString } from "@/utilities/main";
+import BaseTooltip from "@/components/BaseTooltip.vue";
+import {
+    inputMethods,
+    inputMethodKeys,
+    type DeclarationInput,
+    type InputMethod,
+    workDayKeys,
+    workDays,
+} from "@/typing";
+import { useUserStore } from "@/stores/user";
+import DeleteOutline from "@/components/icons/DeleteOutline.vue";
+import AddOutline from "@/components/icons/AddOutline.vue";
+import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
+const addFavoritesModal = ref(false);
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
+const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
+const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
 
-const projectStore = useProjectStore()
-
-const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration)
-
-const methodSelected = ref<InputMethod>("weekly")
-// if (inputMethodKeys.includes(route.query["method"])){
-//     return route.query["method"]
-//   }
-//   else {  return  userStore.$state.preferences.preferedMethod
-// }
+watch(defaultDeclaration, (value) => {
+    const newDeclaration = value;
+    newDeclaration.forEach((val) => {
+        const index = ongoingDeclaration.value.findIndex((dec) => dec.projectId === val.projectId);
+        if (index != -1) {
+            val.hours = ongoingDeclaration.value[index].hours;
+        }
+    });
+    ongoingDeclaration.value = newDeclaration;
+});
+const methodSelected = ref<InputMethod>("weekly");
 
 watch(methodSelected, (method) => {
-    router.push({ path: route.path, query: { method: method } })
-})
+    router.push({ path: route.path, query: { method: method } });
+});
 
 const sumProjectHours = computed<number>(() => {
-    let total: number = 0
+    let total: number = 0;
     if (methodSelected.value === "weekly") {
         ongoingDeclaration.value.forEach((declaration) => {
-            total += Number(declaration.hours)
-        })
+            total += Number(declaration.hours);
+        });
     } else if (methodSelected.value === "daily") {
-        total = userStore.getDailyDeclarationTotal
+        total = userStore.getDailyDeclarationTotal;
     }
-    return total
-})
+    return total;
+});
 
 interface RegisterHours {
-    worked_hours: number
-    project_id: number
-    user_id: number
+    worked_hours: number;
+    project_id: number;
+    user_id: number;
 }
 
 function validateDeclaration() {
     // let register:RegisterHours = {
     //   worked_hours: ongoingDeclaration.value
     // }
-    let sendedDeclaration: DeclarationInput[] | undefined
+    let sendedDeclaration: DeclarationInput[] | undefined;
     if (methodSelected.value === "daily") {
-        sendedDeclaration = userStore.getDailyDeclarationToWeekly
+        sendedDeclaration = userStore.getDailyDeclarationToWeekly;
     } else if (methodSelected.value === "weekly") {
-        sendedDeclaration = ongoingDeclaration.value
+        sendedDeclaration = ongoingDeclaration.value;
     } else {
-        throw Error("no input method Selected")
+        throw Error("no input method Selected");
     }
     sendedDeclaration.forEach((declaration) => {
         fetch("http://192.168.14.30:8080/register-hours/", {
@@ -214,8 +249,8 @@ function validateDeclaration() {
                 project_id: declaration.projectId,
                 user_id: 3,
             }),
-        })
-    })
+        });
+    });
 }
 </script>
 
@@ -288,11 +323,6 @@ function validateDeclaration() {
     align-self: center;
 }
 
-.footer-buttons {
-    display: flex;
-    align-self: flex-end;
-    gap: 14px;
-}
 .error-validation {
     color: red;
     font-weight: 600;

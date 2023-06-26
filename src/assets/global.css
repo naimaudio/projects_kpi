@@ -43,8 +43,10 @@
 
 }
 
-.inline {
+.icon-with-text {
     display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .modal {
@@ -92,4 +94,10 @@
   height: 24px;
   border-radius: 100%;
   user-select: none;
+}
+
+.footer-buttons {
+  display: flex;
+  align-self: flex-end;
+  gap: 14px;
 }

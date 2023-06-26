@@ -1,13 +1,19 @@
 <template>
     <div>
         <div class="table-headers">
+            <div v-if="selectable"></div>
             <div v-for="header in props.headers" :key="header.id" class="table-cell header-cell">
                 <span>{{ header.name }}</span>
             </div>
         </div>
         <div v-for="(cell, index) in props.items" :key="cell.id" class="table-raw">
             <div v-for="header in props.headers" :key="header.id" class="table-cell">
-                <span v-if="header.id == 'favorite' && 'favorite' in cell && typeof cell.favorite === 'boolean'">
+                <span v-if="header.id == 'selected' && 'selected' in cell && typeof cell.selected === 'boolean'">
+                    <fluent-checkbox
+                        @change="(event: ChangeEvent) => emitGlobal('change', index, 'selected', event.target.currentChecked)"
+                    ></fluent-checkbox>
+                </span>
+                <span v-else-if="header.id == 'favorite' && 'favorite' in cell && typeof cell.favorite === 'boolean'">
                     <StarOutline
                         clickable
                         :checked="cell.favorite"
@@ -23,25 +29,31 @@
 </template>
 
 <script setup lang="ts" generic="T extends {id: string | number; favorite: boolean}">
-import { computed } from "vue"
-import StarOutline from "@/components/icons/StarOutline.vue"
-import type { Header } from "@/typing"
-const props = defineProps<{
-    headers: Header[]
-    items: T[]
-}>()
+import { computed } from "vue";
+import StarOutline from "@/components/icons/StarOutline.vue";
+import type { ChangeEvent, Header } from "@/typing";
+const props = withDefaults(
+    defineProps<{
+        headers: Header[];
+        items: T[];
+        selectable?: boolean;
+    }>(),
+    {
+        selectable: false,
+    }
+);
 
 const emit = defineEmits<{
-    (e: "change", index: number, field: keyof T, value: T[keyof T]): void
-}>()
+    (e: "change", index: number, field: keyof T, value: T[keyof T]): void;
+}>();
 
 function emitGlobal<K extends keyof T>(event: "change", index: number, field: K, value: T[K]) {
-    return emit(event, index, field, value)
+    return emit(event, index, field, value);
 }
 
 const tableSize = computed(() => {
-    return props.headers.length
-})
+    return props.headers.length;
+});
 </script>
 
 <style>
