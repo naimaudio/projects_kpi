@@ -19,13 +19,13 @@
 </template>
 
 <script setup lang="ts">
-import BaseAvatar from "./components/BaseAvatar.vue"
+import BaseAvatar from "./components/BaseAvatar.vue";
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
     ["Declaration history", "/history"],
     ["Projects", "/projects"],
-]
+];
 </script>
 <style scoped>
 #sidebar {

@@ -16,13 +16,13 @@
 </template>
 
 <script setup lang="ts">
-import { weekNumberToString } from "@/utilities/main"
-import { useRouter } from "vue-router"
-import BaseButton from "@/components/BaseButton.vue"
-const router = useRouter()
+import { weekNumberToString } from "@/utilities/main";
+import { useRouter } from "vue-router";
+import BaseButton from "@/components/BaseButton.vue";
+const router = useRouter();
 
 interface Week {
-    number: number
+    number: number;
 }
 
 const weeks: Week[] = [
@@ -32,7 +32,7 @@ const weeks: Week[] = [
     {
         number: 35,
     },
-]
+];
 </script>
 
 <style scoped>
