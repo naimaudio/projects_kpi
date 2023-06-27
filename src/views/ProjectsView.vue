@@ -21,7 +21,6 @@ const headers: Header[] = [
     { name: "Time spend(hours)", id: "time_spend", filterable: false },
     { name: "Fav", id: "favorite", filterable: false },
 ];
-
 const userStore = useUserStore();
 function change<K extends keyof Project>(index: number, field: K, value: Project[K]) {
     if (field === "favorite") {

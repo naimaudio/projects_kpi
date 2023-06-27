@@ -27,6 +27,7 @@ const names: [string, string][] = [
     ["Projects", "/projects"],
 ];
 </script>
+
 <style scoped>
 #sidebar {
     position: fixed;

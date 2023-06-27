@@ -248,6 +248,7 @@ function validateDeclaration() {
                 worked_hours: declaration.hours,
                 project_id: declaration.projectId,
                 user_id: 3,
+                date_rec: Date.now(),
             }),
         });
     });
