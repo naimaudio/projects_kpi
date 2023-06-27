@@ -13,6 +13,7 @@ import {
     fluentOption,
     fluentTooltip,
     fluentCheckbox,
+    fluentTextField,
 } from "@fluentui/web-components";
 
 const app = createApp(App);
@@ -28,5 +29,6 @@ provideFluentDesignSystem().register(
     fluentTextArea(),
     fluentSelect(),
     fluentOption(),
-    fluentCheckbox()
+    fluentCheckbox(),
+    fluentTextField()
 );

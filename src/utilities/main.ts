@@ -1,5 +1,5 @@
 const now = new Date();
-import { type days } from "@/typing";
+import type { days } from "@/typing";
 import { parse, format } from "date-fns";
 
 export const weekNumberToString = (weekNumber: number, year: number) => {
@@ -20,5 +20,12 @@ export const weekNumberToString = (weekNumber: number, year: number) => {
     }
 };
 
-export const stringToDay = (day: string | string[]): days | null =>
-    day === "monday" || day === "tuesday" || day === "wednesday" || day === "thursday" || day === "friday" ? day : null;
+export const dayValidation = (day: string | string[]): days | null => {
+    const dayNb = Number(day);
+    return dayNb === 0 || dayNb === 1 || dayNb === 2 || dayNb === 3 || dayNb === 4 ? dayNb : null;
+};
+
+export const dayNumberToString = (day: days, weekNumber: number, year: number) => {
+    const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
+    return format(dayDate, "MMMM d, yyyy");
+};

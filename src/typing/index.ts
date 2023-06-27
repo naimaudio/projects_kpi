@@ -39,16 +39,10 @@ export interface User {
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>;
 
-export const workDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"] as const;
+export const workDayKeys = [0, 1, 2, 3, 4] as const;
 export type days = (typeof workDayKeys)[number];
 
-export const workDays: Record<days, string> = {
-    monday: "Monday",
-    tuesday: "Tuesday",
-    wednesday: "Wednesday",
-    thursday: "Thursday",
-    friday: "Friday",
-};
+export const workDays: Record<days, string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
 export interface ChangeEvent {
     target: { value: string; currentChecked: boolean };

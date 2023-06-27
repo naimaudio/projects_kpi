@@ -202,7 +202,9 @@ watch(defaultDeclaration, (value) => {
     });
     ongoingDeclaration.value = newDeclaration;
 });
-const methodSelected = ref<InputMethod>("weekly");
+const methodSelected = ref<InputMethod>(
+    route.query.method === "weekly" ? "weekly" : route.query.method === "daily" ? "daily" : "weekly"
+);
 
 watch(methodSelected, (method) => {
     router.push({ path: route.path, query: { method: method } });

@@ -23,29 +23,29 @@ export const useUserStore = defineStore("user", () => {
         }, []);
     });
 
-    const dailyHoursSpend = ref<DailyDeclaration>({
-        monday: cloneDeep(getElementaryDeclaration.value),
-        tuesday: cloneDeep(getElementaryDeclaration.value),
-        wednesday: cloneDeep(getElementaryDeclaration.value),
-        thursday: cloneDeep(getElementaryDeclaration.value),
-        friday: cloneDeep(getElementaryDeclaration.value),
-    });
+    const dailyHoursSpend = ref<DailyDeclaration>([
+        cloneDeep(getElementaryDeclaration.value),
+        cloneDeep(getElementaryDeclaration.value),
+        cloneDeep(getElementaryDeclaration.value),
+        cloneDeep(getElementaryDeclaration.value),
+        cloneDeep(getElementaryDeclaration.value),
+    ]);
 
     const getDailyDeclarationTotal = computed<number>(() => {
         let total = 0;
-        total += dailyHoursSpend.value.monday.reduce<number>((sum, declaration) => {
+        total += dailyHoursSpend.value[0].reduce<number>((sum, declaration) => {
             return sum + declaration.hours;
         }, 0);
-        total += dailyHoursSpend.value.tuesday.reduce<number>((sum, declaration) => {
+        total += dailyHoursSpend.value[1].reduce<number>((sum, declaration) => {
             return sum + declaration.hours;
         }, 0);
-        total += dailyHoursSpend.value.wednesday.reduce<number>((sum, declaration) => {
+        total += dailyHoursSpend.value[2].reduce<number>((sum, declaration) => {
             return sum + declaration.hours;
         }, 0);
-        total += dailyHoursSpend.value.thursday.reduce<number>((sum, declaration) => {
+        total += dailyHoursSpend.value[3].reduce<number>((sum, declaration) => {
             return sum + declaration.hours;
         }, 0);
-        total += dailyHoursSpend.value.friday.reduce<number>((sum, declaration) => {
+        total += dailyHoursSpend.value[4].reduce<number>((sum, declaration) => {
             return sum + declaration.hours;
         }, 0);
         return total;
@@ -53,19 +53,19 @@ export const useUserStore = defineStore("user", () => {
 
     const getDailyDeclarationToWeekly = computed<DeclarationInput[]>(() => {
         const declarationInput: DeclarationInput[] = cloneDeep(getElementaryDeclaration.value);
-        dailyHoursSpend.value.monday.forEach((declaration, index) => {
+        dailyHoursSpend.value[0].forEach((declaration, index) => {
             declarationInput[index].hours += declaration.hours;
         }, 0);
-        dailyHoursSpend.value.tuesday.forEach((declaration, index) => {
+        dailyHoursSpend.value[1].forEach((declaration, index) => {
             declarationInput[index].hours += declaration.hours;
         }, 0);
-        dailyHoursSpend.value.wednesday.forEach((declaration, index) => {
+        dailyHoursSpend.value[2].forEach((declaration, index) => {
             declarationInput[index].hours += declaration.hours;
         }, 0);
-        dailyHoursSpend.value.thursday.forEach((declaration, index) => {
+        dailyHoursSpend.value[3].forEach((declaration, index) => {
             declarationInput[index].hours += declaration.hours;
         }, 0);
-        dailyHoursSpend.value.friday.forEach((declaration, index) => {
+        dailyHoursSpend.value[4].forEach((declaration, index) => {
             declarationInput[index].hours += declaration.hours;
         }, 0);
         return declarationInput;
@@ -79,23 +79,23 @@ export const useUserStore = defineStore("user", () => {
             favorites.value.add(projectId);
             const newFavoriteProject = projectStore.projects.find((project) => project.id === projectId);
             if (newFavoriteProject !== undefined) {
-                dailyHoursSpend.value.monday.push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value.tuesday.push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value.wednesday.push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value.thursday.push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value.friday.push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
+                dailyHoursSpend.value[0].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
+                dailyHoursSpend.value[1].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
+                dailyHoursSpend.value[2].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
+                dailyHoursSpend.value[3].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
+                dailyHoursSpend.value[4].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
             } else {
                 throw new Error("project has not been found");
             }
         } else {
             favorites.value.delete(projectId);
-            const i = dailyHoursSpend.value.monday.findIndex((declaration) => declaration.projectId === projectId);
+            const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === projectId);
             if (i !== -1) {
-                dailyHoursSpend.value.monday.splice(i, 1);
-                dailyHoursSpend.value.tuesday.splice(i, 1);
-                dailyHoursSpend.value.wednesday.splice(i, 1);
-                dailyHoursSpend.value.thursday.splice(i, 1);
-                dailyHoursSpend.value.friday.splice(i, 1);
+                dailyHoursSpend.value[0].splice(i, 1);
+                dailyHoursSpend.value[1].splice(i, 1);
+                dailyHoursSpend.value[2].splice(i, 1);
+                dailyHoursSpend.value[3].splice(i, 1);
+                dailyHoursSpend.value[4].splice(i, 1);
             } else {
                 throw new Error("project has not been found");
             }
