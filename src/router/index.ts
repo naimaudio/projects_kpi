@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import DeclarationView from "@/views/DeclarationView.vue";
 import ProjectsView from "@/views/ProjectsView.vue";
+import ProfileView from "@/views/ProfileView.vue";
 import HistoryView from "@/views/HistoryView.vue";
 import ModalHoursView from "@/views/declaration/ModalHoursView.vue";
 import HoursView from "@/views/declaration/HoursView.vue";
@@ -11,6 +12,11 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
+            path: "/",
+            redirect: { name: "declaration" },
+        },
+        {
+            path: "/undefinedshouldnotgothere",
             name: "sidebar",
             component: Default,
             children: [
@@ -40,6 +46,11 @@ const router = createRouter({
                     path: "/projects",
                     name: "projects",
                     component: ProjectsView,
+                },
+                {
+                    path: "/profile",
+                    name: "profile",
+                    component: ProfileView,
                 },
             ],
         },

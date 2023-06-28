@@ -5,15 +5,13 @@
             <fluent-text-field>Username</fluent-text-field>
             <fluent-text-field>Password</fluent-text-field>
             <div class="footer-buttons">
-                <fluent-button class="larger-button" appearance="accent" @click="addFavoriteProjects"
-                    >Connect</fluent-button
-                >
+                <fluent-button class="larger-button" appearance="accent">Connect</fluent-button>
             </div>
         </div>
     </div>
 </template>
 
-<script></script>
+<script setup lang="ts"></script>
 
 <style>
 .card {
