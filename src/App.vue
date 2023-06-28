@@ -35,11 +35,9 @@ fetch("http://192.168.14.30:8080/projects/", {
     .then(() =>
         fetch("http://192.168.14.30:8080/get-favorites/2")
             .then((response) => {
-                console.log(response);
                 return response.json();
             })
-            .then((favorites) => {
-                console.log(favorites);
+            .then((favorites: number[]) => {
                 favorites.forEach((fav) => userStore.favorites.add(fav));
             })
     );
