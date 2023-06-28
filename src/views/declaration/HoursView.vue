@@ -27,23 +27,106 @@
                     </fluent-select>
                 </div>
             </div>
-            <!-- WEEKLY METHOD -->
-            <div v-if="methodSelected === 'weekly'" class="declaration-container column-flex">
-                <span class="prefix sub-title">Week {{ route.params.week }}</span>
-                <span class="prefix"
-                    >Please input your hours for {{ weekNumberToString(route.params.week, route.params.year) }}
-                </span>
-                <div class="declaration-inputs prefix">
-                    <HoursForm
-                        deletable
-                        :model-value="ongoingDeclaration"
-                        @update:modelValue="(index, value) => (ongoingDeclaration[index].hours = value)"
-                        @remove="
-                            (projectId, index) => {
-                                userStore.setFavorite(projectId, false);
-                            }
-                        "
-                    />
+            <template v-if="weekNumber !== undefined && yearNumber !== undefined">
+                <!-- WEEKLY METHOD -->
+                <div v-if="methodSelected === 'weekly'" class="declaration-container column-flex">
+                    <span class="prefix sub-title">Week {{ route.params.week }}</span>
+                    <span class="prefix"
+                        >Please input your hours for {{ weekNumberToString(weekNumber, yearNumber) }}
+                    </span>
+                    <div class="declaration-inputs prefix">
+                        <HoursForm
+                            deletable
+                            :model-value="ongoingDeclaration"
+                            @update:model-value="(index, value) => (ongoingDeclaration[index].hours = value)"
+                            @remove="
+                                (projectId, _) => {
+                                    userStore.setFavorite(projectId, false);
+                                }
+                            "
+                        />
+                        <div class="icon-with-text">
+                            <AddOutline
+                                clickable
+                                @click="
+                                    (event) => {
+                                        event.stopPropagation();
+                                        addFavoritesModal = true;
+                                    }
+                                "
+                            />
+                            <span class="prefix align-center italic">add a project to favorites</span>
+                        </div>
+                        <div class="divider" />
+                        <div class="table-raw-container">
+                            <span class="prefix align-center">Total</span>
+                            <div class="prefix">
+                                <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
+                                <span> / 35</span>
+                            </div>
+                        </div>
+                        <div class="table-raw-gap" />
+                        <div class="table-raw-container-2">
+                            <span class="prefix">Commentary (optional)</span>
+                            <fluent-text-area />
+                        </div>
+                        <div class="table-raw-gap" />
+                        <div class="footer-buttons">
+                            <fluent-button> Save draft</fluent-button>
+                            <fluent-button
+                                appearance="accent"
+                                :disabled="sumProjectHours != 35"
+                                @click="validateDeclaration"
+                                >Validate</fluent-button
+                            >
+                        </div>
+                    </div>
+                </div>
+                <!-- DAILY METHOD -->
+                <div v-else class="declaration-container column-flex">
+                    <span class="prefix sub-title">Week {{ weekNumber }}</span>
+                    <span class="prefix"
+                        >Please input your hours for {{ weekNumberToString(weekNumber, yearNumber) }}
+                    </span>
+
+                    <div class="table-vertical">
+                        <div class="table-legend">
+                            <span class="table-cell"></span>
+                            <span
+                                v-for="declaration in userStore.getElementaryDeclaration"
+                                :key="declaration.projectId"
+                                class="table-cell"
+                            >
+                                <DeleteOutline
+                                    clickable
+                                    @click="
+                                        () => {
+                                            userStore.setFavorite(declaration.projectId, false);
+                                        }
+                                    "
+                                />
+                                <span>{{ declaration.name }}</span></span
+                            >
+                        </div>
+                        <div
+                            v-for="day in workDayKeys"
+                            :key="day"
+                            class="table-column"
+                            @click="(event:MouseEvent) => {
+            router.push({name: 'dayDeclaration', params: {...route.params, day: day}, query: route.query})
+            event.stopPropagation()
+          }"
+                        >
+                            <span class="table-cell">{{ workDays[day] }}</span>
+                            <span
+                                v-for="declaration in userStore.dailyHoursSpend[day]"
+                                :key="declaration.name"
+                                class="table-cell"
+                            >
+                                {{ declaration.hours }}
+                            </span>
+                        </div>
+                    </div>
                     <div class="icon-with-text">
                         <AddOutline
                             clickable
@@ -80,85 +163,10 @@
                         >
                     </div>
                 </div>
-            </div>
-            <!-- DAILY METHOD -->
-            <div v-else class="declaration-container column-flex">
-                <span class="prefix sub-title">Week {{ route.params.week }}</span>
-                <span class="prefix"
-                    >Please input your hours for {{ weekNumberToString(route.params.week, route.params.year) }}
-                </span>
-
-                <div class="table-vertical">
-                    <div class="table-legend">
-                        <span class="table-cell"></span>
-                        <span
-                            v-for="(declaration, index) in userStore.getElementaryDeclaration"
-                            :key="declaration.projectId"
-                            class="table-cell"
-                        >
-                            <DeleteOutline
-                                clickable
-                                @click="
-                                    () => {
-                                        userStore.setFavorite(declaration.projectId, false);
-                                    }
-                                "
-                            />
-                            <span>{{ declaration.name }}</span></span
-                        >
-                    </div>
-                    <div
-                        v-for="day in workDayKeys"
-                        :key="day"
-                        class="table-column"
-                        @click="(event:MouseEvent) => {
-            router.push({name: 'dayDeclaration', params: {...route.params, day: day}, query: route.query})
-            event.stopPropagation()
-          }"
-                    >
-                        <span class="table-cell">{{ workDays[day] }}</span>
-                        <span
-                            v-for="declaration in userStore.dailyHoursSpend[day]"
-                            :key="declaration.name"
-                            class="table-cell"
-                        >
-                            {{ declaration.hours }}
-                        </span>
-                    </div>
-                </div>
-                <div class="icon-with-text">
-                    <AddOutline
-                        clickable
-                        @click="
-                            (event) => {
-                                event.stopPropagation();
-                                addFavoritesModal = true;
-                            }
-                        "
-                    />
-                    <span class="prefix align-center italic">add a project to favorites</span>
-                </div>
-                <div class="divider" />
-                <div class="table-raw-container">
-                    <span class="prefix align-center">Total</span>
-                    <div class="prefix">
-                        <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
-                        <span> / 35</span>
-                    </div>
-                </div>
-                <div class="table-raw-gap" />
-                <div class="table-raw-container-2">
-                    <span class="prefix">Commentary (optional)</span>
-                    <fluent-text-area />
-                </div>
-                <div class="table-raw-gap" />
-                <div class="footer-buttons">
-                    <fluent-button> Save draft</fluent-button>
-                    <fluent-button appearance="accent" :disabled="sumProjectHours != 35" @click="validateDeclaration"
-                        >Validate</fluent-button
-                    >
-                </div>
-            </div>
+            </template>
+            <template v-else>
+                <div>Oh ! There is something wrong with the declaration week</div>
+            </template>
         </div>
         <RouterView />
     </div>
@@ -188,7 +196,20 @@ const addFavoritesModal = ref(false);
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
-
+const weekNumber = computed<number | undefined>(() => {
+    return Array.isArray(route.params.week)
+        ? undefined
+        : Number.isNaN(Number(route.params.week))
+        ? undefined
+        : Number(route.params.week);
+});
+const yearNumber = computed<number | undefined>(() => {
+    return Array.isArray(route.params.year)
+        ? undefined
+        : Number.isNaN(Number(route.params.year))
+        ? undefined
+        : Number(route.params.year);
+});
 const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
 const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
 
@@ -222,11 +243,11 @@ const sumProjectHours = computed<number>(() => {
     return total;
 });
 
-interface RegisterHours {
-    worked_hours: number;
-    project_id: number;
-    user_id: number;
-}
+// interface RegisterHours {
+//     worked_hours: number;
+//     project_id: number;
+//     user_id: number;
+// }
 
 function validateDeclaration() {
     // let register:RegisterHours = {
