@@ -17,13 +17,14 @@ import { useUserStore } from "@/stores/user";
 import type { Header } from "@/typing";
 import { type SelectableProject } from "@/typing/project";
 import { ref } from "vue";
-import { useRoute } from "vue-router";
-import { useRouter } from "vue-router";
+
 const emit = defineEmits<{
     (event: "close"): void;
 }>();
-const change = (index, field, value) => {
-    selectionableProjects.value[index][field] = value;
+const change = (index: number, field: string, value: string | number | boolean | undefined) => {
+    if (field === "selected" && typeof value === "boolean") {
+        selectionableProjects.value[index][field] = value;
+    }
 };
 const userStore = useUserStore();
 const headers: Header[] = [
@@ -59,6 +60,4 @@ const addFavoriteProjects = () => {
         });
     emit("close");
 };
-const router = useRouter();
-const route = useRoute();
 </script>

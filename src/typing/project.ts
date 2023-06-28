@@ -1,7 +1,8 @@
-export interface Project {
+export interface UserProject {
     id: number;
+    code: string;
     name: string;
-    manager?: string;
+    manager?: number;
     time_spend: number;
     favorite: boolean;
 }
@@ -15,16 +16,28 @@ export enum Classification {
 }
 export type ExpansionRenewal = "EXPANSION" | "RENEWAL";
 
-export interface RawProject {
+export interface Project {
     id: number;
+    code: string;
     division: Division[];
     sub_category: SubCategory;
     classification?: Classification;
     expansion_renewal?: ExpansionRenewal;
-    manager?: string;
+    manager?: number;
     name: string;
 }
 
-export interface SelectableProject extends Project {
+export interface RawProject {
+    id: number;
+    project_code: string;
+    division: Division[];
+    sub_category: SubCategory;
+    classification?: Classification;
+    expansion_renewal?: ExpansionRenewal;
+    project_manager?: number;
+    project_name: string;
+}
+
+export interface SelectableProject extends UserProject {
     selected: boolean;
 }

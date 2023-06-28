@@ -3,13 +3,13 @@ import type { DailyDeclaration, DeclarationInput, Preferences } from "../typing/
 import { computed, ref } from "vue";
 import { useProjectStore } from "./projects";
 import { cloneDeep } from "lodash";
-import type { Project } from "@/typing/project";
+import type { UserProject } from "@/typing/project";
 export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
         preferedMethod: "weekly",
     });
     const projectStore = useProjectStore();
-    const favorites = ref<Set<number>>(new Set([41, 23]));
+    const favorites = ref<Set<number>>(new Set([]));
     const getElementaryDeclaration = computed<DeclarationInput[]>(() => {
         return projectStore.projects.reduce<DeclarationInput[]>((declarations, project) => {
             if (favorites.value.has(project.id)) {
@@ -102,13 +102,14 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    const getUserProjects = computed<Project[]>(() => {
+    const getUserProjects = computed<UserProject[]>(() => {
         return projectStore.projects.map((project) => {
-            const displayableProject: Project = {
+            const displayableProject: UserProject = {
                 id: project.id,
                 manager: project?.manager,
                 favorite: isFavorite(project.id),
                 name: project.name,
+                code: project.code,
                 time_spend: 0,
             };
             return displayableProject;

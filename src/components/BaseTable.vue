@@ -13,7 +13,11 @@
                         @change="(event: ChangeEvent) => emitGlobal('change', index, 'selected', event.target.currentChecked)"
                     ></fluent-checkbox>
                 </span>
-                <span v-else-if="header.id == 'favorite' && 'favorite' in cell && typeof cell.favorite === 'boolean'">
+                <span
+                    v-else-if="
+                        header.id == 'favorite' && cell.favorite !== undefined && typeof cell.favorite === 'boolean'
+                    "
+                >
                     <StarOutline
                         clickable
                         :checked="cell.favorite"
@@ -28,8 +32,7 @@
     </div>
 </template>
 
-<script setup lang="ts" generic="T extends {id: string | number; favorite: boolean}">
-import { computed } from "vue";
+<script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean}">
 import StarOutline from "@/components/icons/StarOutline.vue";
 import type { ChangeEvent, Header } from "@/typing";
 const props = withDefaults(
@@ -50,10 +53,6 @@ const emit = defineEmits<{
 function emitGlobal<K extends keyof T>(event: "change", index: number, field: K, value: T[K]) {
     return emit(event, index, field, value);
 }
-
-const tableSize = computed(() => {
-    return props.headers.length;
-});
 </script>
 
 <style>

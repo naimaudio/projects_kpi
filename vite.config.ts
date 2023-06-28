@@ -1,7 +1,7 @@
-import { fileURLToPath, URL } from "node:url"
+import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig } from "vite"
-import vue from "@vitejs/plugin-vue"
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,7 +10,7 @@ export default defineConfig({
             template: {
                 compilerOptions: {
                     isCustomElement: (tag) => {
-                        return tag.startsWith("fluent")
+                        return tag.startsWith("fluent");
                     },
                 },
             },
@@ -22,4 +22,4 @@ export default defineConfig({
             "@": fileURLToPath(new URL("./src", import.meta.url)),
         },
     },
-})
+});

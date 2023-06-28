@@ -11,14 +11,14 @@
 
 <script lang="ts">
 interface Props {
-    clickable: boolean
+    clickable: boolean;
 }
 </script>
 
 <script setup lang="ts">
 const props = withDefaults(defineProps<Props>(), {
     clickable: false,
-})
+});
 </script>
 
 <style scoped>

@@ -24,7 +24,6 @@
 <script setup lang="ts">
 import type { ChangeEvent, DeclarationInput } from "@/typing";
 import DeleteOutline from "@/components/icons/DeleteOutline.vue";
-import AddOutline from "@/components/icons/AddOutline.vue";
 import { computed } from "vue";
 
 const props = withDefaults(
@@ -36,13 +35,7 @@ const props = withDefaults(
         deletable: false,
     }
 );
-const sumProjectHours = computed<number>(() => {
-    let total: number = 0;
-    props.modelValue.forEach((declaration) => {
-        total += Number(declaration.hours);
-    });
-    return total;
-});
+
 const emit = defineEmits<{
     (e: "update:modelValue", index: number, value: number): void;
     (e: "remove", projectId: number, index: number): void;

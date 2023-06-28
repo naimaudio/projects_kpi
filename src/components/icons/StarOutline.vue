@@ -17,8 +17,8 @@
 
 <script lang="ts">
 interface Props {
-    clickable: boolean
-    checked: boolean
+    clickable: boolean;
+    checked: boolean;
 }
 </script>
 
@@ -26,7 +26,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     clickable: false,
     checked: false,
-})
+});
 </script>
 
 <style scoped>

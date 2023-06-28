@@ -29,3 +29,9 @@ export const dayNumberToString = (day: days, weekNumber: number, year: number) =
     const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
     return format(dayDate, "MMMM d, yyyy");
 };
+
+export function assertIsNode(e: EventTarget | null): asserts e is Node {
+    if (!e || !("nodeType" in e)) {
+        throw new Error(`Node expected`);
+    }
+}

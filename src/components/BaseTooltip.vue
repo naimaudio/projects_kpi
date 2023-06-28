@@ -6,15 +6,15 @@
 </template>
 
 <script setup lang="ts">
-import InfoOutline from "@/components/icons/InfoOutline.vue"
-import { useFloating } from "@floating-ui/vue"
-import { ref } from "vue"
-const mouseover = ref<boolean>(false)
-const infoIcon = ref<Element | null>(null)
-const tooltip = ref<HTMLElement | null>(null)
+import InfoOutline from "@/components/icons/InfoOutline.vue";
+import { useFloating } from "@floating-ui/vue";
+import { ref } from "vue";
+const mouseover = ref<boolean>(false);
+const infoIcon = ref<Element | null>(null);
+const tooltip = ref<HTMLElement | null>(null);
 const { floatingStyles } = useFloating(infoIcon, tooltip, {
     placement: "bottom-end",
-})
+});
 </script>
 
 <style scoped>

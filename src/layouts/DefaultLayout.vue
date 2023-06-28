@@ -2,7 +2,7 @@
     <div id="sidebar">
         <div class="avatar-container raw-container">
             <BaseAvatar />
-            <span>Beatrice Franz</span>
+            <RouterLink class="base-links" to="profile">Beatrice Franz</RouterLink>
         </div>
         <div class="divider-soft" />
         <div class="base-menu">
