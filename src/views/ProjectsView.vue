@@ -8,7 +8,7 @@
         <div v-else class="column-flex">
             <div class="centered-flex">
                 <span class="big"> Oh ! No projects found for your organisation</span>
-                <img src="@/assets/icons/Neutral Face.png" alt="Neutral Face" width="60" height="60" />
+                <img src="@/assets/icons/neutral-face.png" alt="Neutral Face" width="60" height="60" />
             </div>
         </div>
     </div>
