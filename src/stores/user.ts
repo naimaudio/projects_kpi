@@ -92,7 +92,7 @@ export const useUserStore = defineStore("user", () => {
         });
         oldValue.forEach((favorite) => {
             if (!newValue.has(favorite)) {
-                const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === projectId);
+                const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === favorite);
                 if (i !== -1) {
                     dailyHoursSpend.value[0].splice(i, 1);
                     dailyHoursSpend.value[1].splice(i, 1);
