@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { DailyDeclaration, DeclarationInput, Preferences } from "../typing/index";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useProjectStore } from "./projects";
 import { cloneDeep } from "lodash";
 import type { UserProject } from "@/typing/project";
@@ -74,31 +74,54 @@ export const useUserStore = defineStore("user", () => {
     function isFavorite(projectId: number) {
         return favorites.value.has(projectId);
     }
-    function setFavorite(projectId: number, value: boolean) {
-        if (value) {
-            favorites.value.add(projectId);
-            const newFavoriteProject = projectStore.projects.find((project) => project.id === projectId);
-            if (newFavoriteProject !== undefined) {
-                dailyHoursSpend.value[0].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value[1].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value[2].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value[3].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-                dailyHoursSpend.value[4].push({ hours: 0, projectId: projectId, name: newFavoriteProject.name });
-            } else {
-                throw new Error("project has not been found");
+
+    watch(favorites, (newValue, oldValue) => {
+        newValue.forEach((favorite) => {
+            if (!oldValue.has(favorite)) {
+                const newFavoriteProject = projectStore.projects.find((project) => project.id === favorite);
+                if (newFavoriteProject !== undefined) {
+                    dailyHoursSpend.value[0].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+                    dailyHoursSpend.value[1].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+                    dailyHoursSpend.value[2].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+                    dailyHoursSpend.value[3].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+                    dailyHoursSpend.value[4].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+                } else {
+                    throw new Error("project has not been found");
+                }
             }
+        });
+        oldValue.forEach((favorite) => {
+            if (!newValue.has(favorite)) {
+                const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === projectId);
+                if (i !== -1) {
+                    dailyHoursSpend.value[0].splice(i, 1);
+                    dailyHoursSpend.value[1].splice(i, 1);
+                    dailyHoursSpend.value[2].splice(i, 1);
+                    dailyHoursSpend.value[3].splice(i, 1);
+                    dailyHoursSpend.value[4].splice(i, 1);
+                } else {
+                    throw new Error("project has not been found");
+                }
+            }
+        });
+    });
+    async function setFavorite(projectId: number, value: boolean) {
+        if (value) {
+            await fetch("http://192.168.14.30:8080/define-favorites/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify([
+                    {
+                        user_id: 2,
+                        project_id: projectId,
+                    },
+                ]),
+            });
+            favorites.value.add(projectId);
         } else {
             favorites.value.delete(projectId);
-            const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === projectId);
-            if (i !== -1) {
-                dailyHoursSpend.value[0].splice(i, 1);
-                dailyHoursSpend.value[1].splice(i, 1);
-                dailyHoursSpend.value[2].splice(i, 1);
-                dailyHoursSpend.value[3].splice(i, 1);
-                dailyHoursSpend.value[4].splice(i, 1);
-            } else {
-                throw new Error("project has not been found");
-            }
         }
     }
 
