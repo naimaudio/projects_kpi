@@ -41,6 +41,8 @@
             <PaginationTable
                 :current-page="currentPage"
                 :page-count="pageCount"
+                :items-count="items.length"
+                :items-per-page-count="itemsPerPageCount"
                 @page-change="(pageNumber) => (currentPage = pageNumber)"
             />
         </div>
@@ -72,7 +74,7 @@ const currentPage = ref(1);
 const itemsPerPageCount = 10;
 
 const pageCount = computed(() => {
-    return Math.floor(props.items.length / itemsPerPageCount + 1);
+    return Math.floor((props.items.length - 1) / itemsPerPageCount) + 1;
 });
 
 const displayedItems = computed<T[]>(() => {

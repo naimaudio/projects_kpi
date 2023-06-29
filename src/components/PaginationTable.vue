@@ -1,39 +1,46 @@
 <template>
-    <div class="inline-pagination">
-        <PreviousIcon clickable :disabled="props.currentPage === 1" @click="emit('pageChange', 1)" />
-        <CarretLeftSolidIcon
-            clickable
-            :disabled="props.currentPage === 1"
-            @click="emit('pageChange', props.currentPage - 1)"
-        />
-        <button
-            v-for="i in buttonCount"
-            :key="i"
-            :class="{
-                'selected-button': i + PagesHiddenLeftCount === props.currentPage,
-                'pagination-button': i + PagesHiddenLeftCount !== props.currentPage,
-            }"
-            class="no-selection"
-            @click="
-                () => {
-                    if (i + PagesHiddenLeftCount !== props.currentPage) {
-                        emit('pageChange', i + PagesHiddenLeftCount);
+    <div class="pagination-container">
+        <div class="inline-pagination">
+            <PreviousIcon clickable :disabled="props.currentPage === 1" @click="emit('pageChange', 1)" />
+            <CarretLeftSolidIcon
+                clickable
+                :disabled="props.currentPage === 1"
+                @click="emit('pageChange', props.currentPage - 1)"
+            />
+            <button
+                v-for="i in buttonCount"
+                :key="i"
+                :class="{
+                    'selected-button': i + PagesHiddenLeftCount === props.currentPage,
+                    'pagination-button': i + PagesHiddenLeftCount !== props.currentPage,
+                }"
+                class="no-selection"
+                @click="
+                    () => {
+                        if (i + PagesHiddenLeftCount !== props.currentPage) {
+                            emit('pageChange', i + PagesHiddenLeftCount);
+                        }
                     }
-                }
-            "
-        >
-            {{ i + PagesHiddenLeftCount }}
-        </button>
-        <CarretRightSolidIcon
-            clickable
-            :disabled="props.currentPage === props.pageCount"
-            @click="emit('pageChange', props.currentPage + 1)"
-        />
-        <NextIcon
-            clickable
-            :disabled="props.currentPage === props.pageCount"
-            @click="emit('pageChange', props.pageCount)"
-        />
+                "
+            >
+                {{ i + PagesHiddenLeftCount }}
+            </button>
+            <CarretRightSolidIcon
+                clickable
+                :disabled="props.currentPage === props.pageCount"
+                @click="emit('pageChange', props.currentPage + 1)"
+            />
+            <NextIcon
+                clickable
+                :disabled="props.currentPage === props.pageCount"
+                @click="emit('pageChange', props.pageCount)"
+            />
+        </div>
+        <span class="pagination-text"
+            >{{ (currentPage - 1) * itemsPerPageCount + 1 }} -
+            {{ Math.min(currentPage * itemsPerPageCount, itemsCount) }} of
+            {{ itemsCount }}
+        </span>
     </div>
 </template>
 
@@ -56,6 +63,8 @@ const emit = defineEmits<{
 const props = defineProps<{
     currentPage: number;
     pageCount: number;
+    itemsCount: number;
+    itemsPerPageCount: number;
 }>();
 </script>
 
@@ -94,5 +103,17 @@ const props = defineProps<{
     height: 32px;
     font-weight: 500;
     background-color: white;
+}
+
+.pagination-text {
+    color: #605e5c;
+    size: 14px;
+    font-weight: 400;
+}
+
+.pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 </style>
