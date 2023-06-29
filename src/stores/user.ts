@@ -75,33 +75,27 @@ export const useUserStore = defineStore("user", () => {
         return favorites.value.has(projectId);
     }
 
-    watch(favorites, (newValue, oldValue) => {
-        newValue.forEach((favorite) => {
-            if (!oldValue.has(favorite)) {
-                const newFavoriteProject = projectStore.projects.find((project) => project.id === favorite);
-                if (newFavoriteProject !== undefined) {
-                    dailyHoursSpend.value[0].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
-                    dailyHoursSpend.value[1].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
-                    dailyHoursSpend.value[2].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
-                    dailyHoursSpend.value[3].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
-                    dailyHoursSpend.value[4].push({ hours: 0, projectId: favorite, name: newFavoriteProject.name });
+    watch(favorites.value, (newValue) => {
+        projectStore.projects.forEach((project) => {
+            if (newValue.has(project.id)) {
+                if (dailyHoursSpend.value[0].findIndex((decl) => decl.projectId === project.id) === -1) {
+                    dailyHoursSpend.value[0].push({ hours: 0, projectId: project.id, name: project.name });
+                    dailyHoursSpend.value[1].push({ hours: 0, projectId: project.id, name: project.name });
+                    dailyHoursSpend.value[2].push({ hours: 0, projectId: project.id, name: project.name });
+                    dailyHoursSpend.value[3].push({ hours: 0, projectId: project.id, name: project.name });
+                    dailyHoursSpend.value[4].push({ hours: 0, projectId: project.id, name: project.name });
                 } else {
-                    throw new Error("project has not been found");
+                    // throw new Error("project has not been found");
                 }
             }
         });
-        oldValue.forEach((favorite) => {
-            if (!newValue.has(favorite)) {
-                const i = dailyHoursSpend.value[0].findIndex((declaration) => declaration.projectId === favorite);
-                if (i !== -1) {
-                    dailyHoursSpend.value[0].splice(i, 1);
-                    dailyHoursSpend.value[1].splice(i, 1);
-                    dailyHoursSpend.value[2].splice(i, 1);
-                    dailyHoursSpend.value[3].splice(i, 1);
-                    dailyHoursSpend.value[4].splice(i, 1);
-                } else {
-                    throw new Error("project has not been found");
-                }
+        dailyHoursSpend.value[0].forEach((decl, i) => {
+            if (!newValue.has(decl.projectId)) {
+                dailyHoursSpend.value[0].splice(i, 1);
+                dailyHoursSpend.value[1].splice(i, 1);
+                dailyHoursSpend.value[2].splice(i, 1);
+                dailyHoursSpend.value[3].splice(i, 1);
+                dailyHoursSpend.value[4].splice(i, 1);
             }
         });
     });
@@ -121,6 +115,16 @@ export const useUserStore = defineStore("user", () => {
             });
             favorites.value.add(projectId);
         } else {
+            await fetch("http://192.168.14.30:8080/delete-favorites/", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_id: 2,
+                    project_id: projectId,
+                }),
+            });
             favorites.value.delete(projectId);
         }
     }
