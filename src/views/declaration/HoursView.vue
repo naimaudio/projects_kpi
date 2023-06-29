@@ -46,7 +46,7 @@
                             "
                         />
                         <div class="icon-with-text">
-                            <AddOutline
+                            <AddOutlineIcon
                                 clickable
                                 @click="
                                     (event) => {
@@ -97,7 +97,7 @@
                                 :key="declaration.projectId"
                                 class="table-cell"
                             >
-                                <DeleteOutline
+                                <DeleteOutlineIcon
                                     clickable
                                     @click="
                                         () => {
@@ -128,10 +128,10 @@
                         </div>
                     </div>
                     <div class="icon-with-text">
-                        <AddOutline
+                        <AddOutlineIcon
                             clickable
                             @click="
-                                (event) => {
+                                (event: Event) => {
                                     event.stopPropagation();
                                     addFavoritesModal = true;
                                 }
@@ -189,8 +189,8 @@ import {
     workDays,
 } from "@/typing";
 import { useUserStore } from "@/stores/user";
-import DeleteOutline from "@/components/icons/DeleteOutline.vue";
-import AddOutline from "@/components/icons/AddOutline.vue";
+import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
+import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 const addFavoritesModal = ref(false);
 const router = useRouter();

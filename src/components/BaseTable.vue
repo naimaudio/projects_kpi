@@ -6,11 +6,12 @@
                 <span>{{ header.name }}</span>
             </div>
         </div>
-        <div v-for="(cell, index) in props.items" :key="cell.id" class="table-raw">
+        <div v-for="(cell, index) in displayedItems" :key="cell.id" class="table-raw">
             <div v-for="header in props.headers" :key="header.id" class="table-cell">
                 <span v-if="header.id == 'selected' && 'selected' in cell && typeof cell.selected === 'boolean'">
                     <fluent-checkbox
-                        @change="(event: ChangeEvent) => emitGlobal('change', index, 'selected', event.target.currentChecked)"
+                        :checked="cell['selected']"
+                        @change="(event: ChangeEvent) => changeSelect(index, event)"
                     ></fluent-checkbox>
                 </span>
                 <span
@@ -18,10 +19,17 @@
                         header.id == 'favorite' && cell.favorite !== undefined && typeof cell.favorite === 'boolean'
                     "
                 >
-                    <StarOutline
+                    <StarOutlineIcon
                         clickable
                         :checked="cell.favorite"
-                        @click="emitGlobal<'favorite'>('change', index, 'favorite', !cell.favorite)"
+                        @click="
+                            emitGlobal<'favorite'>(
+                                'change',
+                                index + (currentPage - 1) * itemsPerPageCount,
+                                'favorite',
+                                !cell.favorite
+                            )
+                        "
                     />
                 </span>
                 <span v-else>
@@ -29,12 +37,22 @@
                 </span>
             </div>
         </div>
+        <div class="footer-pagination">
+            <PaginationTable
+                :current-page="currentPage"
+                :page-count="pageCount"
+                @page-change="(pageNumber) => (currentPage = pageNumber)"
+            />
+        </div>
     </div>
 </template>
 
 <script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean}">
-import StarOutline from "@/components/icons/StarOutline.vue";
+import StarOutlineIcon from "@/components/icons/StarOutlineIcon.vue";
 import type { ChangeEvent, Header } from "@/typing";
+import PaginationTable from "@/components/PaginationTable.vue";
+import { computed, ref } from "vue";
+
 const props = withDefaults(
     defineProps<{
         headers: Header[];
@@ -45,14 +63,30 @@ const props = withDefaults(
         selectable: false,
     }
 );
-
 const emit = defineEmits<{
     (e: "change", index: number, field: keyof T, value: T[keyof T]): void;
 }>();
 
+const currentPage = ref(1);
+
+const itemsPerPageCount = 10;
+
+const pageCount = computed(() => {
+    return Math.floor(props.items.length / itemsPerPageCount + 1);
+});
+
+const displayedItems = computed<T[]>(() => {
+    return props.items.slice((currentPage.value - 1) * itemsPerPageCount, currentPage.value * itemsPerPageCount);
+});
+
 function emitGlobal<K extends keyof T>(event: "change", index: number, field: K, value: T[K]) {
     return emit(event, index, field, value);
 }
+
+const changeSelect = (index: number, event: ChangeEvent) => {
+    console.log(index + (currentPage.value - 1) * itemsPerPageCount, event.target.currentChecked);
+    emitGlobal("change", index + (currentPage.value - 1) * itemsPerPageCount, "selected", event.target.currentChecked);
+};
 </script>
 
 <style>
@@ -76,5 +110,11 @@ function emitGlobal<K extends keyof T>(event: "change", index: number, field: K,
     min-height: 44px;
     display: flex;
     align-items: center;
+}
+
+.footer-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
 }
 </style>

@@ -1,12 +1,12 @@
 <template>
-    <InfoOutline ref="infoIcon" @mouseover="mouseover = true" @mouseleave="mouseover = false" />
+    <InfoOutlineIcon ref="infoIcon" @mouseover="mouseover = true" @mouseleave="mouseover = false" />
     <div v-if="mouseover" ref="tooltip" :style="floatingStyles" class="tooltip">
         <slot></slot>
     </div>
 </template>
 
 <script setup lang="ts">
-import InfoOutline from "@/components/icons/InfoOutline.vue";
+import InfoOutlineIcon from "@/components/icons/InfoOutlineIcon.vue";
 import { useFloating } from "@floating-ui/vue";
 import { ref } from "vue";
 const mouseover = ref<boolean>(false);

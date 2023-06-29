@@ -6,7 +6,7 @@
         </div>
         <div v-for="(declaration, index) in props.modelValue" :key="declaration.name" class="table-raw-container">
             <div class="raw-container">
-                <DeleteOutline v-if="deletable" clickable @click="emit('remove', declaration.projectId, index)" />
+                <DeleteOutlineIcon v-if="deletable" clickable @click="emit('remove', declaration.projectId, index)" />
                 <span class="prefix align-center">{{ declaration.name }}</span>
             </div>
             <div style="width: 100px">
@@ -23,8 +23,7 @@
 
 <script setup lang="ts">
 import type { ChangeEvent, DeclarationInput } from "@/typing";
-import DeleteOutline from "@/components/icons/DeleteOutline.vue";
-import { computed } from "vue";
+import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 
 const props = withDefaults(
     defineProps<{

@@ -2,6 +2,8 @@
     <Teleport to=".global">
         <div class="modal">
             <div v-clickOutside="() => emit('close')" class="modal-container column-flex">
+                <span class="sub-title">Favorites</span>
+                <span>Please select projects you have spend time in</span>
                 <BaseTable :headers="headers" :items="selectionableProjects" @change="change" />
                 <div class="footer-buttons">
                     <fluent-button appearance="accent" @click="addFavoriteProjects">Add favorites</fluent-button>
@@ -34,8 +36,8 @@ const headers: Header[] = [
         filterable: false,
     },
     {
-        id: "id",
-        name: "Id",
+        id: "code",
+        name: "Project code",
         filterable: false,
     },
     {
