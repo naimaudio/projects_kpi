@@ -1,4 +1,4 @@
-import type { DeclarationInput } from "@/typing";
+import type { DeclarationInput, RawDeclaration } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { format } from "date-fns";
 
@@ -48,15 +48,7 @@ export async function deleteFavorites(userId: number, projectId: number) {
 }
 
 export async function hoursRegistration(declarations: DeclarationInput[], userId: number, comment?: string) {
-    interface RegisterHoursParams {
-        worked_hours: number;
-        date_rec: string;
-        project_id: number;
-        user_id: number;
-        comment?: string;
-    }
-
-    const requestBody: RegisterHoursParams[] = [];
+    const requestBody: RawDeclaration[] = [];
     declarations.forEach((declaration) => {
         requestBody.push({
             worked_hours: declaration.hours,
@@ -66,11 +58,17 @@ export async function hoursRegistration(declarations: DeclarationInput[], userId
             user_id: userId,
         });
     });
-    return fetch(`${origin}/register-hours`, {
+    return fetch(`${origin}/record`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+    });
+}
+
+export async function getDeclarations(userId: number): Promise<RawDeclaration[]> {
+    return fetch(`${origin}/records/${userId}`).then((response) => {
+        return response.json();
     });
 }

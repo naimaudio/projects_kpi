@@ -51,7 +51,7 @@ import CarretLeftSolidIcon from "./icons/CarretLeftSolidIcon.vue";
 import CarretRightSolidIcon from "./icons/CarretRightSolidIcon.vue";
 import { computed } from "vue";
 const PagesHiddenLeftCount = computed<number>(() => {
-    return Math.min(Math.max(0, props.currentPage - 3), props.pageCount - 5);
+    return Math.min(Math.max(0, props.currentPage - 3), Math.max(props.pageCount, 5) - 5);
 });
 const buttonCount = computed<number>(() => {
     return Math.min(5, props.pageCount);

@@ -21,27 +21,13 @@ import dayjs from "dayjs";
 import { range, weekNumberToString } from "@/utilities/main";
 import { useRouter } from "vue-router";
 import BaseButton from "@/components/BaseButton.vue";
+import type { WeekInYear } from "@/typing/project";
+import { useUserStore } from "@/stores/user";
 const router = useRouter();
+const userStore = useUserStore();
 // Les flows :
 // 1 date de début => Toutes les semaines d'après doivent être renseignées
 // 1 date de début => si à la fin du mois non renseignée, sert plus à rien de le renseigner.
-
-interface WeekInYear {
-    week: number;
-    year: number;
-}
-
-const weeksDeclared: WeekInYear[] = [
-    { week: 13, year: 2023 },
-    { week: 28, year: 2022 },
-    { week: 24, year: 2022 },
-    { week: 21, year: 2023 },
-    { week: 25, year: 2022 },
-    { week: 26, year: 2022 },
-    { week: 28, year: 2023 },
-    { week: 27, year: 2022 },
-    { week: 22, year: 2023 },
-];
 
 function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: WeekInYear): WeekInYear[] {
     const now = dayjs(new Date());
@@ -71,7 +57,7 @@ function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: Week
     });
     return declarationsToInput;
 }
-const weeks = buildDeclarations(weeksDeclared, { year: 2021, week: 2 });
+const weeks = buildDeclarations(userStore.getWeeksDeclared(), { year: 2021, week: 2 });
 </script>
 
 <style scoped>

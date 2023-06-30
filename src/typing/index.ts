@@ -22,15 +22,6 @@ export interface DeclarationInput {
     hours: number;
 }
 
-export interface Declaration {
-    id: string;
-    userEmail: string;
-    projectCode: string;
-    workedHours: number;
-    dateReg: Date;
-    comment: string;
-}
-
 export interface User {
     id: number;
     username: string;
@@ -46,4 +37,20 @@ export const workDays: Record<days, string> = ["Monday", "Tuesday", "Wednesday",
 
 export interface ChangeEvent {
     target: { value: string; currentChecked: boolean };
+}
+
+export interface RawDeclaration {
+    worked_hours: number;
+    date_rec: string;
+    project_id: number;
+    user_id: number;
+    comment?: string;
+}
+
+export interface Declaration {
+    hours: number;
+    week: number;
+    year: number;
+    projectId: number;
+    comment?: string;
 }

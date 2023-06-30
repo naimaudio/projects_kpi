@@ -41,3 +41,8 @@ export interface RawProject {
 export interface SelectableProject extends UserProject {
     selected: boolean;
 }
+
+export interface WeekInYear {
+    week: number;
+    year: number;
+}

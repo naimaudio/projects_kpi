@@ -27,7 +27,7 @@
                     </fluent-select>
                 </div>
             </div>
-            <template v-if="weekNumber !== undefined && yearNumber !== undefined">
+            <template v-if="valideRoute">
                 <!-- WEEKLY METHOD -->
                 <div v-if="methodSelected === 'weekly'" class="declaration-container column-flex">
                     <span class="prefix sub-title">Week {{ route.params.week }}</span>
@@ -193,6 +193,7 @@ import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 import { hoursRegistration } from "@/API/requests";
+import { type WeekInYear } from "@/typing/project";
 const addFavoritesModal = ref(false);
 const router = useRouter();
 const route = useRoute();
@@ -258,6 +259,13 @@ async function validateDeclaration() {
     }
     hoursRegistration(sendedDeclaration, 2, comment.value);
 }
+const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared());
+const valideRoute = computed<boolean>(
+    () =>
+        weekNumber.value !== undefined &&
+        yearNumber.value !== undefined &&
+        weeksDeclared.value.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
+);
 </script>
 
 <style scoped>

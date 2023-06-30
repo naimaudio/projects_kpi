@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
-import type { DailyDeclaration, DeclarationInput, Preferences } from "../typing/index";
+import type { DailyDeclaration, Declaration, DeclarationInput, Preferences, RawDeclaration } from "../typing/index";
 import { computed, ref, watch } from "vue";
 import { useProjectStore } from "./projects";
+import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
-import type { UserProject } from "@/typing/project";
+import type { UserProject, WeekInYear } from "@/typing/project";
 import { deleteFavorites, postFavorites } from "@/API/requests";
 export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
@@ -123,9 +124,41 @@ export const useUserStore = defineStore("user", () => {
             return displayableProject;
         });
     });
+    const weeksDeclared = ref<WeekInYear[]>([
+        { week: 13, year: 2023 },
+        { week: 28, year: 2022 },
+        { week: 24, year: 2022 },
+        { week: 21, year: 2023 },
+        { week: 25, year: 2022 },
+        { week: 26, year: 2022 },
+        { week: 28, year: 2023 },
+        { week: 27, year: 2022 },
+        { week: 22, year: 2023 },
+    ]);
+
+    function getWeeksDeclared(): WeekInYear[] {
+        return weeksDeclared.value;
+    }
     function initFavorites(newFavorites: number[]) {
         favorites.value.clear();
         newFavorites.forEach((fav) => favorites.value.add(fav));
+    }
+    const declarations = ref<Declaration[]>([]);
+    function setDeclarationsFromRaw(rawDeclarations: RawDeclaration[]) {
+        const decl: Declaration[] = [];
+        rawDeclarations.forEach((rawDeclaration) => {
+            decl.push({
+                comment: rawDeclaration.comment,
+                week: dayjs(rawDeclaration.date_rec).week(),
+                year: dayjs(rawDeclaration.date_rec).get("year"),
+                projectId: rawDeclaration.project_id,
+                hours: rawDeclaration.worked_hours,
+            });
+        });
+        declarations.value = decl;
+    }
+    function getDeclarations() {
+        return declarations.value;
     }
     return {
         preferences,
@@ -135,8 +168,11 @@ export const useUserStore = defineStore("user", () => {
         getElementaryDeclaration,
         getDailyDeclarationTotal,
         getDailyDeclarationToWeekly,
+        setDeclarationsFromRaw,
+        getWeeksDeclared,
         isFavorite,
         setFavorite,
         initFavorites,
+        getDeclarations,
     };
 });
