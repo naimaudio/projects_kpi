@@ -150,7 +150,7 @@
                     <div class="table-raw-gap" />
                     <div class="table-raw-container-2">
                         <span class="prefix">Commentary (optional)</span>
-                        <fluent-text-area />
+                        <fluent-text-area v-model="comment" />
                     </div>
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
@@ -192,6 +192,7 @@ import { useUserStore } from "@/stores/user";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
+import { hoursRegistration } from "@/API/requests";
 const addFavoritesModal = ref(false);
 const router = useRouter();
 const route = useRoute();
@@ -210,6 +211,9 @@ const yearNumber = computed<number | undefined>(() => {
         ? undefined
         : Number(route.params.year);
 });
+
+const comment = ref<string | undefined>();
+
 const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
 const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
 
@@ -243,16 +247,7 @@ const sumProjectHours = computed<number>(() => {
     return total;
 });
 
-// interface RegisterHours {
-//     worked_hours: number;
-//     project_id: number;
-//     user_id: number;
-// }
-
-function validateDeclaration() {
-    // let register:RegisterHours = {
-    //   worked_hours: ongoingDeclaration.value
-    // }
+async function validateDeclaration() {
     let sendedDeclaration: DeclarationInput[] | undefined;
     if (methodSelected.value === "daily") {
         sendedDeclaration = userStore.getDailyDeclarationToWeekly;
@@ -261,20 +256,7 @@ function validateDeclaration() {
     } else {
         throw Error("no input method Selected");
     }
-    sendedDeclaration.forEach((declaration) => {
-        fetch("http://192.168.14.30:8080/register-hours/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                worked_hours: declaration.hours,
-                project_id: declaration.projectId,
-                user_id: 3,
-                date_rec: Date.now(),
-            }),
-        });
-    });
+    hoursRegistration(sendedDeclaration, 2, comment.value);
 }
 </script>
 

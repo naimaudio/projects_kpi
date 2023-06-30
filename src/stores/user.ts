@@ -4,6 +4,7 @@ import { computed, ref, watch } from "vue";
 import { useProjectStore } from "./projects";
 import { cloneDeep } from "lodash";
 import type { UserProject } from "@/typing/project";
+import { deleteFavorites, postFavorites } from "@/API/requests";
 export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
         preferedMethod: "weekly",
@@ -101,31 +102,11 @@ export const useUserStore = defineStore("user", () => {
     });
     async function setFavorite(projectId: number, value: boolean) {
         if (value) {
-            await fetch("http://192.168.14.30:8080/define-favorites/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify([
-                    {
-                        user_id: 2,
-                        project_id: projectId,
-                    },
-                ]),
-            });
+            await postFavorites(2, projectId);
             favorites.value.add(projectId);
         } else {
-            await fetch("http://192.168.14.30:8080/delete-favorites/", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    user_id: 2,
-                    project_id: projectId,
-                }),
-            });
             favorites.value.delete(projectId);
+            await deleteFavorites(2, projectId);
         }
     }
 
@@ -142,7 +123,10 @@ export const useUserStore = defineStore("user", () => {
             return displayableProject;
         });
     });
-
+    function initFavorites(newFavorites: number[]) {
+        favorites.value.clear();
+        newFavorites.forEach((fav) => favorites.value.add(fav));
+    }
     return {
         preferences,
         favorites,
@@ -153,5 +137,6 @@ export const useUserStore = defineStore("user", () => {
         getDailyDeclarationToWeekly,
         isFavorite,
         setFavorite,
+        initFavorites,
     };
 });
