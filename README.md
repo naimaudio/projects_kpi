@@ -1,21 +1,20 @@
 # Time Management Interface for projects
 
-This frontend application has the purpose to provide to employees an interface to input there hours. It will provide to project managers .
+The purpose of this frontend application is to provide employees with an interface for inputting their working hours. It will provide project managers .
 
 ## Choices made
 
-The choice has been made to make this frontend the most accurate to the fluent 2 design system. The firsts users of this application will be Focal. Employees from this company are fluent with microsoft ecosystem.
+This frontend has been made the most accurate according to the fluent 2 design system. The first users of this application will be Focal employees, which are fluent with the Microsoft ecosystem.
 
 ## Vue concepts
 
-To understand the code, it is necessary to have an idea of the notions bellow :
+To understand the code, it is necessary to have an idea of the following notions:
 
 This application is a [one page application](https://vuejs.org/guide/extras/ways-of-using-vue.html#embedded-web-components)
 
-This project uses Vue 3 (not the same syntax as vue 2)
+This project uses Vue 3 (not the same syntax as Vue 2)
 
-It uses the [Typescript](https://www.typescriptlang.org/) langage.
-Typescript is a superset of javascript.
+It uses the [Typescript](https://www.typescriptlang.org/) language, which is a superset of Javascript.
 The purpose of typescript is to help developpers. It adds static types to javascript.
 Is is only used in development, indeed, web navigators only understand javascript
 
@@ -37,9 +36,9 @@ The library used in this app are
 - eslint which is a linter, tell the developpers bad practices with a set of rules. It mades the code consistente.
 - prettier : tool that make code pretty
 - web components from fluent ui.
-- lodash : used for the cloneDeep function, useful to make a copy of an array, or object without references.
-- dayjs: provide utilities for date manipulation. (used to format dates and weeks manipulation)
-- date-fns : Possible to do without it, to be removed
+- lodash : cloneDeep function, useful to make a copy of an array.
+- dayjs: provide utilities for date manipulation. (format dates and weeks manipulation)
+- date-fns : to be removed
 - vite : development server.
 - types packages : relative to Typescript
 
