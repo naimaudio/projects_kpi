@@ -53,4 +53,5 @@ export interface Declaration {
     year: number;
     projectId: number;
     comment?: string;
+    id: number;
 }

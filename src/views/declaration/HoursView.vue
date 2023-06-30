@@ -27,7 +27,7 @@
                     </fluent-select>
                 </div>
             </div>
-            <template v-if="valideRoute">
+            <template v-if="weekNumber !== undefined && yearNumber !== undefined && valideRoute">
                 <!-- WEEKLY METHOD -->
                 <div v-if="methodSelected === 'weekly'" class="declaration-container column-flex">
                     <span class="prefix sub-title">Week {{ route.params.week }}</span>
@@ -261,10 +261,7 @@ async function validateDeclaration() {
 }
 const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared());
 const valideRoute = computed<boolean>(
-    () =>
-        weekNumber.value !== undefined &&
-        yearNumber.value !== undefined &&
-        weeksDeclared.value.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
+    () => weeksDeclared.value.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
 );
 </script>
 

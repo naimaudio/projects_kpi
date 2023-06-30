@@ -146,13 +146,14 @@ export const useUserStore = defineStore("user", () => {
     const declarations = ref<Declaration[]>([]);
     function setDeclarationsFromRaw(rawDeclarations: RawDeclaration[]) {
         const decl: Declaration[] = [];
-        rawDeclarations.forEach((rawDeclaration) => {
+        rawDeclarations.forEach((rawDeclaration, index) => {
             decl.push({
                 comment: rawDeclaration.comment,
                 week: dayjs(rawDeclaration.date_rec).week(),
                 year: dayjs(rawDeclaration.date_rec).get("year"),
                 projectId: rawDeclaration.project_id,
                 hours: rawDeclaration.worked_hours,
+                id: index,
             });
         });
         declarations.value = decl;
