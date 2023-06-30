@@ -38,7 +38,8 @@ The library used in this app are
 - prettier : tool that make code pretty
 - web components from fluent ui.
 - lodash : used for the cloneDeep function, useful to make a copy of an array, or object without references.
-- date-fns (maybe it is possible to do without it)
+- dayjs: provide utilities for date manipulation. (used to format dates and weeks manipulation)
+- date-fns : Possible to do without it, to be removed
 - vite : development server.
 - types packages : relative to Typescript
 

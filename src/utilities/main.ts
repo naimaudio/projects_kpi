@@ -35,3 +35,16 @@ export function assertIsNode(e: EventTarget | null): asserts e is Node {
         throw new Error(`Node expected`);
     }
 }
+
+export function range(begining: number, end: number): number[] {
+    if (begining >= end) {
+        return [];
+    }
+    const range = [];
+    let i: number = begining;
+    while (i < end) {
+        range.push(i);
+        i++;
+    }
+    return range;
+}

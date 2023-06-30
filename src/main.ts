@@ -16,6 +16,15 @@ import {
     fluentTextField,
 } from "@fluentui/web-components";
 
+import { extend } from "dayjs";
+import isoWeekInYear from "dayjs/plugin/isoWeeksInYear";
+import isLeapYear from "dayjs/plugin/isLeapYear";
+import weekOfYear from "dayjs/plugin/weekOfYear";
+
+extend(weekOfYear);
+extend(isoWeekInYear);
+extend(isLeapYear);
+
 const app = createApp(App);
 
 app.use(createPinia());
