@@ -1,9 +1,9 @@
 <template>
     <div id="sidebar">
-        <div class="avatar-container raw-container">
+        <RouterLink class="avatar-container raw-container" to="/profile">
             <BaseAvatar />
-            <RouterLink class="base-links" to="profile">Beatrice Franz</RouterLink>
-        </div>
+            <span>Beatrice Franz</span>
+        </RouterLink>
         <div class="divider-soft" />
         <div class="base-menu">
             <RouterLink v-for="[name, link] in names" :key="name" class="base-links" :to="link">
@@ -50,7 +50,10 @@ const names: [string, string][] = [
 .avatar-container {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    padding: 20px 0;
+    text-decoration: none;
+
+    color: black;
 }
 
 .base-menu {
@@ -70,7 +73,8 @@ const names: [string, string][] = [
     border-radius: 5px;
 }
 
-.base-links:hover {
+.base-links:hover,
+.avatar-container:hover {
     background-color: rgba(138, 153, 168, 0.2);
 }
 </style>
