@@ -259,7 +259,7 @@ async function validateDeclaration() {
     }
     hoursRegistration(sendedDeclaration, 2, comment.value);
 }
-const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared());
+const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared);
 const valideRoute = computed<boolean>(
     () => weeksDeclared.value.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
 );

@@ -124,21 +124,11 @@ export const useUserStore = defineStore("user", () => {
             return displayableProject;
         });
     });
-    const weeksDeclared = ref<WeekInYear[]>([
-        { week: 13, year: 2023 },
-        { week: 28, year: 2022 },
-        { week: 24, year: 2022 },
-        { week: 21, year: 2023 },
-        { week: 25, year: 2022 },
-        { week: 26, year: 2022 },
-        { week: 28, year: 2023 },
-        { week: 27, year: 2022 },
-        { week: 22, year: 2023 },
-    ]);
+    const weeksDeclared = ref<WeekInYear[]>([]);
 
-    function getWeeksDeclared(): WeekInYear[] {
+    const getWeeksDeclared = computed<WeekInYear[]>(() => {
         return weeksDeclared.value;
-    }
+    });
     function initFavorites(newFavorites: number[]) {
         favorites.value.clear();
         newFavorites.forEach((fav) => favorites.value.add(fav));
@@ -157,10 +147,26 @@ export const useUserStore = defineStore("user", () => {
             });
         });
         declarations.value = decl;
+        const sortedDeclarations = decl.sort((decl1, decl2) =>
+            decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
+        );
+        weeksDeclared.value = sortedDeclarations.reduce<WeekInYear[]>((previousValue, currentValue) => {
+            const length = previousValue.length;
+            if (
+                length === 0 ||
+                (currentValue.week !== previousValue[length - 1].week &&
+                    currentValue.year !== previousValue[length - 1].year)
+            )
+                previousValue.push({
+                    week: currentValue.week,
+                    year: currentValue.year,
+                });
+            return previousValue;
+        }, []);
     }
-    function getDeclarations() {
+    const getDeclarations = computed(() => {
         return declarations.value;
-    }
+    });
     return {
         preferences,
         favorites,

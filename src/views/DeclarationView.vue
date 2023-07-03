@@ -37,7 +37,6 @@ function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: Week
     const sortedWeeksDeclared = weeksDeclared.sort((weekInYear, weekInYear2) =>
         weekInYear2.year !== weekInYear.year ? weekInYear.year - weekInYear2.year : weekInYear.week - weekInYear2.week
     );
-    console.log("ici : ", sortedWeeksDeclared);
     const declarationsToInput: WeekInYear[] = [];
     let j = 0;
     const lengthOfWeeksDeclared = sortedWeeksDeclared.length;
@@ -57,7 +56,7 @@ function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: Week
     });
     return declarationsToInput;
 }
-const weeks = buildDeclarations(userStore.getWeeksDeclared(), { year: 2021, week: 2 });
+const weeks = buildDeclarations(userStore.getWeeksDeclared, { year: 2023, week: 2 });
 </script>
 
 <style scoped>

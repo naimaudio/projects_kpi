@@ -2,8 +2,15 @@
     <div>
         <div class="table-headers">
             <div v-if="selectable"></div>
-            <div v-for="header in props.headers" :key="header.id" class="table-cell header-cell">
+            <div
+                v-for="(header, index) in props.headers"
+                :key="header.id"
+                class="table-cell header-cell"
+                @click="() => setSortedColumn(index)"
+            >
                 <span>{{ header.name }}</span>
+                <ArrowUpIcon v-if="sortedColumn?.index === index && sortedColumn.value === 'ASC'" />
+                <ArrowDownIcon v-else-if="sortedColumn?.index === index && sortedColumn.value === 'DESC'" />
             </div>
         </div>
         <div v-for="(cell, index) in displayedItems" :key="cell.id" class="table-raw">
@@ -52,9 +59,30 @@
 <script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean}">
 import StarOutlineIcon from "@/components/icons/StarOutlineIcon.vue";
 import type { ChangeEvent, Header } from "@/typing";
+import ArrowUpIcon from "@/components/icons/ArrowUpIcon.vue";
+import ArrowDownIcon from "@/components/icons/ArrowDownIcon.vue";
 import PaginationTable from "@/components/PaginationTable.vue";
 import { computed, ref } from "vue";
+import { cloneDeep } from "lodash";
+interface SortedColumn {
+    index: number;
+    value: "ASC" | "DESC";
+}
 
+const sortedColumn = ref<SortedColumn | undefined>();
+
+function setSortedColumn(index: number) {
+    if (sortedColumn.value === undefined || sortedColumn.value.index !== index) {
+        sortedColumn.value = {
+            index: index,
+            value: "ASC",
+        };
+    } else if (sortedColumn.value.value === "ASC") {
+        sortedColumn.value.value = "DESC";
+    } else {
+        sortedColumn.value = undefined;
+    }
+}
 const props = withDefaults(
     defineProps<{
         headers: Header[];
@@ -77,8 +105,56 @@ const pageCount = computed(() => {
     return Math.floor((props.items.length - 1) / itemsPerPageCount) + 1;
 });
 
+const sortedItems = computed(() => {
+    const sortedItems = cloneDeep(props.items);
+    if (sortedColumn.value !== undefined) {
+        const key = props.headers[sortedColumn.value.index].id;
+        if (sortedColumn.value.value === "ASC") {
+            if (typeof sortedItems[0][key as keyof T] === "string") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as string;
+                    const b = itemB[key as keyof T] as string;
+                    return a.localeCompare(b);
+                });
+            } else if (typeof sortedItems[0][key as keyof T] === "number") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as number;
+                    const b = itemB[key as keyof T] as number;
+                    return a - b;
+                });
+            } else if (typeof sortedItems[0][key as keyof T] === "boolean") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as boolean;
+                    const b = itemB[key as keyof T] as boolean;
+                    return (a && b) || (!a && !b) ? 0 : a && !b ? -1 : 1;
+                });
+            }
+        } else if (sortedColumn.value.value === "DESC") {
+            if (typeof sortedItems[0][key as keyof T] === "string") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as string;
+                    const b = itemB[key as keyof T] as string;
+                    return b.localeCompare(a);
+                });
+            } else if (typeof sortedItems[0][key as keyof T] === "number") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as number;
+                    const b = itemB[key as keyof T] as number;
+                    return b - a;
+                });
+            } else if (typeof sortedItems[0][key as keyof T] === "boolean") {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = itemA[key as keyof T] as boolean;
+                    const b = itemB[key as keyof T] as boolean;
+                    return (a && b) || (!a && !b) ? 0 : a && !b ? 1 : -1;
+                });
+            }
+        }
+    }
+    return sortedItems;
+});
 const displayedItems = computed<T[]>(() => {
-    return props.items.slice((currentPage.value - 1) * itemsPerPageCount, currentPage.value * itemsPerPageCount);
+    return sortedItems.value.slice((currentPage.value - 1) * itemsPerPageCount, currentPage.value * itemsPerPageCount);
 });
 
 function emitGlobal<K extends keyof T>(event: "change", index: number, field: K, value: T[K]) {
@@ -106,6 +182,7 @@ const changeSelect = (index: number, event: ChangeEvent) => {
 .table-raw:hover,
 .header-cell:hover {
     background-color: #f5f5f5;
+    cursor: pointer;
 }
 .table-cell {
     padding: 0 8px;

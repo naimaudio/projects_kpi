@@ -1,7 +1,7 @@
 export interface Header {
     name: string;
     id: string;
-    filterable: boolean;
+    filterable?: boolean;
 }
 
 export interface Preferences {

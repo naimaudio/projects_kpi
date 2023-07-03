@@ -46,6 +46,6 @@ const headers: Header[] = [
 ];
 const userStore = useUserStore();
 const declarations = computed(() => {
-    return userStore.getDeclarations();
+    return userStore.getDeclarations;
 });
 </script>
