@@ -14,7 +14,7 @@
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--card-border-radius);
     font-weight: 500;
     min-width: 60px;
 }

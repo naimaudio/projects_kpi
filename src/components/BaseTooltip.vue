@@ -27,7 +27,7 @@ const { floatingStyles } = useFloating(infoIcon, tooltip, {
     background: #222;
     color: white;
     padding: 5px;
-    border-radius: 4px;
+    border-radius: var(--button-border-radius);
     font-size: 90%;
 }
 </style>
