@@ -1,9 +1,18 @@
 import { defineStore } from "pinia";
 import type { Project, RawProject } from "@/typing/project";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export const useProjectStore = defineStore("project", () => {
     const projects = ref<Project[]>([]);
+
+    const projectCodes = computed(() => {
+        const projectCodes: { [key: number]: string } = {};
+        projects.value.forEach((project) => {
+            projectCodes[project.id] = project.code;
+            return project;
+        });
+        return projectCodes;
+    });
     function addProject(project: Project) {
         projects.value.push(project);
     }
@@ -21,5 +30,5 @@ export const useProjectStore = defineStore("project", () => {
             };
         });
     }
-    return { projects, addProject, setProjectsFromRaw };
+    return { projects, projectCodes, addProject, setProjectsFromRaw };
 });

@@ -9,8 +9,8 @@ export async function getProjects(): Promise<RawProject[]> {
         headers: {
             "Content-Type": "application/json",
         },
-    }).then((projects) => {
-        return projects.json();
+    }).then((response) => {
+        return response.json();
     });
 }
 export async function getFavorites(userId: number): Promise<number[]> {

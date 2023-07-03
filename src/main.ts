@@ -15,6 +15,7 @@ import {
     fluentCheckbox,
     fluentTextField,
     fluentProgressRing,
+    fluentSearch,
 } from "@fluentui/web-components";
 
 import { extend } from "dayjs";
@@ -47,5 +48,6 @@ provideFluentDesignSystem().register(
     fluentOption(),
     fluentCheckbox(),
     fluentTextField(),
-    fluentProgressRing()
+    fluentProgressRing(),
+    fluentSearch()
 );

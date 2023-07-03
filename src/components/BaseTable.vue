@@ -1,5 +1,6 @@
 <template>
     <div>
+        <fluent-search v-model="search" style="width: 100%"></fluent-search>
         <div class="table-headers">
             <div v-if="selectable"></div>
             <div
@@ -48,7 +49,7 @@
             <PaginationTable
                 :current-page="currentPage"
                 :page-count="pageCount"
-                :items-count="items.length"
+                :items-count="sortedItems.length"
                 :items-per-page-count="itemsPerPageCount"
                 @page-change="(pageNumber) => (currentPage = pageNumber)"
             />
@@ -71,6 +72,7 @@ interface SortedColumn {
 
 const sortedColumn = ref<SortedColumn | undefined>();
 
+const search = ref<string>("");
 function setSortedColumn(index: number) {
     if (sortedColumn.value === undefined || sortedColumn.value.index !== index) {
         sortedColumn.value = {
@@ -102,11 +104,11 @@ const currentPage = ref(1);
 const itemsPerPageCount = 10;
 
 const pageCount = computed(() => {
-    return Math.floor((props.items.length - 1) / itemsPerPageCount) + 1;
+    return Math.floor((sortedItems.value.length - 1) / itemsPerPageCount) + 1;
 });
 
 const sortedItems = computed(() => {
-    const sortedItems = cloneDeep(props.items);
+    let sortedItems = cloneDeep(props.items);
     if (sortedColumn.value !== undefined) {
         const key = props.headers[sortedColumn.value.index].id;
         if (sortedColumn.value.value === "ASC") {
@@ -150,6 +152,20 @@ const sortedItems = computed(() => {
                 });
             }
         }
+    }
+    if (search.value !== undefined && search.value !== "" && props.items.length !== 0) {
+        sortedItems = sortedItems.filter((item) => {
+            for (let i = 0; i < props.headers.length; i++) {
+                const value = item[props.headers[i].id as keyof T];
+                if (typeof value === "string" && value.includes(search.value)) {
+                    return true;
+                }
+                if (typeof value === "number" && String(value).includes(search.value)) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
     return sortedItems;
 });

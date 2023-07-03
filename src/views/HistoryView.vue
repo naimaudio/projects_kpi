@@ -34,8 +34,8 @@ const headers: Header[] = [
         filterable: false,
     },
     {
-        id: "projectId",
-        name: "Project ID ( will be code)",
+        id: "projectCode",
+        name: "Project code",
         filterable: false,
     },
     {

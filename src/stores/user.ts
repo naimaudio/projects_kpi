@@ -1,5 +1,12 @@
 import { defineStore } from "pinia";
-import type { DailyDeclaration, Declaration, DeclarationInput, Preferences, RawDeclaration } from "../typing/index";
+import type {
+    DailyDeclaration,
+    Declaration,
+    DeclarationInput,
+    Preferences,
+    RawDeclaration,
+    User,
+} from "../typing/index";
 import { computed, ref, watch } from "vue";
 import { useProjectStore } from "./projects";
 import dayjs from "dayjs";
@@ -10,8 +17,17 @@ export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
         preferedMethod: "weekly",
     });
+
+    const user = ref<User | undefined>();
+
     const projectStore = useProjectStore();
+
     const favorites = ref<Set<number>>(new Set([]));
+
+    const declarations = ref<Declaration[]>([]);
+
+    const weeksDeclared = ref<WeekInYear[]>([]);
+
     const getElementaryDeclaration = computed<DeclarationInput[]>(() => {
         return projectStore.projects.reduce<DeclarationInput[]>((declarations, project) => {
             if (favorites.value.has(project.id)) {
@@ -73,10 +89,6 @@ export const useUserStore = defineStore("user", () => {
         return declarationInput;
     });
 
-    function isFavorite(projectId: number) {
-        return favorites.value.has(projectId);
-    }
-
     watch(favorites.value, (newValue) => {
         projectStore.projects.forEach((project) => {
             if (newValue.has(project.id)) {
@@ -101,18 +113,31 @@ export const useUserStore = defineStore("user", () => {
             }
         });
     });
-    async function setFavorite(projectId: number, value: boolean) {
-        if (value) {
-            await postFavorites(2, projectId);
-            favorites.value.add(projectId);
-        } else {
-            favorites.value.delete(projectId);
-            await deleteFavorites(2, projectId);
-        }
-    }
+
+    const getWeeksDeclared = computed<WeekInYear[]>(() => {
+        return weeksDeclared.value;
+    });
+
+    const getDeclarations = computed(() => {
+        return declarations.value;
+    });
 
     const getUserProjects = computed<UserProject[]>(() => {
-        return projectStore.projects.map((project) => {
+        const sortedDeclarations = cloneDeep(declarations.value).sort((decl1, decl2) =>
+            decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
+        );
+        let i = -1;
+        const cumulTDE: { time_spend: number; projectId: number }[] = [];
+        sortedDeclarations.forEach((decl) => {
+            if (i === -1 || cumulTDE[i].projectId !== decl.projectId) {
+                cumulTDE.push({ projectId: decl.projectId, time_spend: decl.hours });
+                i += 1;
+            } else {
+                cumulTDE[i].time_spend += decl.hours;
+            }
+        });
+        i = 0;
+        const userProjects = projectStore.projects.map((project) => {
             const displayableProject: UserProject = {
                 id: project.id,
                 manager: project?.manager,
@@ -123,17 +148,24 @@ export const useUserStore = defineStore("user", () => {
             };
             return displayableProject;
         });
+        const sortedProjects = cloneDeep(userProjects).sort((p1, p2) => {
+            return p1.id - p2.id;
+        });
+        const length = cumulTDE.length;
+        sortedProjects.forEach((p) => {
+            if (i < length && p.id === cumulTDE[i].projectId) {
+                p.time_spend = cumulTDE[i].time_spend;
+                i++;
+            }
+        });
+        return sortedProjects;
     });
-    const weeksDeclared = ref<WeekInYear[]>([]);
 
-    const getWeeksDeclared = computed<WeekInYear[]>(() => {
-        return weeksDeclared.value;
-    });
     function initFavorites(newFavorites: number[]) {
         favorites.value.clear();
         newFavorites.forEach((fav) => favorites.value.add(fav));
     }
-    const declarations = ref<Declaration[]>([]);
+
     function setDeclarationsFromRaw(rawDeclarations: RawDeclaration[]) {
         const decl: Declaration[] = [];
         rawDeclarations.forEach((rawDeclaration, index) => {
@@ -144,6 +176,7 @@ export const useUserStore = defineStore("user", () => {
                 projectId: rawDeclaration.project_id,
                 hours: rawDeclaration.worked_hours,
                 id: index,
+                projectCode: projectStore.projectCodes[rawDeclaration.project_id],
             });
         });
         declarations.value = decl;
@@ -164,10 +197,29 @@ export const useUserStore = defineStore("user", () => {
             return previousValue;
         }, []);
     }
-    const getDeclarations = computed(() => {
-        return declarations.value;
-    });
+
+    // function setUserFromRaw(rawUser: RawUser) {
+    //     user.value = {
+    //         email:
+    //     }
+    // }
+
+    function isFavorite(projectId: number) {
+        return favorites.value.has(projectId);
+    }
+
+    async function setFavorite(projectId: number, value: boolean) {
+        if (value) {
+            await postFavorites(2, projectId);
+            favorites.value.add(projectId);
+        } else {
+            favorites.value.delete(projectId);
+            await deleteFavorites(2, projectId);
+        }
+    }
+
     return {
+        user,
         preferences,
         favorites,
         getUserProjects,

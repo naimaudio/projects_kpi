@@ -52,6 +52,7 @@ export interface Declaration {
     week: number;
     year: number;
     projectId: number;
+    projectCode: string;
     comment?: string;
     id: number;
 }
