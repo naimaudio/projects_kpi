@@ -1,7 +1,6 @@
 <template>
     <div class="page-container">
         <h1 class="title">Projects</h1>
-        <div class="divider"></div>
         <div v-if="userStore.getUserProjects.length !== 0">
             <BaseTable :headers="headers" :items="userStore.getUserProjects" @change="change" />
         </div>

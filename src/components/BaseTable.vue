@@ -182,8 +182,18 @@ const changeSelect = (index: number, event: ChangeEvent) => {
 .table-raw:hover,
 .header-cell:hover {
     background-color: #f5f5f5;
-    cursor: pointer;
 }
+
+.header-cell:hover {
+    cursor: pointer;
+    user-select: none;
+}
+
+.header-cell {
+    align-items: center;
+    gap: 4px;
+}
+
 .table-cell {
     padding: 0 8px;
     min-height: 44px;
