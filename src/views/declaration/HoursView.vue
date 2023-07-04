@@ -3,7 +3,7 @@
         <div class="column-container">
             <div class="flex-space-between">
                 <div class="raw-container">
-                    <img :src="arrowPrevious" class="clickable-icon" @click="() => router.push({ path: '/declare' })" />
+                    <ArrowPreviousIcon class="clickable-icon" @click="() => router.push({ path: '/declare' })" />
                     <h1 class="sub-title">Declaration</h1>
                 </div>
                 <div style="display: flex; flex-direction: column">
@@ -175,7 +175,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import arrowPrevious from "@/assets/icons/arrow-previous.svg";
+import ArrowPreviousIcon from "@/components/icons/ArrowPreviousIcon.vue";
 import { useRoute, useRouter } from "vue-router";
 import HoursForm from "@/components/input_hours/HoursForm.vue";
 import { weekNumberToString } from "@/utilities/main";

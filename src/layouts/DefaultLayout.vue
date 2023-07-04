@@ -1,10 +1,5 @@
 <template>
     <div id="sidebar">
-        <RouterLink class="avatar-container raw-container" to="/profile">
-            <BaseAvatar />
-            <span>Beatrice Franz</span>
-        </RouterLink>
-        <div class="divider-soft" />
         <div class="base-menu">
             <RouterLink v-for="[name, link] in names" :key="name" class="base-links" :to="link">
                 {{ name }}
@@ -12,24 +7,60 @@
         </div>
     </div>
     <div id="main-section">
+        <div id="headerbar">
+            <img src="@/assets/userportal_logo.png" style="image-rendering: high-quality; margin-left: 20px" />
+            <div>
+                <RouterLink class="avatar-container raw-container" to="/profile">
+                    <span>Beatrice Franz</span>
+                    <BaseAvatar />
+                </RouterLink>
+                <a v-if="false" class="connect-button" @click="signIn">login</a>
+            </div>
+        </div>
         <RouterView />
     </div>
 </template>
 
 <script setup lang="ts">
 import BaseAvatar from "@/components/BaseAvatar.vue";
+import { PublicClientApplication, type AccountInfo } from "@azure/msal-browser";
+import { useAuthStore } from "@/stores/authStore";
+import { onMounted, ref } from "vue";
+const account = ref<AccountInfo | undefined>(undefined);
+const authStore = useAuthStore();
+
+const msalInstance = new PublicClientApplication(authStore.msalConfig);
+
+onMounted(() => {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length == 0) {
+        return;
+    }
+    account.value = accounts[0];
+});
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
     ["Declaration history", "/history"],
     ["Projects", "/projects"],
 ];
+
+async function signIn() {
+    await msalInstance.loginPopup({ scopes: [] }).then(() => {
+        const myAccounts = msalInstance.getAllAccounts();
+        account.value = myAccounts[0];
+    });
+}
+
+async function signOut() {
+    msalInstance.logoutPopup({});
+}
 </script>
 
 <style scoped>
 #sidebar {
     position: fixed;
-    top: 0;
+    top: 80px;
     left: 0;
     bottom: 0;
     width: 280px;
@@ -37,22 +68,42 @@ const names: [string, string][] = [
     border-right: 1px solid #e6e6e6;
 }
 
+#headerbar {
+    justify-content: space-between;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background-color: white;
+    border-right: 1px solid #e6e6e6;
+    box-shadow: rgb(15, 108, 189) 0px 0px 4px -2px;
+}
+
 #main-section {
     position: fixed;
     left: 282px;
-    top: 0;
+    top: 80px;
     bottom: 0;
     right: 0;
     background-color: white;
     overflow-y: scroll;
 }
 
+.connect-button {
+    color: black;
+    text-decoration: none;
+}
+.connect-button:hover {
+    text-decoration: underline;
+}
+
 .avatar-container {
     display: flex;
     justify-content: center;
-    padding: 20px 0;
+    padding: 20px;
     text-decoration: none;
-
     color: black;
 }
 
