@@ -1,11 +1,11 @@
 import type { DeclarationInput, RawDeclaration } from "@/typing";
 import type { RawProject } from "@/typing/project";
-import { format } from "date-fns";
+import { dayNumberToDayDate } from "@/utilities/main";
 
 const origin = "http://192.168.14.30:8080";
 
 export async function getProjects(): Promise<RawProject[]> {
-    return fetch(`${origin}/projects/`, {
+    return fetch(`${origin}/projects`, {
         headers: {
             "Content-Type": "application/json",
         },
@@ -13,6 +13,13 @@ export async function getProjects(): Promise<RawProject[]> {
         return response.json();
     });
 }
+
+export async function getUser(userId: number): Promise<RawProject[]> {
+    return fetch(`${origin}/user?user_id=${userId}`, {}).then((response) => {
+        return response.json();
+    });
+}
+
 export async function getFavorites(userId: number): Promise<number[]> {
     return fetch(`${origin}/favorites/${userId}`).then((response) => {
         return response.json();
@@ -47,18 +54,38 @@ export async function deleteFavorites(userId: number, projectId: number) {
     });
 }
 
-export async function hoursRegistration(declarations: DeclarationInput[], userId: number, comment?: string) {
+export async function hoursRegistration(
+    declarations: DeclarationInput[],
+    userId: number,
+    week: number,
+    year: number,
+    comment?: string
+) {
     const requestBody: RawDeclaration[] = [];
     declarations.forEach((declaration) => {
         requestBody.push({
-            worked_hours: declaration.hours,
-            date_rec: format(new Date(), "YYYY-MM-DD"),
+            declared_hours: declaration.hours,
+            modified_hours: declaration.hours,
+            date_rec: dayNumberToDayDate(0, week, year),
             project_id: declaration.projectId,
-            comment: comment,
             user_id: userId,
         });
     });
-    return fetch(`${origin}/record`, {
+    fetch(`${origin}/records`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify([
+            {
+                date_rec: dayNumberToDayDate(0, week, year),
+                comment: comment,
+                user_id: userId,
+            },
+        ]),
+    });
+
+    fetch(`${origin}/record-projects`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -68,7 +95,7 @@ export async function hoursRegistration(declarations: DeclarationInput[], userId
 }
 
 export async function getDeclarations(userId: number): Promise<RawDeclaration[]> {
-    return fetch(`${origin}/records/${userId}`).then((response) => {
+    return fetch(`${origin}/record-projects?hoursuserid=${userId}`).then((response) => {
         return response.json();
     });
 }

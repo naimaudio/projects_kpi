@@ -22,11 +22,7 @@ export interface DeclarationInput {
     hours: number;
 }
 
-export interface User {
-    id: number;
-    username: string;
-    email: string;
-}
+type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>;
 
@@ -40,7 +36,8 @@ export interface ChangeEvent {
 }
 
 export interface RawDeclaration {
-    worked_hours: number;
+    declared_hours: number;
+    modified_hours?: number;
     date_rec: string;
     project_id: number;
     user_id: number;
@@ -55,4 +52,21 @@ export interface Declaration {
     projectCode: string;
     comment?: string;
     id: number;
+}
+
+export interface RawUser {
+    email: string;
+    username: string;
+    domain: string;
+    role: string;
+    view: boolean;
+    date_entrance: string | null;
+}
+
+export interface User {
+    id: number;
+    username: string;
+    email: string;
+    firstDeclarationDay: Date;
+    domain: domain;
 }

@@ -127,16 +127,15 @@ export const useUserStore = defineStore("user", () => {
             decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
         );
         let i = -1;
-        const cumulTDE: { time_spend: number; projectId: number }[] = [];
+        const cumulTDE: { [projectId: number]: number } = {};
         sortedDeclarations.forEach((decl) => {
-            if (i === -1 || cumulTDE[i].projectId !== decl.projectId) {
-                cumulTDE.push({ projectId: decl.projectId, time_spend: decl.hours });
+            if (i === -1 || cumulTDE[decl.projectId] !== decl.projectId) {
+                cumulTDE[decl.projectId] = decl.hours;
                 i += 1;
             } else {
-                cumulTDE[i].time_spend += decl.hours;
+                cumulTDE[decl.projectId] += decl.hours;
             }
         });
-        i = 0;
         const userProjects = projectStore.projects.map((project) => {
             const displayableProject: UserProject = {
                 id: project.id,
@@ -151,11 +150,10 @@ export const useUserStore = defineStore("user", () => {
         const sortedProjects = cloneDeep(userProjects).sort((p1, p2) => {
             return p1.id - p2.id;
         });
-        const length = cumulTDE.length;
+
         sortedProjects.forEach((p) => {
-            if (i < length && p.id === cumulTDE[i].projectId) {
-                p.time_spend = cumulTDE[i].time_spend;
-                i++;
+            if (cumulTDE[p.id] !== undefined) {
+                p.time_spend = cumulTDE[p.id];
             }
         });
         return sortedProjects;
@@ -174,7 +172,7 @@ export const useUserStore = defineStore("user", () => {
                 week: dayjs(rawDeclaration.date_rec).week(),
                 year: dayjs(rawDeclaration.date_rec).get("year"),
                 projectId: rawDeclaration.project_id,
-                hours: rawDeclaration.worked_hours,
+                hours: rawDeclaration.declared_hours,
                 id: index,
                 projectCode: projectStore.projectCodes[rawDeclaration.project_id],
             });
@@ -198,11 +196,11 @@ export const useUserStore = defineStore("user", () => {
         }, []);
     }
 
-    // function setUserFromRaw(rawUser: RawUser) {
-    //     user.value = {
-    //         email:
-    //     }
-    // }
+    function setUserFromRaw(rawUser: RawUser) {
+        // user.value = {
+        //     email:
+        // }
+    }
 
     function isFavorite(projectId: number) {
         return favorites.value.has(projectId);
@@ -232,6 +230,7 @@ export const useUserStore = defineStore("user", () => {
         isFavorite,
         setFavorite,
         initFavorites,
+        setUserFromRaw,
         getDeclarations,
     };
 });

@@ -257,7 +257,9 @@ async function validateDeclaration() {
     } else {
         throw Error("no input method Selected");
     }
-    hoursRegistration(sendedDeclaration, 2, comment.value);
+    if (weekNumber.value !== undefined && yearNumber.value !== undefined) {
+        hoursRegistration(sendedDeclaration, 2, weekNumber.value, yearNumber.value, comment.value);
+    }
 }
 const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared);
 const valideRoute = computed<boolean>(

@@ -25,6 +25,11 @@ export const dayValidation = (day: string | string[]): days | null => {
     return dayNb === 0 || dayNb === 1 || dayNb === 2 || dayNb === 3 || dayNb === 4 ? dayNb : null;
 };
 
+export const dayNumberToDayDate = (day: days, weekNumber: number, year: number) => {
+    const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
+    return format(dayDate, "yyyy-MM-dd");
+};
+
 export const dayNumberToString = (day: days, weekNumber: number, year: number) => {
     const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
     return format(dayDate, "MMMM d, yyyy");
