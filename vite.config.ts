@@ -16,7 +16,9 @@ export default defineConfig({
             },
         }),
     ],
-
+    preview: {
+        https: true,
+    },
     resolve: {
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url)),
