@@ -53,3 +53,10 @@ export function range(begining: number, end: number): number[] {
     }
     return range;
 }
+
+export function envValidation(envVariable: string | undefined) {
+    if (envVariable === undefined) {
+        throw Error(`Environnement variable ${envVariable} missing`);
+    }
+    return envVariable;
+}

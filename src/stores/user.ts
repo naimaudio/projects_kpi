@@ -196,11 +196,11 @@ export const useUserStore = defineStore("user", () => {
         }, []);
     }
 
-    function setUserFromRaw(rawUser: RawUser) {
-        // user.value = {
-        //     email:
-        // }
-    }
+    // function setUserFromRaw(rawUser: RawUser) {
+    //     user.value = {
+    //         email:
+    //     }
+    // }
 
     function isFavorite(projectId: number) {
         return favorites.value.has(projectId);
@@ -230,7 +230,6 @@ export const useUserStore = defineStore("user", () => {
         isFavorite,
         setFavorite,
         initFavorites,
-        setUserFromRaw,
         getDeclarations,
     };
 });

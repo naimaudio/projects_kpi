@@ -14,7 +14,6 @@
                     <span>Beatrice Franz</span>
                     <BaseAvatar />
                 </RouterLink>
-                <a v-if="false" class="connect-button" @click="signIn">login</a>
             </div>
         </div>
         <RouterView />
@@ -23,38 +22,12 @@
 
 <script setup lang="ts">
 import BaseAvatar from "@/components/BaseAvatar.vue";
-import { PublicClientApplication, type AccountInfo } from "@azure/msal-browser";
-import { useAuthStore } from "@/stores/authStore";
-import { onMounted, ref } from "vue";
-const account = ref<AccountInfo | undefined>(undefined);
-const authStore = useAuthStore();
-
-const msalInstance = new PublicClientApplication(authStore.msalConfig);
-
-onMounted(() => {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length == 0) {
-        return;
-    }
-    account.value = accounts[0];
-});
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
     ["Declaration history", "/history"],
     ["Projects", "/projects"],
 ];
-
-async function signIn() {
-    await msalInstance.loginPopup({ scopes: [] }).then(() => {
-        const myAccounts = msalInstance.getAllAccounts();
-        account.value = myAccounts[0];
-    });
-}
-
-async function signOut() {
-    msalInstance.logoutPopup({});
-}
 </script>
 
 <style scoped>

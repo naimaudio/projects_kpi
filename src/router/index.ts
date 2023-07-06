@@ -62,4 +62,11 @@ const router = createRouter({
     ],
 });
 
+router.beforeEach((to) => {
+    if (to.name !== "login" && !localStorage.getItem("msal.account.keys")) {
+        return router.push({ name: "login" });
+    }
+    // msalInstance.handleRedirectPromise().then((response) => console.log("cio", response));
+});
+
 export default router;
