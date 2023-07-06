@@ -2,9 +2,13 @@
     <div class="page-container">
         <div class="column-flex">
             <h1 class="title">Profile</h1>
-            <fluent-text-field value="Franz" disabled>Name</fluent-text-field>
-            <fluent-text-field value="Beatrice" disabled>Firstname</fluent-text-field>
-            <fluent-text-field value="21/05/2022" disabled>First declaration day</fluent-text-field>
+            <span class="sub-title">Beatrice Franz</span>
+            <span class="icon-with-text"><EmailIcon />b.franz@focal.com</span>
+            <br />
+            <fluent-button @click="disconnect">Disconnect</fluent-button>
+            <br />
+            <div class="divider"></div>
+            <br />
             <span>Domain</span>
             <fluent-select>
                 <fluent-option v-for="domain in domains" :key="domain" :value="domain">{{ domain }}</fluent-option>
@@ -15,5 +19,14 @@
 </template>
 
 <script setup lang="ts">
+import EmailIcon from "@/components/icons/EmailIcon.vue";
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "vue-router";
+
 const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics"];
+const authStore = useAuthStore();
+const router = useRouter();
+async function disconnect() {
+    authStore.msalInstance?.logoutPopup().then(() => router.push("/"));
+}
 </script>

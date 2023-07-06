@@ -37,6 +37,7 @@ app.use(router);
 // Useful when the component is a modal : possible to close it and return to the page
 app.directive("clickOutside", clickOutside);
 app.mount("#app");
+
 // Registration of fluent components. Across the whole application,
 // it is possible to use the tags <fluent-tooltip>, <fluent-button> etc...
 provideFluentDesignSystem().register(

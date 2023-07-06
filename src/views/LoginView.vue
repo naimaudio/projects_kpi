@@ -24,38 +24,40 @@
 </template>
 
 <script setup lang="ts">
-import { PublicClientApplication, type AccountInfo, BrowserAuthError } from "@azure/msal-browser";
+import { BrowserAuthError } from "@azure/msal-browser";
 import { useAuthStore } from "@/stores/authStore";
-import { onMounted, ref } from "vue";
-const account = ref<AccountInfo | undefined>(undefined);
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
 const authStore = useAuthStore();
-
-const msalInstance = new PublicClientApplication(authStore.msalConfig);
-
+const router = useRouter();
 onMounted(() => {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length === 0) {
-        return;
-    } else if (accounts.length > 1) {
-        // Add choose account code here
-        console.warn("Multiple accounts detected.");
-    } else {
-        account.value = accounts[0];
+    if (authStore.msalInstance !== undefined) {
+        const accounts = authStore.msalInstance.getAllAccounts();
+        if (accounts.length === 0) {
+            return;
+        } else if (accounts.length > 1) {
+            // Add choose account code here
+            console.warn("Multiple accounts detected.");
+        } else {
+            authStore.setAccount(accounts[0]);
+        }
     }
 });
 
 async function signIn() {
-    await msalInstance
-        .loginPopup({ scopes: ["User.Read"] })
-        .then((response) => {
-            if (response !== null) {
-                console.log("a", response);
-                console.log("a", response.account?.username);
-            }
-            const myAccounts = msalInstance.getAllAccounts();
-            account.value = myAccounts[0];
-        })
-        .catch((browserAuthError: BrowserAuthError) => console.log(browserAuthError));
+    if (authStore.msalInstance !== undefined) {
+        await authStore.msalInstance
+            .loginPopup({ scopes: ["User.Read"] })
+            .then((response) => {
+                if (response !== null && authStore.msalInstance !== undefined) {
+                    const myAccounts = authStore.msalInstance.getAllAccounts();
+                    authStore.setAccount(myAccounts[0]);
+                    router.push({ name: "declaration" });
+                }
+            })
+            .catch((browserAuthError: BrowserAuthError) => console.log(browserAuthError));
+    }
 }
 </script>
 

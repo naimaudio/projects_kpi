@@ -13,10 +13,15 @@ import { getProjects, getFavorites, getDeclarations } from "@/API/requests";
 import type { RawProject } from "./typing/project";
 import { ref } from "vue";
 import ErrorCard from "./components/ErrorCard.vue";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { useAuthStore } from "@/stores/authStore";
 const projectStore = useProjectStore();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const done = ref(false);
 const noError = ref(true);
+const msalInstance = new PublicClientApplication(authStore.msalConfig);
+authStore.msalInstance = msalInstance;
 getProjects()
     .then((projects: RawProject[]) => projectStore.setProjectsFromRaw(projects))
     .then(() => getFavorites(2))

@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DeclarationView from "@/views/DeclarationView.vue";
-import ProjectsView from "@/views/ProjectsView.vue";
-import ProfileView from "@/views/ProfileView.vue";
-import HistoryView from "@/views/HistoryView.vue";
-import ModalHoursView from "@/views/declaration/ModalHoursView.vue";
-import HoursView from "@/views/declaration/HoursView.vue";
-import LoginView from "@/views/LoginView.vue";
-import Default from "@/layouts/DefaultLayout.vue";
+const DeclarationView = () => import("@/views/DeclarationView.vue");
+const ProjectsView = () => import("@/views/ProjectsView.vue");
+const ProfileView = () => import("@/views/ProfileView.vue");
+const HistoryView = () => import("@/views/HistoryView.vue");
+const ModalHoursView = () => import("@/views/declaration/ModalHoursView.vue");
+const HoursView = () => import("@/views/declaration/HoursView.vue");
+const LoginView = () => import("@/views/LoginView.vue");
+const Default = () => import("@/layouts/DefaultLayout.vue");
+import { useAuthStore } from "../stores/authStore";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,10 +64,10 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-    if (to.name !== "login" && !localStorage.getItem("msal.account.keys")) {
+    const authStore = useAuthStore();
+    if (to.name !== "login" && authStore.msalInstance?.getAllAccounts().length === 0) {
         return router.push({ name: "login" });
     }
-    // msalInstance.handleRedirectPromise().then((response) => console.log("cio", response));
 });
 
 export default router;
