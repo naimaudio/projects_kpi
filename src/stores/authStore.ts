@@ -1,12 +1,13 @@
+import { envVariableWithValidation } from "@/utilities/main";
 import { LogLevel, type Configuration } from "@azure/msal-browser";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 export const useAuthStore = defineStore("auth", () => {
     const msalConfig = ref<Configuration>({
         auth: {
-            clientId: import.meta.env.CLIENT_ID,
-            authority: import.meta.env.AUTHORITY,
-            redirectUri: import.meta.env.REDIRECT_URI,
+            clientId: envVariableWithValidation("vite_client_id"),
+            authority: envVariableWithValidation("vite_authority"),
+            redirectUri: envVariableWithValidation("vite_redirect_uri"),
         },
         cache: {
             cacheLocation: "localStorage",

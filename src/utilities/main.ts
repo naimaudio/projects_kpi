@@ -54,9 +54,11 @@ export function range(begining: number, end: number): number[] {
     return range;
 }
 
-export function envValidation(envVariable: string | undefined) {
-    if (envVariable === undefined) {
-        throw Error(`Environnement variable ${envVariable} missing`);
+export function envVariableWithValidation(envVariableKey: string) {
+    const envVariable = import.meta.env[envVariableKey];
+    console.log(import.meta.env);
+    if (typeof envVariable !== "string") {
+        throw Error(`Environnement variable ${envVariableKey} missing or incorect value : ${envVariable}`);
     }
     return envVariable;
 }

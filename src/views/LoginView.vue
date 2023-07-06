@@ -57,10 +57,6 @@ async function signIn() {
         })
         .catch((browserAuthError: BrowserAuthError) => console.log(browserAuthError));
 }
-
-// async function signOut() {
-//     msalInstance.logoutPopup({});
-// }
 </script>
 
 <style>
