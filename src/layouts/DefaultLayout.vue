@@ -11,8 +11,8 @@
             <img src="@/assets/userportal_logo.png" style="image-rendering: high-quality; margin-left: 20px" />
             <div>
                 <RouterLink class="avatar-container raw-container" to="/profile">
-                    <span>Beatrice Franz</span>
-                    <BaseAvatar />
+                    <span>{{ authStore.accountGetter?.name }}</span>
+                    <BaseAvatar v-if="initials !== undefined" :initials="initials" />
                 </RouterLink>
             </div>
         </div>
@@ -22,12 +22,23 @@
 
 <script setup lang="ts">
 import BaseAvatar from "@/components/BaseAvatar.vue";
+import { useAuthStore } from "../stores/authStore";
+import { computed } from "vue";
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
     ["Declaration history", "/history"],
     ["Projects", "/projects"],
 ];
+
+const authStore = useAuthStore();
+
+const initials = computed<string | undefined>(() =>
+    authStore.accountGetter?.name
+        ?.split(" ")
+        .map((name) => name[0])
+        .join("")
+);
 </script>
 
 <style scoped>

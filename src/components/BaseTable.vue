@@ -178,7 +178,6 @@ function emitGlobal<K extends keyof T>(event: "change", index: number, field: K,
 }
 
 const changeSelect = (index: number, event: ChangeEvent) => {
-    console.log(index + (currentPage.value - 1) * itemsPerPageCount, event.target.currentChecked);
     emitGlobal("change", index + (currentPage.value - 1) * itemsPerPageCount, "selected", event.target.currentChecked);
 };
 </script>

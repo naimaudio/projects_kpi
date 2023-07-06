@@ -22,6 +22,10 @@ const done = ref(false);
 const noError = ref(true);
 const msalInstance = new PublicClientApplication(authStore.msalConfig);
 authStore.msalInstance = msalInstance;
+const accounts = msalInstance.getAllAccounts();
+if (accounts.length === 1) {
+    authStore.setAccount(accounts[0]);
+}
 getProjects()
     .then((projects: RawProject[]) => projectStore.setProjectsFromRaw(projects))
     .then(() => getFavorites(2))

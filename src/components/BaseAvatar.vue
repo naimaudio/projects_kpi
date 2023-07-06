@@ -1,10 +1,14 @@
 <template>
     <div class="avatar">
-        <span class="avatar-initials">BF</span>
+        <span class="avatar-initials">{{ props.initials }}</span>
     </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{
+    initials: string;
+}>();
+</script>
 
 <style scoped>
 .avatar {

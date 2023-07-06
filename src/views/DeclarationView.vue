@@ -32,7 +32,6 @@ const userStore = useUserStore();
 function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: WeekInYear): WeekInYear[] {
     const now = dayjs(new Date());
     const currentWeek: WeekInYear = { week: now.week(), year: now.get("year") };
-    console.log(currentWeek);
     const years = range(firstWeekToDeclare.year, now.get("year") + 1);
     const sortedWeeksDeclared = weeksDeclared.sort((weekInYear, weekInYear2) =>
         weekInYear2.year !== weekInYear.year ? weekInYear.year - weekInYear2.year : weekInYear.week - weekInYear2.week

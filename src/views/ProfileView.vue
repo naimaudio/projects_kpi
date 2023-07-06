@@ -2,8 +2,8 @@
     <div class="page-container">
         <div class="column-flex">
             <h1 class="title">Profile</h1>
-            <span class="sub-title">Beatrice Franz</span>
-            <span class="icon-with-text"><EmailIcon />b.franz@focal.com</span>
+            <span class="sub-title">{{ authStore.accountGetter?.name }}</span>
+            <span class="icon-with-text"><EmailIcon />{{ authStore.accountGetter?.username }}</span>
             <br />
             <fluent-button @click="disconnect">Disconnect</fluent-button>
             <br />
