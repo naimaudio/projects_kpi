@@ -10,7 +10,13 @@
                         @click="() => router.push({ path: `/declare/${week.week}/${week.year}` })"
                         >{{ week.week }}</BaseButton
                     >
-                    <span> {{ weekNumberToString(week.week, week.year) }}</span>
+                    <span
+                        class="text"
+                        :class="{ 'warning-color': currentWeek.week !== week.week || currentWeek.year !== week.year }"
+                    >
+                        <ErrorIcon v-if="currentWeek.week !== week.week || currentWeek.year !== week.year" />
+                        {{ weekNumberToString(week.week, week.year) }}</span
+                    >
                 </div>
             </div>
         </div>
@@ -25,11 +31,15 @@ import { useRouter } from "vue-router";
 import BaseButton from "@/components/BaseButton.vue";
 import type { WeekInYear } from "@/typing/project";
 import { useUserStore } from "@/stores/userStore";
+import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 const router = useRouter();
 const userStore = useUserStore();
 // Les flows :
 // 1 date de début => Toutes les semaines d'après doivent être renseignées
 // 1 date de début => si à la fin du mois non renseignée, sert plus à rien de le renseigner.
+
+const now = dayjs(new Date());
+const currentWeek: WeekInYear = { week: now.week(), year: now.get("year") };
 
 function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: WeekInYear): WeekInYear[] {
     const now = dayjs(new Date());
@@ -57,7 +67,10 @@ function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: Week
     });
     return declarationsToInput;
 }
-const weeks = buildDeclarations(userStore.weeksDeclared, { year: 2023, week: 2 });
+const weeks = buildDeclarations(userStore.weeksDeclared, {
+    year: dayjs(userStore.user?.firstDeclarationDay).get("year"),
+    week: dayjs(userStore.user?.firstDeclarationDay).week(),
+});
 </script>
 
 <style scoped>
@@ -70,5 +83,14 @@ const weeks = buildDeclarations(userStore.weeksDeclared, { year: 2023, week: 2 }
     flex-direction: column;
     margin: 28px 14px 14px 14px;
     gap: 14px;
+}
+
+.warning-color {
+    color: #797673;
+}
+
+.text {
+    display: flex;
+    gap: var(--gap-inline);
 }
 </style>
