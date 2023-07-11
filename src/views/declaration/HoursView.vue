@@ -68,7 +68,7 @@
                         <div class="table-raw-gap" />
                         <div class="table-raw-container-2">
                             <span class="prefix">Commentary (optional)</span>
-                            <fluent-text-area />
+                            <fluent-text-area v-model="comment" />
                         </div>
                         <div class="table-raw-gap" />
                         <div class="footer-buttons">
@@ -198,7 +198,7 @@ import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 import { hoursRegistration } from "@/API/requests";
 import BaseButton from "@/components/BaseButton.vue";
-import { useGlobalStore } from "../../stores/globalStore";
+import { useGlobalStore } from "@/stores/globalStore";
 import { initialization } from "@/utilities/initialization";
 
 const addFavoritesModal = ref(false);

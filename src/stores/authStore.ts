@@ -41,7 +41,6 @@ export const useAuthStore = defineStore("auth", () => {
     const msalInstance = ref<PublicClientApplication | undefined>();
     const accessToken = ref<string>("");
 
-    const accountId = ref<string | undefined>(undefined);
     const account = ref<AccountInfo | null>(null);
     const accountGetter = computed(() => {
         return account.value;
@@ -58,7 +57,6 @@ export const useAuthStore = defineStore("auth", () => {
         msalInstance,
         msalConfig,
         accessToken,
-        accountId,
         setAccessToken,
         setAccount,
         accountGetter,

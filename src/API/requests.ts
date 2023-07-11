@@ -1,6 +1,7 @@
 import type { DeclarationInput, RawDeclaration, RawUser } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
+import { domain } from "../typing/index";
 
 const origin = "http://192.168.14.30:8080";
 
@@ -107,4 +108,17 @@ export async function getDeclarations(userId: number): Promise<RawDeclaration[]>
     return fetcher(`${origin}/records/${userId}`).then((response) => {
         return response.json();
     });
+}
+
+export async function getDomain(userId: number) {
+    return fetcher(`${origin}/domain/${userId}`).then((response) => {
+        return response.json();
+    });
+}
+
+export async function putDomain(userId: number, domain: domain) {
+    const response = await fetcher(`${origin}/domain/${userId}?updated_domain=${domain}`, {
+        method: "PUT",
+    });
+    return { status: response.status, data: await response.json() };
 }

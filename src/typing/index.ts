@@ -22,7 +22,7 @@ export interface DeclarationInput {
     hours: number;
 }
 
-type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
+export type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
 export const stringToDomain = (str: string): domain => {
     if (str === "Acoustics" || str === "Tests" || str === "Hardware" || str === "Software" || str === "Mechanics") {
         return str;
