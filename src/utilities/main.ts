@@ -26,7 +26,7 @@ export const dayValidation = (day: string | string[]): days | null => {
 };
 
 export const dayNumberToDayDate = (day: days, weekNumber: number, year: number) => {
-    const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
+    const dayDate: Date = parse(`${year}-${weekNumber}-${((day + 1) % 7) + 1}`, "Y-w-e", now);
     return format(dayDate, "yyyy-MM-dd");
 };
 
