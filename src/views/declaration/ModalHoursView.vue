@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import HoursForm from "@/components/input_hours/HoursForm.vue";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore";
 import type { days } from "@/typing";
 import type { DeclarationInput } from "@/typing";
 import { dayNumberToString, dayValidation } from "@/utilities/main";

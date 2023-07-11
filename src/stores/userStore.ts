@@ -6,13 +6,16 @@ import type {
     Preferences,
     RawDeclaration,
     User,
-} from "../typing/index";
+    RawUser,
+} from "@/typing/index";
+import { stringToDomain } from "@/typing/index";
 import { computed, ref, watch } from "vue";
-import { useProjectStore } from "./projects";
+import { useProjectStore } from "./projectStore";
 import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import type { UserProject, WeekInYear } from "@/typing/project";
 import { deleteFavorites, postFavorites } from "@/API/requests";
+import { type DeclRecord } from "../typing/index";
 export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
         preferedMethod: "weekly",
@@ -26,8 +29,28 @@ export const useUserStore = defineStore("user", () => {
 
     const declarations = ref<Declaration[]>([]);
 
-    const weeksDeclared = ref<WeekInYear[]>([]);
+    const records = ref<DeclRecord[]>([]);
 
+    const weeksDeclared = computed<WeekInYear[]>(() => {
+        const sortedDeclarations = declarations.value.sort((decl1, decl2) =>
+            decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
+        );
+        return sortedDeclarations.reduce<WeekInYear[]>((previousValue, currentValue) => {
+            const length = previousValue.length;
+            if (
+                length === 0 ||
+                currentValue.week !== previousValue[length - 1].week ||
+                currentValue.year !== previousValue[length - 1].year
+            ) {
+                previousValue.push({
+                    week: currentValue.week,
+                    year: currentValue.year,
+                });
+            }
+            return previousValue;
+        }, []);
+    });
+    const userIdGetter = computed<number | undefined>(() => (user.value === undefined ? undefined : user.value?.id));
     const getElementaryDeclaration = computed<DeclarationInput[]>(() => {
         return projectStore.projects.reduce<DeclarationInput[]>((declarations, project) => {
             if (favorites.value.has(project.id)) {
@@ -114,10 +137,6 @@ export const useUserStore = defineStore("user", () => {
         });
     });
 
-    const getWeeksDeclared = computed<WeekInYear[]>(() => {
-        return weeksDeclared.value;
-    });
-
     const getDeclarations = computed(() => {
         return declarations.value;
     });
@@ -126,12 +145,10 @@ export const useUserStore = defineStore("user", () => {
         const sortedDeclarations = cloneDeep(declarations.value).sort((decl1, decl2) =>
             decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
         );
-        let i = -1;
         const cumulTDE: { [projectId: number]: number } = {};
         sortedDeclarations.forEach((decl) => {
-            if (i === -1 || cumulTDE[decl.projectId] !== decl.projectId) {
+            if (cumulTDE[decl.projectId] === undefined) {
                 cumulTDE[decl.projectId] = decl.hours;
-                i += 1;
             } else {
                 cumulTDE[decl.projectId] += decl.hours;
             }
@@ -166,70 +183,74 @@ export const useUserStore = defineStore("user", () => {
 
     function setDeclarationsFromRaw(rawDeclarations: RawDeclaration[]) {
         const decl: Declaration[] = [];
+        const rec: DeclRecord[] = [];
+        const lengthProjects = rawDeclarations.length;
         rawDeclarations.forEach((rawDeclaration, index) => {
-            decl.push({
-                comment: rawDeclaration.comment,
-                week: dayjs(rawDeclaration.date_rec).week(),
-                year: dayjs(rawDeclaration.date_rec).get("year"),
-                projectId: rawDeclaration.project_id,
-                hours: rawDeclaration.declared_hours,
+            rawDeclaration.projects.forEach((p, jndex) =>
+                decl.push({
+                    week: dayjs(rawDeclaration.record.date_rec).week(),
+                    year: dayjs(rawDeclaration.record.date_rec).get("year"),
+                    projectId: p.project_id,
+                    hours: p.declared_hours,
+                    id: index * lengthProjects + jndex,
+                    projectCode: projectStore.projectCodes[p.project_id],
+                })
+            );
+            rec.push({
                 id: index,
-                projectCode: projectStore.projectCodes[rawDeclaration.project_id],
+                userId: rawDeclaration.record.user_id,
+                week: dayjs(rawDeclaration.record.date_rec).week(),
+                year: dayjs(rawDeclaration.record.date_rec).get("year"),
+                comment: rawDeclaration.record.comment,
             });
         });
         declarations.value = decl;
-        const sortedDeclarations = decl.sort((decl1, decl2) =>
-            decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
-        );
-        weeksDeclared.value = sortedDeclarations.reduce<WeekInYear[]>((previousValue, currentValue) => {
-            const length = previousValue.length;
-            if (
-                length === 0 ||
-                (currentValue.week !== previousValue[length - 1].week &&
-                    currentValue.year !== previousValue[length - 1].year)
-            )
-                previousValue.push({
-                    week: currentValue.week,
-                    year: currentValue.year,
-                });
-            return previousValue;
-        }, []);
+        records.value = rec;
     }
 
-    // function setUserFromRaw(rawUser: RawUser) {
-    //     user.value = {
-    //         email:
-    //     }
-    // }
+    function setUserFromRaw(rawUser: RawUser): void {
+        user.value = {
+            email: rawUser.email,
+            domain: stringToDomain(rawUser.domain),
+            firstDeclarationDay: dayjs(rawUser.date_entrance, "YYYY-MM-DD").toDate(),
+            id: rawUser.id,
+            username: rawUser.username,
+        };
+    }
 
     function isFavorite(projectId: number) {
         return favorites.value.has(projectId);
     }
 
     async function setFavorite(projectId: number, value: boolean) {
-        if (value) {
-            await postFavorites(2, projectId);
-            favorites.value.add(projectId);
-        } else {
-            favorites.value.delete(projectId);
-            await deleteFavorites(2, projectId);
+        if (user.value !== undefined) {
+            if (value) {
+                await postFavorites(user.value.id, projectId);
+                favorites.value.add(projectId);
+            } else {
+                favorites.value.delete(projectId);
+                await deleteFavorites(user.value.id, projectId);
+            }
         }
     }
 
     return {
         user,
+        records,
         preferences,
         favorites,
         getUserProjects,
+        userIdGetter,
         dailyHoursSpend,
         getElementaryDeclaration,
         getDailyDeclarationTotal,
         getDailyDeclarationToWeekly,
         setDeclarationsFromRaw,
-        getWeeksDeclared,
+        weeksDeclared,
         isFavorite,
         setFavorite,
         initFavorites,
         getDeclarations,
+        setUserFromRaw,
     };
 });

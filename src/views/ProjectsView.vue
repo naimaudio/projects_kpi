@@ -6,6 +6,7 @@
         </div>
         <div v-else class="column-flex">
             <div class="centered-flex">
+                <div class="divider"></div>
                 <span class="big"> Oh ! No projects found for your organisation</span>
                 <img src="@/assets/icons/neutral-face.png" alt="Neutral Face" width="60" height="60" />
             </div>
@@ -15,7 +16,7 @@
 
 <script setup lang="ts">
 import BaseTable from "@/components/BaseTable.vue";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore";
 import type { Header } from "@/typing";
 import type { UserProject } from "@/typing/project";
 
@@ -33,11 +34,4 @@ function change<K extends keyof UserProject>(index: number, field: K, value: Use
     }
 }
 </script>
-<style>
-.centered-flex {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-</style>
+<style></style>

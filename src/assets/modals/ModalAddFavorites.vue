@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import BaseTable from "@/components/BaseTable.vue";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore";
 import type { Header } from "@/typing";
 import { type SelectableProject } from "@/typing/project";
 import { ref } from "vue";

@@ -54,5 +54,13 @@ export const useAuthStore = defineStore("auth", () => {
         account.value = newAccount;
     }
 
-    return { msalInstance, msalConfig, accessToken, accountId, setAccessToken, setAccount, accountGetter };
+    return {
+        msalInstance,
+        msalConfig,
+        accessToken,
+        accountId,
+        setAccessToken,
+        setAccount,
+        accountGetter,
+    };
 });
