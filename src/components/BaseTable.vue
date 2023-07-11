@@ -1,7 +1,7 @@
 <template>
     <div>
         <fluent-search v-model="search" style="width: 100%"></fluent-search>
-        <div class="table-headers">
+        <div class="table-headers" :style="{ 'grid-template-columns': `repeat(${headers.length}, 1fr)` }">
             <div v-if="selectable"></div>
             <div
                 v-for="(header, index) in props.headers"
@@ -14,9 +14,17 @@
                 <ArrowDownIcon v-else-if="sortedColumn?.index === index && sortedColumn.value === 'DESC'" />
             </div>
         </div>
-        <div v-for="(cell, index) in displayedItems" :key="cell.id" class="table-raw">
+        <div
+            v-for="(cell, index) in displayedItems"
+            :key="cell.id"
+            class="table-raw"
+            :style="{ 'grid-template-columns': `repeat(${headers.length}, 1fr)` }"
+        >
             <div v-for="header in props.headers" :key="header.id" class="table-cell">
-                <span v-if="header.id == 'selected' && 'selected' in cell && typeof cell.selected === 'boolean'">
+                <span
+                    v-if="header.id == 'selected' && 'selected' in cell && typeof cell.selected === 'boolean'"
+                    class="cell-text"
+                >
                     <fluent-checkbox
                         :checked="cell['selected']"
                         @change="(event: ChangeEvent) => changeSelect(index, event)"
@@ -26,6 +34,7 @@
                     v-else-if="
                         header.id == 'favorite' && cell.favorite !== undefined && typeof cell.favorite === 'boolean'
                     "
+                    class="cell-text"
                 >
                     <StarOutlineIcon
                         clickable
@@ -40,7 +49,7 @@
                         "
                     />
                 </span>
-                <span v-else>
+                <span v-else class="cell-text">
                     {{ cell[header.id as keyof T] }}
                 </span>
             </div>
@@ -182,11 +191,10 @@ const changeSelect = (index: number, event: ChangeEvent) => {
 };
 </script>
 
-<style>
+<style scoped>
 .table-raw,
 .table-headers {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
     grid-template-rows: 1fr;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
@@ -210,15 +218,22 @@ const changeSelect = (index: number, event: ChangeEvent) => {
 }
 
 .table-cell {
-    padding: 0 8px;
-    min-height: 44px;
+    padding: 0px 8px;
+    height: 44px;
+    margin-top: auto;
+    margin-bottom: auto;
     display: flex;
-    align-items: center;
+    overflow-y: auto;
 }
 
 .footer-pagination {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+}
+
+.cell-text {
+    margin-top: auto;
+    margin-bottom: auto;
 }
 </style>

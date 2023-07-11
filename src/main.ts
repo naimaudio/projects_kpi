@@ -16,6 +16,9 @@ import {
     fluentTextField,
     fluentProgressRing,
     fluentSearch,
+    fluentTabs,
+    fluentTabPanel,
+    fluentTab,
 } from "@fluentui/web-components";
 
 import { extend } from "dayjs";
@@ -41,6 +44,7 @@ app.mount("#app");
 // Registration of fluent components. Across the whole application,
 // it is possible to use the tags <fluent-tooltip>, <fluent-button> etc...
 provideFluentDesignSystem().register(
+    fluentTabs(),
     fluentTooltip(),
     fluentButton(),
     fluentNumberField(),
@@ -50,5 +54,7 @@ provideFluentDesignSystem().register(
     fluentCheckbox(),
     fluentTextField(),
     fluentProgressRing(),
-    fluentSearch()
+    fluentSearch(),
+    fluentTab(),
+    fluentTabPanel()
 );

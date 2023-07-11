@@ -23,6 +23,13 @@ export interface DeclarationInput {
 }
 
 type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
+export const stringToDomain = (str: string): domain => {
+    if (str === "Acoustics" || str === "Tests" || str === "Hardware" || str === "Software" || str === "Mechanics") {
+        return str;
+    } else {
+        throw Error("given string is not a domain");
+    }
+};
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>;
 
@@ -36,12 +43,15 @@ export interface ChangeEvent {
 }
 
 export interface RawDeclaration {
-    declared_hours: number;
-    modified_hours?: number;
-    date_rec: string;
-    project_id: number;
-    user_id: number;
-    comment?: string;
+    record: {
+        date_rec: string;
+        user_id: number;
+        comment?: string;
+    };
+    projects: {
+        project_id: number;
+        declared_hours: number;
+    }[];
 }
 
 export interface Declaration {
@@ -50,17 +60,17 @@ export interface Declaration {
     year: number;
     projectId: number;
     projectCode: string;
-    comment?: string;
     id: number;
 }
 
 export interface RawUser {
-    email: string;
-    username: string;
-    domain: string;
-    role: string;
-    view: boolean;
     date_entrance: string | null;
+    domain: string;
+    email: string;
+    id: number;
+    role: string;
+    username: string;
+    view: boolean;
 }
 
 export interface User {
@@ -69,4 +79,12 @@ export interface User {
     email: string;
     firstDeclarationDay: Date;
     domain: domain;
+}
+
+export interface DeclRecord {
+    id: number;
+    userId: number;
+    comment?: string;
+    week: number;
+    year: number;
 }
