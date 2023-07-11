@@ -72,13 +72,17 @@
                         </div>
                         <div class="table-raw-gap" />
                         <div class="footer-buttons">
-                            <fluent-button> Save draft</fluent-button>
-                            <fluent-button
-                                appearance="accent"
-                                :disabled="sumProjectHours != 35"
+                            <fluent-button disabled> Save draft</fluent-button>
+                            <BaseButton
+                                accent
+                                :disabled="sumProjectHours != 35 || loading"
                                 @click="validateDeclaration"
-                                >Validate</fluent-button
                             >
+                                <template #default> <span> Validate</span> </template>
+                                <template v-if="loading" #start>
+                                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
+                                </template>
+                            </BaseButton>
                         </div>
                     </div>
                 </div>
@@ -154,13 +158,13 @@
                     </div>
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
-                        <fluent-button> Save draft</fluent-button>
-                        <fluent-button
-                            appearance="accent"
-                            :disabled="sumProjectHours != 35"
-                            @click="validateDeclaration"
-                            >Validate</fluent-button
-                        >
+                        <fluent-button disabled> Save draft</fluent-button>
+                        <BaseButton accent :disabled="sumProjectHours != 35 || loading" @click="validateDeclaration">
+                            <template #default> <span> Validate</span> </template>
+                            <template v-if="loading" #start>
+                                <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
+                            </template>
+                        </BaseButton>
                     </div>
                 </div>
             </template>
@@ -176,7 +180,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import ArrowPreviousIcon from "@/components/icons/ArrowPreviousIcon.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type Router } from "vue-router";
 import HoursForm from "@/components/input_hours/HoursForm.vue";
 import { weekNumberToString } from "@/utilities/main";
 import BaseTooltip from "@/components/BaseTooltip.vue";
@@ -188,15 +192,19 @@ import {
     workDayKeys,
     workDays,
 } from "@/typing";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 import { hoursRegistration } from "@/API/requests";
-import { type WeekInYear } from "@/typing/project";
+import BaseButton from "@/components/BaseButton.vue";
+import { useGlobalStore } from "../../stores/globalStore";
+import { initialization } from "@/utilities/initialization";
+
 const addFavoritesModal = ref(false);
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoaded = useRoute();
+const globalstore = useGlobalStore();
 const userStore = useUserStore();
 const weekNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.week)
@@ -217,6 +225,8 @@ const comment = ref<string | undefined>();
 
 const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
 const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
+
+const loading = ref<boolean>(false);
 
 watch(defaultDeclaration, (value) => {
     const newDeclaration = value;
@@ -249,6 +259,8 @@ const sumProjectHours = computed<number>(() => {
 });
 
 async function validateDeclaration() {
+    loading.value = true;
+    globalstore.notification.display = false;
     let sendedDeclaration: DeclarationInput[] | undefined;
     if (methodSelected.value === "daily") {
         sendedDeclaration = userStore.getDailyDeclarationToWeekly;
@@ -257,13 +269,30 @@ async function validateDeclaration() {
     } else {
         throw Error("no input method Selected");
     }
-    if (weekNumber.value !== undefined && yearNumber.value !== undefined) {
-        hoursRegistration(sendedDeclaration, 2, weekNumber.value, yearNumber.value, comment.value);
+    if (weekNumber.value !== undefined && yearNumber.value !== undefined && userStore.userIdGetter !== undefined) {
+        const response = await hoursRegistration(
+            sendedDeclaration,
+            userStore.userIdGetter,
+            weekNumber.value,
+            yearNumber.value,
+            comment.value
+        );
+        if (!response.ok) {
+            globalstore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
+            globalstore.notification.type = "FAILURE";
+            globalstore.notification.display = true;
+        } else {
+            globalstore.notification.content = "Declaration has been registered";
+            globalstore.notification.type = "SUCCESS";
+            globalstore.notification.display = true;
+            router.push({ name: "declaration" });
+        }
+        initialization();
     }
+    loading.value = false;
 }
-const weeksDeclared = computed<WeekInYear[]>(() => userStore.getWeeksDeclared);
 const valideRoute = computed<boolean>(
-    () => weeksDeclared.value.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
+    () => userStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
 );
 </script>
 
