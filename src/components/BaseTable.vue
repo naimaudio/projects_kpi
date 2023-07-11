@@ -15,7 +15,7 @@
             </div>
         </div>
         <div
-            v-for="(cell, index) in displayedItems"
+            v-for="cell in displayedItems"
             :key="cell.id"
             class="table-raw"
             :style="{ 'grid-template-columns': `repeat(${headers.length}, 1fr)` }"
@@ -27,7 +27,7 @@
                 >
                     <fluent-checkbox
                         :checked="cell['selected']"
-                        @change="(event: ChangeEvent) => changeSelect(index, event)"
+                        @change="(event: ChangeEvent) => changeSelect(cell.id, event)"
                     ></fluent-checkbox>
                 </span>
                 <span
@@ -39,14 +39,7 @@
                     <StarOutlineIcon
                         clickable
                         :checked="cell.favorite"
-                        @click="
-                            emitGlobal<'favorite'>(
-                                'change',
-                                index + (currentPage - 1) * itemsPerPageCount,
-                                'favorite',
-                                !cell.favorite
-                            )
-                        "
+                        @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
                     />
                 </span>
                 <span v-else class="cell-text">
@@ -182,12 +175,12 @@ const displayedItems = computed<T[]>(() => {
     return sortedItems.value.slice((currentPage.value - 1) * itemsPerPageCount, currentPage.value * itemsPerPageCount);
 });
 
-function emitGlobal<K extends keyof T>(event: "change", index: number, field: K, value: T[K]) {
-    return emit(event, index, field, value);
+function emitGlobal<K extends keyof T>(event: "change", id: number, field: K, value: T[K]) {
+    return emit(event, id, field, value);
 }
 
-const changeSelect = (index: number, event: ChangeEvent) => {
-    emitGlobal("change", index + (currentPage.value - 1) * itemsPerPageCount, "selected", event.target.currentChecked);
+const changeSelect = (id: number, event: ChangeEvent) => {
+    emitGlobal("change", id, "selected", event.target.currentChecked);
 };
 </script>
 

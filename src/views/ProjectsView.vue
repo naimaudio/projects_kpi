@@ -28,9 +28,10 @@ const headers: Header[] = [
     { name: "Fav", id: "favorite", filterable: false },
 ];
 const userStore = useUserStore();
-function change<K extends keyof UserProject>(index: number, field: K, value: UserProject[K]) {
+
+function change<K extends keyof UserProject>(id: number, field: K, value: UserProject[K]) {
     if (field === "favorite" && typeof value === "boolean") {
-        userStore.setFavorite(userStore.getUserProjects[index].id, value);
+        userStore.setFavorite(id, value);
     }
 }
 </script>

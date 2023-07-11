@@ -23,8 +23,9 @@ import { ref } from "vue";
 const emit = defineEmits<{
     (event: "close"): void;
 }>();
-const change = (index: number, field: string, value: string | number | boolean | undefined) => {
+const change = (id: number, field: string, value: string | number | boolean | undefined) => {
     if (field === "selected" && typeof value === "boolean") {
+        const index = selectionableProjects.value.findIndex((p) => p.id === id);
         selectionableProjects.value[index][field] = value;
     }
 };

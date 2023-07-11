@@ -1,5 +1,8 @@
 <template>
-    <button class="button" :class="{ 'white-button': !accent, 'blue-button': accent, disabled: disabled }">
+    <button
+        class="button"
+        :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled }"
+    >
         <div class="button-inside">
             <slot name="start"></slot>
             <slot name="default"></slot>

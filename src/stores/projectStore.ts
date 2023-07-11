@@ -13,6 +13,14 @@ export const useProjectStore = defineStore("project", () => {
         });
         return projectCodes;
     });
+    const projectCodeIds = computed(() => {
+        const projectCodes: { [key: string]: number } = {};
+        projects.value.forEach((project) => {
+            projectCodes[project.code] = project.id;
+            return project;
+        });
+        return projectCodes;
+    });
     function addProject(project: Project) {
         projects.value.push(project);
     }
@@ -30,5 +38,5 @@ export const useProjectStore = defineStore("project", () => {
             };
         });
     }
-    return { projects, projectCodes, addProject, setProjectsFromRaw };
+    return { projects, projectCodes, projectCodeIds, addProject, setProjectsFromRaw };
 });
