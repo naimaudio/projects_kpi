@@ -1,6 +1,22 @@
 # Time Management Interface for projects
 
-The purpose of this frontend application is to provide employees with an interface for inputting their working hours. It will provide project managers .
+This frontend application give to employees an interface to input hours worked on each of their projects. 
+
+## Install application
+
+```bash
+npm install
+```
+
+Run local developpement application
+```bash
+npm run dev
+```
+
+Build project for production
+```bash
+npm run build
+```
 
 ## Choices made
 
