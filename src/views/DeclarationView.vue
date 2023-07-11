@@ -5,9 +5,11 @@
             <span>Please fill in the schedules for the week :</span>
             <div class="column-container">
                 <div v-for="week in weeks" :key="week.week" class="raw-container">
-                    <BaseButton @click="() => router.push({ path: `/declare/${week.week}/${week.year}` })">{{
-                        week.week
-                    }}</BaseButton>
+                    <BaseButton
+                        style="width: 41px"
+                        @click="() => router.push({ path: `/declare/${week.week}/${week.year}` })"
+                        >{{ week.week }}</BaseButton
+                    >
                     <span> {{ weekNumberToString(week.week, week.year) }}</span>
                 </div>
             </div>
@@ -22,7 +24,7 @@ import { range, weekNumberToString } from "@/utilities/main";
 import { useRouter } from "vue-router";
 import BaseButton from "@/components/BaseButton.vue";
 import type { WeekInYear } from "@/typing/project";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore";
 const router = useRouter();
 const userStore = useUserStore();
 // Les flows :
@@ -55,7 +57,7 @@ function buildDeclarations(weeksDeclared: WeekInYear[], firstWeekToDeclare: Week
     });
     return declarationsToInput;
 }
-const weeks = buildDeclarations(userStore.getWeeksDeclared, { year: 2023, week: 2 });
+const weeks = buildDeclarations(userStore.weeksDeclared, { year: 2023, week: 2 });
 </script>
 
 <style scoped>

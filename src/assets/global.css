@@ -131,3 +131,10 @@
   -khtml-user-select: none; /* webkit (konqueror) browsers */
   -ms-user-select: none; /* IE10+ */
 }
+.centered-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+

@@ -18,12 +18,24 @@
         </div>
         <RouterView />
     </div>
+    <Transition name="fade">
+        <NotificationCard
+            v-if="globalStore.notification.display"
+            :type="globalStore.notification.type"
+            :lifetime="7"
+            @close="closeNotif"
+        >
+            {{ globalStore.notification.content }}
+        </NotificationCard>
+    </Transition>
 </template>
 
 <script setup lang="ts">
 import BaseAvatar from "@/components/BaseAvatar.vue";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { computed } from "vue";
+import NotificationCard from "@/components/NotificationCard.vue";
+import { useGlobalStore } from "@/stores/globalStore";
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
@@ -32,13 +44,17 @@ const names: [string, string][] = [
 ];
 
 const authStore = useAuthStore();
-
+const globalStore = useGlobalStore();
 const initials = computed<string | undefined>(() =>
     authStore.accountGetter?.name
         ?.split(" ")
         .map((name) => name[0])
         .join("")
 );
+
+const closeNotif = async () => {
+    globalStore.notification.display = false;
+};
 </script>
 
 <style scoped>
@@ -111,5 +127,17 @@ const initials = computed<string | undefined>(() =>
 .base-links:hover,
 .avatar-container:hover {
     background-color: rgba(138, 153, 168, 0.2);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.7s ease;
+}
+
+.fade-leave-from {
+    opacity: 1;
+}
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
