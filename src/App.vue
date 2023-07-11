@@ -5,38 +5,16 @@
         <ErrorCard v-if="!noError" @close="noError = true">Oh no, there was an error at the initialization</ErrorCard>
     </div>
 </template>
-<script setup lang="ts">
-import { useProjectStore } from "./stores/projects";
-import { useUserStore } from "./stores/user";
 
-import { getProjects, getFavorites, getDeclarations } from "@/API/requests";
-import type { RawProject } from "./typing/project";
+<script setup lang="ts">
 import { ref } from "vue";
 import ErrorCard from "./components/ErrorCard.vue";
-import { PublicClientApplication } from "@azure/msal-browser";
-import { useAuthStore } from "@/stores/authStore";
-const projectStore = useProjectStore();
-const userStore = useUserStore();
-const authStore = useAuthStore();
+import { initialization } from "@/utilities/initialization";
+
 const done = ref(false);
 const noError = ref(true);
-const msalInstance = new PublicClientApplication(authStore.msalConfig);
-authStore.msalInstance = msalInstance;
-const accounts = msalInstance.getAllAccounts();
-if (accounts.length === 1) {
-    authStore.setAccount(accounts[0]);
-}
-getProjects()
-    .then((projects: RawProject[]) => projectStore.setProjectsFromRaw(projects))
-    .then(() => getFavorites(2))
-    .then((favorites: number[]) => {
-        userStore.initFavorites(favorites);
-    })
-    .then(() => getDeclarations(2))
-    .then((declarations) => userStore.setDeclarationsFromRaw(declarations))
-    .then(() => {
-        done.value = true;
-    });
+
+initialization().then(() => (done.value = true));
 </script>
 
 <style scoped>

@@ -28,6 +28,7 @@ import { BrowserAuthError } from "@azure/msal-browser";
 import { useAuthStore } from "@/stores/authStore";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { initialization } from "@/utilities/initialization";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -53,9 +54,10 @@ async function signIn() {
                 if (response !== null && authStore.msalInstance !== undefined) {
                     const myAccounts = authStore.msalInstance.getAllAccounts();
                     authStore.setAccount(myAccounts[0]);
-                    router.push({ name: "declaration" });
                 }
             })
+            .then(() => initialization())
+            .then(() => router.push({ name: "declaration" }))
             .catch((browserAuthError: BrowserAuthError) => console.log(browserAuthError));
     }
 }
