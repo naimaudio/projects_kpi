@@ -11,6 +11,7 @@
                 <img src="@/assets/icons/neutral-face.png" alt="Neutral Face" width="60" height="60" />
             </div>
         </div>
+        <!-- <RouterView></RouterView> -->
     </div>
 </template>
 
@@ -24,7 +25,7 @@ const headers: Header[] = [
     { name: "Code", id: "code", filterable: false },
     { name: "Name", id: "name", filterable: false },
     { name: "Manager", id: "manager", filterable: false },
-    { name: "Time spend (hours)", id: "time_spend", filterable: false },
+    { name: "Personal time (h)", id: "time_spend", filterable: false },
     { name: "Fav", id: "favorite", filterable: false },
 ];
 const userStore = useUserStore();
@@ -34,5 +35,9 @@ function change<K extends keyof UserProject>(id: number, field: K, value: UserPr
         userStore.setFavorite(id, value);
     }
 }
+
+// function rowClickHandler(id: number) {
+//     router.push("");
+// }
 </script>
 <style></style>
