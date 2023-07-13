@@ -2,14 +2,27 @@
     <div class="page-container">
         <div class="column-flex">
             <h1 class="title">Declaration</h1>
-            <span v-if="currentMode === 'LATE'">Please fill in the schedules for the week :</span>
-            <span v-else-if="currentMode === 'IN_ADVANCE'">You can fill in the schedules in advance :</span>
-            <div class="column-container">
+            <span v-if="currentMode === 'LATE' && weeks.length !== 0" style="font-size: large"
+                >Please fill in the schedules for the week :</span
+            >
+            <span v-else-if="currentMode === 'IN_ADVANCE' && weeks.length !== 0" style="font-size: large"
+                >You can fill in the schedules in advance :</span
+            >
+            <span v-else class="icon-with-text" style="font-size: large">
+                Oh, you've already sent in your declarations !
+                <img
+                    src="@/assets/icons/slightly-smiling-face.png"
+                    alt="Slightly Smiling Face"
+                    width="30"
+                    height="30"
+                />
+            </span>
+            <div v-if="weeks.length !== 0" class="column-container">
                 <div v-for="week in weeks" :key="week.week" class="raw-container">
                     <BaseButton
-                        style="width: 41px"
+                        style="width: 81px"
                         @click="() => router.push({ path: `/declare/${week.week}/${week.year}` })"
-                        >{{ week.week }}
+                        >Week {{ week.week }}
                     </BaseButton>
                     <span
                         class="text"
@@ -31,7 +44,8 @@
                     >
                 </div>
             </div>
-            <span>Or</span>
+            <span v-if="weeks.length !== 0" style="font-size: large">Or</span>
+            <span v-else style="font-size: large">You can</span>
             <div class="column-container">
                 <BaseButton v-if="currentMode === 'LATE'" @click="changeWeeks('IN_ADVANCE')"
                     >Declare hours in advance</BaseButton
@@ -53,12 +67,12 @@ import BaseButton from "@/components/BaseButton.vue";
 import type { WeekInYear } from "@/typing/project";
 import { useUserStore } from "@/stores/userStore";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 const router = useRouter();
 const userStore = useUserStore();
 // Les flows :
 // 1 date de début => Toutes les semaines d'après doivent être renseignées
-// 1 date de début => si à la fin du mois non renseignée, sert plus à rien de le renseigner.
+// 1 date de début => si à la    fin du mois non renseignée, sert plus à rien de le renseigner.
 
 const now = dayjs(new Date());
 const currentWeek: WeekInYear = { week: now.week(), year: now.get("year") };
@@ -102,8 +116,17 @@ function buildDeclarations(
     });
     return declarationsToInput;
 }
+const weeksDeclared = computed<WeekInYear[]>(() => {
+    return userStore.weeksDeclared;
+});
 const currentMode = ref<"IN_ADVANCE" | "LATE">("LATE");
 watch(currentMode, (value) => {
+    updateWeeks(value);
+});
+watch(weeksDeclared, () => {
+    updateWeeks(currentMode.value);
+});
+function updateWeeks(value: "IN_ADVANCE" | "LATE") {
     if (value === "LATE") {
         weeks.value = buildDeclarations(
             userStore.weeksDeclared,
@@ -126,7 +149,8 @@ watch(currentMode, (value) => {
             }
         );
     }
-});
+}
+
 const weeks = ref<WeekInYear[]>(
     buildDeclarations(
         userStore.weeksDeclared,
@@ -151,7 +175,7 @@ const changeWeeks = (mode: "IN_ADVANCE" | "LATE") => {
 .column-container {
     display: flex;
     flex-direction: column;
-    margin: 28px 14px 14px 14px;
+    margin: 14px 14px 14px 14px;
     gap: 14px;
 }
 

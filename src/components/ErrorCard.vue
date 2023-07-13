@@ -2,7 +2,7 @@
     <div class="error-container">
         <ErrorIcon />
         <slot></slot>
-        <DismissIcon class="close" @click="emits('close')" />
+        <DismissIcon v-if="props.closable" class="close" @click="emits('close')" />
     </div>
 </template>
 
@@ -11,6 +11,7 @@ import DismissIcon from "@/components/icons/DismissIcon.vue";
 
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 const emits = defineEmits<{ (event: "close"): void }>();
+const props = withDefaults(defineProps<{ closable?: boolean }>(), { closable: true });
 </script>
 
 <style scoped>

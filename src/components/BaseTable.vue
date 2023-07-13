@@ -1,7 +1,18 @@
 <template>
     <div>
         <fluent-search v-model="search" style="width: 100%"></fluent-search>
-        <div class="table-headers" :style="{ 'grid-template-columns': `repeat(${headers.length}, 1fr)` }">
+        <div
+            class="table-headers"
+            :style="{
+                'grid-template-columns':
+                    props.headers.reduce <
+                    string >
+                    ((str, header) => {
+                        return `${str} ${header.width === undefined ? '1fr' : header.width}`;
+                    },
+                    ''),
+            }"
+        >
             <div v-if="selectable"></div>
             <div
                 v-for="(header, index) in props.headers"
@@ -18,7 +29,15 @@
             v-for="cell in displayedItems"
             :key="cell.id"
             class="table-raw"
-            :style="{ 'grid-template-columns': `repeat(${headers.length}, 1fr)` }"
+            :style="{
+                'grid-template-columns':
+                    props.headers.reduce <
+                    string >
+                    ((str, header) => {
+                        return `${str} ${header.width === undefined ? '1fr' : header.width}`;
+                    },
+                    ''),
+            }"
         >
             <div v-for="header in props.headers" :key="header.id" class="table-cell">
                 <span
@@ -42,10 +61,16 @@
                         @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
                     />
                 </span>
+                <span v-else-if="Array.isArray(cell[header.id as keyof T])" class="cell-text">
+                    {{ (cell[header.id as keyof T] as string[]).join(", ") }}
+                </span>
                 <span v-else class="cell-text">
                     {{ cell[header.id as keyof T] }}
                 </span>
             </div>
+        </div>
+        <div v-if="displayedItems.length === 0" class="empty-table-raw" style="grid-template-columns: 1fr">
+            <div class="empty-table-cell">No data</div>
         </div>
         <div class="footer-pagination">
             <PaginationTable
@@ -152,6 +177,13 @@ const sortedItems = computed(() => {
                     const b = itemB[key as keyof T] as boolean;
                     return (a && b) || (!a && !b) ? 0 : a && !b ? 1 : -1;
                 });
+            } else if (Array.isArray(sortedItems[0][key as keyof T])) {
+                sortedItems.sort((itemA, itemB) => {
+                    const a = (itemA[key as keyof T] as string[]).join(" ");
+
+                    const b = (itemB[key as keyof T] as string[]).join(" ");
+                    return b.localeCompare(a);
+                });
             }
         }
     }
@@ -159,10 +191,17 @@ const sortedItems = computed(() => {
         sortedItems = sortedItems.filter((item) => {
             for (let i = 0; i < props.headers.length; i++) {
                 const value = item[props.headers[i].id as keyof T];
-                if (typeof value === "string" && value.includes(search.value)) {
+                if (typeof value === "string" && value.toUpperCase().includes(search.value.toUpperCase())) {
                     return true;
                 }
                 if (typeof value === "number" && String(value).includes(search.value)) {
+                    return true;
+                }
+                if (
+                    Array.isArray(value) &&
+                    value.length !== 0 &&
+                    value.join(", ").toUpperCase().includes(search.value.toUpperCase())
+                ) {
                     return true;
                 }
             }
@@ -186,6 +225,7 @@ const changeSelect = (id: number, event: ChangeEvent) => {
 
 <style scoped>
 .table-raw,
+.empty-table-raw,
 .table-headers {
     display: grid;
     grid-template-rows: 1fr;
@@ -215,6 +255,14 @@ const changeSelect = (id: number, event: ChangeEvent) => {
     height: 44px;
     margin-top: auto;
     margin-bottom: auto;
+    display: flex;
+    overflow-y: auto;
+}
+
+.empty-table-cell {
+    padding: 0px 8px;
+    height: 44px;
+    margin: auto;
     display: flex;
     overflow-y: auto;
 }

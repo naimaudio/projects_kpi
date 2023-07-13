@@ -26,7 +26,7 @@ const headers: Header[] = [
     { name: "Name", id: "name", filterable: false },
     { name: "Manager", id: "manager", filterable: false },
     { name: "Personal time (h)", id: "time_spend", filterable: false },
-    { name: "Fav", id: "favorite", filterable: false },
+    { name: "Fav", id: "favorite", filterable: false, width: "80px" },
 ];
 const userStore = useUserStore();
 

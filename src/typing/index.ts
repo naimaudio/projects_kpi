@@ -2,6 +2,7 @@ export interface Header {
     name: string;
     id: string;
     filterable?: boolean;
+    width?: string;
 }
 
 export interface Preferences {
@@ -46,7 +47,7 @@ export interface RawDeclaration {
     record: {
         date_rec: string;
         user_id: number;
-        comment?: string;
+        comment: string | null;
     };
     projects: {
         project_id: number;
@@ -87,4 +88,10 @@ export interface DeclRecord {
     comment?: string;
     week: number;
     year: number;
+    projectCodes: string[];
+}
+
+export interface SimplifiedResponse<T> {
+    status: number;
+    data: T;
 }

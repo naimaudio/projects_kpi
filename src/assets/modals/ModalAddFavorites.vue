@@ -4,7 +4,7 @@
             <div v-clickOutside="() => emit('close')" class="modal-container column-flex">
                 <span class="sub-title">Favorites</span>
                 <span>Please select projects you have spend time in</span>
-                <BaseTable :headers="headers" :items="selectionableProjects" @change="change" />
+                <BaseTable style="width: 100%" :headers="headers" :items="selectionableProjects" @change="change" />
                 <div class="footer-buttons">
                     <fluent-button appearance="accent" @click="addFavoriteProjects">Add favorites</fluent-button>
                 </div>
@@ -35,16 +35,19 @@ const headers: Header[] = [
         id: "selected",
         name: "",
         filterable: false,
+        width: "60px",
     },
     {
         id: "code",
         name: "Project code",
         filterable: false,
+        width: "4fr",
     },
     {
         id: "name",
         name: "Name",
         filterable: false,
+        width: "4fr",
     },
 ];
 const projects = userStore.getUserProjects;

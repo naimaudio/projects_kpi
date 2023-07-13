@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import type { UserProject, WeekInYear } from "@/typing/project";
 import { deleteFavorites, postFavorites } from "@/API/requests";
-import { type DeclRecord } from "../typing/index";
+import { type DeclRecord } from "@/typing/index";
 export const useUserStore = defineStore("user", () => {
     const preferences = ref<Preferences>({
         preferedMethod: "weekly",
@@ -184,9 +184,19 @@ export const useUserStore = defineStore("user", () => {
     function setDeclarationsFromRaw(rawDeclarations: RawDeclaration[]) {
         const decl: Declaration[] = [];
         const rec: DeclRecord[] = [];
+        let i = -1;
         const lengthProjects = rawDeclarations.length;
         rawDeclarations.forEach((rawDeclaration, index) => {
-            rawDeclaration.projects.forEach((p, jndex) =>
+            rec.push({
+                id: index,
+                userId: rawDeclaration.record.user_id,
+                week: dayjs(rawDeclaration.record.date_rec).week(),
+                year: dayjs(rawDeclaration.record.date_rec).get("year"),
+                projectCodes: [],
+                comment: rawDeclaration.record.comment === null ? undefined : rawDeclaration.record.comment,
+            });
+            i += 1;
+            rawDeclaration.projects.forEach((p, jndex) => {
                 decl.push({
                     week: dayjs(rawDeclaration.record.date_rec).week(),
                     year: dayjs(rawDeclaration.record.date_rec).get("year"),
@@ -194,14 +204,8 @@ export const useUserStore = defineStore("user", () => {
                     hours: p.declared_hours,
                     id: index * lengthProjects + jndex,
                     projectCode: projectStore.projectCodes[p.project_id],
-                })
-            );
-            rec.push({
-                id: index,
-                userId: rawDeclaration.record.user_id,
-                week: dayjs(rawDeclaration.record.date_rec).week(),
-                year: dayjs(rawDeclaration.record.date_rec).get("year"),
-                comment: rawDeclaration.record.comment,
+                });
+                rec[i].projectCodes.push(projectStore.projectCodes[p.project_id]);
             });
         });
         declarations.value = decl;
