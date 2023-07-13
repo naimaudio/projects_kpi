@@ -1,7 +1,7 @@
-import type { DeclarationInput, RawDeclaration, RawUser } from "@/typing";
+import type { DeclarationInput, RawDeclaration, RawUser, SimplifiedResponse } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
-import { domain } from "../typing/index";
+import type { domain } from "@/typing/index";
 
 const origin = "http://192.168.14.30:8080";
 
@@ -24,29 +24,27 @@ async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined)
     return fetch(input, updatedOptions);
 }
 
-export async function getProjects(): Promise<RawProject[]> {
-    return fetcher(`${origin}/projects`, {
+export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
+    const response = await fetcher(`${origin}/projects`, {
         headers: {
             "Content-Type": "application/json",
         },
-    }).then((response) => {
-        return response.json();
     });
+    return { status: response.status, data: await response.json() };
 }
 
-export async function getUser(): Promise<RawUser> {
-    return fetcher(`${origin}/user`, {}).then((response) => {
-        return response.json();
-    });
+export async function getUser(): Promise<SimplifiedResponse<RawUser>> {
+    const response = await fetcher(`${origin}/user`, {});
+    return { status: response.status, data: await response.json() };
 }
 
-export async function getFavorites(userId: number): Promise<{ status: number; data: number[] }> {
+export async function getFavorites(userId: number): Promise<SimplifiedResponse<number[]>> {
     const response = await fetcher(`${origin}/favorites/${userId}`);
     return { status: response.status, data: await response.json() };
 }
 
-export async function postFavorites(userId: number, projectId: number) {
-    return fetcher(`${origin}/favorites`, {
+export async function postFavorites(userId: number, projectId: number): Promise<SimplifiedResponse<any>> {
+    const response = await fetcher(`${origin}/favorites`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -58,10 +56,11 @@ export async function postFavorites(userId: number, projectId: number) {
             },
         ]),
     });
+    return { status: response.status, data: await response.json() };
 }
 
-export async function deleteFavorites(userId: number, projectId: number) {
-    return fetcher(`${origin}/favorites`, {
+export async function deleteFavorites(userId: number, projectId: number): Promise<SimplifiedResponse<any>> {
+    const response = await fetcher(`${origin}/favorites`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -71,6 +70,7 @@ export async function deleteFavorites(userId: number, projectId: number) {
             project_id: projectId,
         }),
     });
+    return { status: response.status, data: await response.json() };
 }
 
 export async function hoursRegistration(
@@ -79,7 +79,7 @@ export async function hoursRegistration(
     week: number,
     year: number,
     comment?: string
-) {
+): Promise<SimplifiedResponse<any>> {
     const requestBody: RawDeclaration = {
         projects: [],
         record: {
@@ -95,25 +95,24 @@ export async function hoursRegistration(
             project_id: declaration.projectId,
         });
     });
-    return fetcher(`${origin}/records`, {
+    const response = await fetcher(`${origin}/records`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
     });
+    return { status: response.status, data: await response.json() };
 }
 
-export async function getDeclarations(userId: number): Promise<RawDeclaration[]> {
-    return fetcher(`${origin}/records/${userId}`).then((response) => {
-        return response.json();
-    });
+export async function getDeclarations(userId: number): Promise<SimplifiedResponse<RawDeclaration[]>> {
+    const response = await fetcher(`${origin}/records/${userId}`);
+    return { status: response.status, data: await response.json() };
 }
 
-export async function getDomain(userId: number) {
-    return fetcher(`${origin}/domain/${userId}`).then((response) => {
-        return response.json();
-    });
+export async function getDomain(userId: number): Promise<SimplifiedResponse<domain>> {
+    const response = await fetcher(`${origin}/domain/${userId}`);
+    return { status: response.status, data: await response.json() };
 }
 
 export async function putDomain(userId: number, domain: domain) {

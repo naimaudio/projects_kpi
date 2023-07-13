@@ -1,8 +1,11 @@
 <template>
     <div class="global">
-        <RouterView v-if="done" />
+        <RouterView v-if="done && noError" />
         <div v-else-if="noError" class="centered"><fluent-progress-ring /></div>
-        <ErrorCard v-if="!noError" @close="noError = true">Oh no, there was an error at the initialization</ErrorCard>
+        <ErrorCard v-else-if="!noError" :closable="false" @close="noError = true"
+            >Oh no, there was an error at the initialization, please try to realod page, or contact IT
+            support</ErrorCard
+        >
     </div>
 </template>
 
@@ -14,7 +17,11 @@ import { initialization } from "@/utilities/initialization";
 const done = ref(false);
 const noError = ref(true);
 
-initialization().then(() => (done.value = true));
+initialization()
+    .then(() => (done.value = true))
+    .catch(() => {
+        noError.value = false;
+    });
 </script>
 
 <style scoped>

@@ -5,6 +5,7 @@ import { useUserStore } from "@/stores/userStore";
 
 import { getProjects, getFavorites, getDeclarations, getUser } from "@/API/requests";
 import type { RawProject } from "@/typing/project";
+import type { SimplifiedResponse } from "@/typing/index";
 
 export async function initialization() {
     const projectStore = useProjectStore();
@@ -18,14 +19,26 @@ export async function initialization() {
         authStore.setAccount(accounts[0]);
 
         await getUser()
-            .then((user) => userStore.setUserFromRaw(user))
+            .then((response) => {
+                if (response.status !== 200) {
+                    throw Error("Initialization failed");
+                } else {
+                    userStore.setUserFromRaw(response.data);
+                }
+            })
             .then(() => getProjects())
-            .then((projects: RawProject[]) => projectStore.setProjectsFromRaw(projects))
+            .then((response: SimplifiedResponse<RawProject[]>) => {
+                if (response.status !== 200) {
+                    throw Error("Initialization failed");
+                } else {
+                    projectStore.setProjectsFromRaw(response.data);
+                }
+            })
             .then(() => {
                 const userId = userStore.userIdGetter;
                 if (userId !== undefined) {
                     return getFavorites(userId);
-                } else throw Error("User not logged in");
+                } else throw Error("Initialization failed");
             })
             .then(({ status: status, data: data }) => {
                 if (status === 200) {
@@ -36,8 +49,14 @@ export async function initialization() {
                 const userId = userStore.userIdGetter;
                 if (userId !== undefined) {
                     return getDeclarations(userId);
-                } else throw Error("User not logged in");
+                } else throw Error("Initialization failed");
             })
-            .then((declarations) => userStore.setDeclarationsFromRaw(declarations));
+            .then((response) => {
+                if (response.status !== 200) {
+                    throw Error("Initialization failed");
+                } else {
+                    userStore.setDeclarationsFromRaw(response.data);
+                }
+            });
     }
 }

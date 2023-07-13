@@ -58,8 +58,7 @@ const userDomain = ref<domain | "">("");
 const userId = userStore.userIdGetter;
 if (userId !== undefined) {
     getDomain(userId).then((domain) => {
-        console.log("a", domain);
-        userDomain.value = domain;
+        userDomain.value = domain.data;
         loading.value = false;
     });
 }
@@ -67,9 +66,9 @@ async function disconnect() {
     authStore.msalInstance?.logoutPopup().then(() => router.push("/"));
 }
 
-async function setDomain(domain: domain) {
+async function setDomain(domain: domain | "") {
     loading.value = true;
-    if (userId !== undefined) {
+    if (userId !== undefined && domain !== "") {
         await putDomain(userId, domain).then((response) => {
             if (response.status === 200) {
                 userDomain.value = domain;

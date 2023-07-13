@@ -277,7 +277,7 @@ async function validateDeclaration() {
             yearNumber.value,
             comment.value
         );
-        if (!response.ok) {
+        if (response.status !== 200) {
             globalstore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
             globalstore.notification.type = "FAILURE";
             globalstore.notification.display = true;
