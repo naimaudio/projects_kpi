@@ -38,9 +38,9 @@ const props = withDefaults(
 
 .button {
     padding: 5px 12px;
-    max-height: 32px;
     border-radius: var(--card-border-radius);
     cursor: pointer;
+    min-height: 32px;
 }
 .white-button {
     background-color: white;

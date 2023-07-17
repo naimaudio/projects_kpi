@@ -6,7 +6,9 @@ const HistoryView = () => import("@/views/HistoryView.vue");
 const ModalHoursView = () => import("@/views/declaration/ModalHoursView.vue");
 const HoursView = () => import("@/views/declaration/HoursView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
+const ProjectView = () => import("@/views/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
+
 import { useAuthStore } from "../stores/authStore";
 
 const router = createRouter({
@@ -47,6 +49,13 @@ const router = createRouter({
                     path: "/projects",
                     name: "projects",
                     component: ProjectsView,
+                    children: [
+                        {
+                            path: ":projectId",
+                            name: "project",
+                            component: ProjectView,
+                        },
+                    ],
                 },
                 {
                     path: "/profile",

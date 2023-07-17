@@ -1,7 +1,7 @@
 <template>
     <Teleport to=".global">
         <div class="modal">
-            <div v-clickOutside="close" class="modal-container column-flex">
+            <div ref="modal" class="modal-container column-flex">
                 <span class="sub-title">{{ workDays[currentDay] }}</span>
                 <span
                     >Hours spend on projects
@@ -35,20 +35,22 @@ import type { days } from "@/typing";
 import type { DeclarationInput } from "@/typing";
 import { dayNumberToString, dayValidation } from "@/utilities/main";
 import { cloneDeep } from "lodash";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { workDays } from "@/typing";
-
+import { onClickOutside } from "@vueuse/core";
 const userStore = useUserStore();
 const router = useRouter();
 const route = useRoute();
-
+const modal = ref(null);
 const close = () =>
     router.push({
         name: "declarationDate",
         query: route.query,
         params: { year: route.params.year, week: route.params.week },
     });
+
+onClickOutside(modal, () => close());
 const currentDay = computed<days>(() => {
     const day = dayValidation(route.params.day);
     if (day === null) {

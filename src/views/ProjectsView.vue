@@ -2,7 +2,13 @@
     <div class="page-container">
         <h1 class="title">Projects</h1>
         <div v-if="userStore.getUserProjects.length !== 0">
-            <BaseTable :headers="headers" :items="userStore.getUserProjects" @change="change" />
+            <BaseTable
+                :headers="headers"
+                :items="userStore.getUserProjects"
+                clickable-row
+                @change="change"
+                @row-click="rowClickHandler"
+            />
         </div>
         <div v-else class="column-flex">
             <div class="centered-flex">
@@ -11,7 +17,7 @@
                 <img src="@/assets/icons/neutral-face.png" alt="Neutral Face" width="60" height="60" />
             </div>
         </div>
-        <!-- <RouterView></RouterView> -->
+        <RouterView></RouterView>
     </div>
 </template>
 
@@ -20,7 +26,9 @@ import BaseTable from "@/components/BaseTable.vue";
 import { useUserStore } from "@/stores/userStore";
 import type { Header } from "@/typing";
 import type { UserProject } from "@/typing/project";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const headers: Header[] = [
     { name: "Code", id: "code", filterable: false },
     { name: "Name", id: "name", filterable: false },
@@ -36,8 +44,8 @@ function change<K extends keyof UserProject>(id: number, field: K, value: UserPr
     }
 }
 
-// function rowClickHandler(id: number) {
-//     router.push("");
-// }
+function rowClickHandler(id: number) {
+    router.push({ name: "project", params: { projectId: id } });
+}
 </script>
 <style></style>

@@ -1,7 +1,7 @@
 <template>
     <Teleport to=".global">
         <div class="modal">
-            <div v-clickOutside="() => emit('close')" class="modal-container column-flex">
+            <div ref="target" class="modal-container column-flex">
                 <span class="sub-title">Favorites</span>
                 <span>Please select projects you have spend time in</span>
                 <BaseTable style="width: 100%" :headers="headers" :items="selectionableProjects" @change="change" />
@@ -19,7 +19,7 @@ import { useUserStore } from "@/stores/userStore";
 import type { Header } from "@/typing";
 import { type SelectableProject } from "@/typing/project";
 import { ref } from "vue";
-
+import { onClickOutside } from "@vueuse/core";
 const emit = defineEmits<{
     (event: "close"): void;
 }>();
@@ -50,6 +50,7 @@ const headers: Header[] = [
         width: "2fr",
     },
 ];
+const target = ref(null);
 const projects = userStore.getUserProjects;
 const selectionableProjects = ref<SelectableProject[]>(
     projects
@@ -66,4 +67,6 @@ const addFavoriteProjects = () => {
         });
     emit("close");
 };
+
+onClickOutside(target, () => emit("close"));
 </script>

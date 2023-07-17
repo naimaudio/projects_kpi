@@ -39,7 +39,19 @@
                     ''),
             }"
         >
-            <div v-for="header in props.headers" :key="header.id" class="table-cell">
+            <div
+                v-for="header in props.headers"
+                :key="header.id"
+                class="table-cell"
+                :class="{ clickable: header.id != 'selected' && header.id != 'favorite' && clickableRow }"
+                @click="
+                    () => {
+                        if (header.id != 'selected' && header.id != 'favorite') {
+                            emit('rowClick', cell.id);
+                        }
+                    }
+                "
+            >
                 <span
                     v-if="header.id == 'selected' && 'selected' in cell && typeof cell.selected === 'boolean'"
                     class="cell-text"
@@ -117,13 +129,16 @@ const props = withDefaults(
         headers: Header[];
         items: T[];
         selectable?: boolean;
+        clickableRow?: boolean;
     }>(),
     {
         selectable: false,
+        clickableRow: false,
     }
 );
 const emit = defineEmits<{
     (e: "change", index: number, field: keyof T, value: T[keyof T]): void;
+    (e: "rowClick", rowId: number): void;
 }>();
 
 const currentPage = ref(1);
@@ -276,5 +291,9 @@ const changeSelect = (id: number, event: ChangeEvent) => {
 .cell-text {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.clickable:hover {
+    cursor: pointer;
 }
 </style>
