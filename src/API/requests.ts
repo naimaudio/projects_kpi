@@ -7,7 +7,13 @@ const origin = "http://192.168.14.30:8080";
 
 async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
     const objKey = localStorage[`msal.token.keys.${envVariableWithValidation("VITE_CLIENT_ID")}`];
-    const updatedOptions = { ...init };
+    const timeout = 10000;
+    const controller = new AbortController();
+    const updatedOptions = { ...init, signal: controller.signal };
+    const id = setTimeout(() => {
+        controller.abort();
+        console.log("request aborted");
+    }, timeout);
 
     if (objKey !== undefined) {
         const tokenObj = localStorage.getItem(JSON.parse(objKey)["accessToken"]);
@@ -21,7 +27,9 @@ async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined)
             updatedOptions.headers = { Authorization: `Bearer ${token}` };
         }
     }
-    return fetch(input, updatedOptions);
+    const response = await fetch(input, updatedOptions);
+    clearTimeout(id);
+    return response;
 }
 
 export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
@@ -34,7 +42,7 @@ export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
 }
 
 export async function getUser(): Promise<SimplifiedResponse<RawUser>> {
-    const response = await fetcher(`${origin}/user`, {});
+    const response = await fetcher(`${origin}/user`);
     return { status: response.status, data: await response.json() };
 }
 
