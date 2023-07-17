@@ -40,7 +40,7 @@ import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { initialization } from "@/utilities/initialization";
 import { useGlobalStore } from "@/stores/globalStore";
-
+import NotificationCard from "@/components/NotificationCard.vue";
 const authStore = useAuthStore();
 const globalStore = useGlobalStore();
 const router = useRouter();
@@ -73,8 +73,7 @@ async function signIn() {
             .catch((browserAuthError: BrowserAuthError) => {
                 console.log(browserAuthError);
                 globalStore.notification = {
-                    content:
-                        "Oh ! There is an error with is authentification provider, please contact IT to solve issue",
+                    content: "Oh ! An error occurred during authentication, please contact IT if problem persists",
                     display: true,
                     type: "FAILURE",
                 };
@@ -128,6 +127,7 @@ async function signIn() {
     background-image: url("https://aadcdn.msftauth.net/shared/1.0/content/images/backgrounds/2_11d9e3bcdfede9ce5ce5ace2d129f1c4.svg");
     background-color: #f2f2f2;
     display: flex;
+    background-size: cover;
     flex-direction: column;
     justify-content: center;
 }
