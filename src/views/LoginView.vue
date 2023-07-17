@@ -21,6 +21,16 @@
             </div>
         </div>
     </div>
+    <Transition name="fade">
+        <NotificationCard
+            v-if="globalStore.notification.display"
+            :type="globalStore.notification.type"
+            :lifetime="7"
+            @close="() => (globalStore.notification.display = false)"
+        >
+            {{ globalStore.notification.content }}
+        </NotificationCard>
+    </Transition>
 </template>
 
 <script setup lang="ts">
@@ -138,5 +148,17 @@ async function signIn() {
     font-size: 16px;
     cursor: pointer;
     border: 1px solid #333;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.7s ease;
+}
+
+.fade-leave-from {
+    opacity: 1;
+}
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
