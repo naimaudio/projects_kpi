@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/userStore";
 import type { Header } from "@/typing";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 
 const commentHeaders: Header[] = [

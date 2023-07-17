@@ -83,7 +83,7 @@ export async function hoursRegistration(
     const requestBody: RawDeclaration = {
         projects: [],
         record: {
-            comment: comment,
+            comment: comment === undefined ? null : comment,
             date_rec: dayNumberToDayDate(4, week, year),
             user_id: userId,
         },
