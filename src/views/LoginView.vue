@@ -29,8 +29,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { initialization } from "@/utilities/initialization";
+import { useGlobalStore } from "@/stores/globalStore";
 
 const authStore = useAuthStore();
+const globalStore = useGlobalStore();
 const router = useRouter();
 onMounted(() => {
     if (authStore.msalInstance !== undefined) {
@@ -58,7 +60,15 @@ async function signIn() {
             })
             .then(() => initialization())
             .then(() => router.push({ name: "declaration" }))
-            .catch((browserAuthError: BrowserAuthError) => console.log(browserAuthError));
+            .catch((browserAuthError: BrowserAuthError) => {
+                console.log(browserAuthError);
+                globalStore.notification = {
+                    content:
+                        "Oh ! There is an error with is authentification provider, please contact IT to solve issue",
+                    display: true,
+                    type: "FAILURE",
+                };
+            });
     }
 }
 </script>
