@@ -1,7 +1,13 @@
 <template>
     <div id="sidebar">
         <div class="base-menu">
-            <RouterLink v-for="[name, link] in names" :key="name" class="base-links" :to="link">
+            <RouterLink
+                v-for="[name, link] in names"
+                :key="name"
+                class="base-links"
+                :to="link"
+                :class="{ 'selected-link': link.includes(currentRoute) }"
+            >
                 {{ name }}
             </RouterLink>
         </div>
@@ -36,6 +42,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { computed } from "vue";
 import NotificationCard from "@/components/NotificationCard.vue";
 import { useGlobalStore } from "@/stores/globalStore";
+import { useRoute } from "vue-router";
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
@@ -51,7 +58,8 @@ const initials = computed<string | undefined>(() =>
         .map((name) => name[0])
         .join("")
 );
-
+const route = useRoute();
+const currentRoute = computed<string>(() => route.path);
 const closeNotif = async () => {
     globalStore.notification.display = false;
 };
@@ -139,5 +147,10 @@ const closeNotif = async () => {
 }
 .fade-leave-to {
     opacity: 0;
+}
+.selected-link {
+    background-color: #fad6dc;
+    font-weight: 600;
+    color: #a63f50;
 }
 </style>

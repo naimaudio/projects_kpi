@@ -44,7 +44,7 @@ const emit = defineEmits<{
 <style scoped>
 .table-raw-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }

@@ -41,13 +41,13 @@ const headers: Header[] = [
         id: "code",
         name: "Project code",
         filterable: false,
-        width: "4fr",
+        width: "1fr",
     },
     {
         id: "name",
         name: "Name",
         filterable: false,
-        width: "4fr",
+        width: "2fr",
     },
 ];
 const projects = userStore.getUserProjects;
