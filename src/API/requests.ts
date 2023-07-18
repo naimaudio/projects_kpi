@@ -2,9 +2,10 @@ import type { DeclarationInput, RawDeclaration, RawUser, SimplifiedResponse } fr
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
+import dayjs from "dayjs";
+import { weekNumberToString } from "../utilities/main";
 
-const origin = "http://192.168.14.30:8080";
-
+const origin = envVariableWithValidation("VITE_FAST_API_URI");
 async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
     const objKey = localStorage[`msal.token.keys.${envVariableWithValidation("VITE_CLIENT_ID")}`];
     const timeout = 10000;
