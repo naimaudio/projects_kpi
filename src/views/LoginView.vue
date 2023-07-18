@@ -71,7 +71,7 @@ async function signIn() {
             .then(() => initialization())
             .then(() => router.push({ name: "declaration" }))
             .catch((browserAuthError: BrowserAuthError) => {
-                console.log(browserAuthError);
+                console.error(browserAuthError);
                 globalStore.notification = {
                     content: "Oh ! An error occurred during authentication, please contact IT if problem persists",
                     display: true,

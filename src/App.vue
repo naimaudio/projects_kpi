@@ -19,8 +19,9 @@ const noError = ref(true);
 
 initialization()
     .then(() => (done.value = true))
-    .catch(() => {
+    .catch((error) => {
         noError.value = false;
+        console.error(error);
     });
 </script>
 
