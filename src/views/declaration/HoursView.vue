@@ -41,7 +41,12 @@
                             @update:model-value="(index, value) => (ongoingDeclaration[index].hours = value)"
                             @remove="
                                 (projectId, _) => {
-                                    userStore.setFavorite(projectId, false);
+                                    () => {
+                                        const userId = userStore.userIdGetter;
+                                        if (userId !== undefined) {
+                                            declarationStore.setFavorite(projectId, false, userId);
+                                        }
+                                    };
                                 }
                             "
                         />
@@ -97,7 +102,7 @@
                         <div class="table-legend">
                             <span class="table-cell"></span>
                             <span
-                                v-for="declaration in userStore.getElementaryDeclaration"
+                                v-for="declaration in declarationStore.getElementaryDeclaration"
                                 :key="declaration.projectId"
                                 class="table-cell"
                             >
@@ -105,7 +110,10 @@
                                     clickable
                                     @click="
                                         () => {
-                                            userStore.setFavorite(declaration.projectId, false);
+                                            const userId = userStore.userIdGetter;
+                                            if (userId !== undefined) {
+                                                declarationStore.setFavorite(declaration.projectId, false, userId);
+                                            }
                                         }
                                     "
                                 />
@@ -123,7 +131,7 @@
                         >
                             <span class="table-cell">{{ workDays[day] }}</span>
                             <span
-                                v-for="declaration in userStore.dailyHoursSpend[day]"
+                                v-for="declaration in declarationStore.dailyHoursSpend[day]"
                                 :key="declaration.name"
                                 class="table-cell"
                             >
@@ -193,6 +201,7 @@ import {
     workDays,
 } from "@/typing";
 import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
@@ -200,12 +209,14 @@ import { hoursRegistration } from "@/API/requests";
 import BaseButton from "@/components/BaseButton.vue";
 import { useGlobalStore } from "@/stores/globalStore";
 import { initialization } from "@/utilities/initialization";
+import { getBufferTable } from "@/API/requests";
 
 const addFavoritesModal = ref(false);
 const router: Router = useRouter();
 const route: RouteLocationNormalizedLoaded = useRoute();
 const globalstore = useGlobalStore();
 const userStore = useUserStore();
+const declarationStore = useDeclarationStore();
 const weekNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.week)
         ? undefined
@@ -222,10 +233,14 @@ const yearNumber = computed<number | undefined>(() => {
 });
 
 const comment = ref<string | undefined>();
+const userId = userStore.userIdGetter;
+if (userId === undefined) throw Error("no user Logged");
 
-const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
-const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
-
+if (weekNumber.value !== undefined && yearNumber.value !== undefined) {
+    getBufferTable(userId, weekNumber.value, yearNumber.value).then((value) => (ongoingDeclaration.value = value));
+}
+const ongoingDeclaration = ref<DeclarationInput[]>(declarationStore.getElementaryDeclaration);
+const defaultDeclaration = computed<DeclarationInput[]>(() => declarationStore.getElementaryDeclaration);
 const loading = ref<boolean>(false);
 
 watch(defaultDeclaration, (value) => {
@@ -253,7 +268,7 @@ const sumProjectHours = computed<number>(() => {
             total += Number(declaration.hours);
         });
     } else if (methodSelected.value === "daily") {
-        total = userStore.getDailyDeclarationTotal;
+        total = declarationStore.getDailyDeclarationTotal;
     }
     return total;
 });
@@ -263,7 +278,7 @@ async function validateDeclaration() {
     globalstore.notification.display = false;
     let sendedDeclaration: DeclarationInput[] | undefined;
     if (methodSelected.value === "daily") {
-        sendedDeclaration = userStore.getDailyDeclarationToWeekly;
+        sendedDeclaration = declarationStore.getDailyDeclarationToWeekly;
     } else if (methodSelected.value === "weekly") {
         sendedDeclaration = ongoingDeclaration.value;
     } else {
@@ -292,7 +307,8 @@ async function validateDeclaration() {
     loading.value = false;
 }
 const valideRoute = computed<boolean>(
-    () => userStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
+    () =>
+        declarationStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
 );
 </script>
 

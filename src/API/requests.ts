@@ -2,8 +2,6 @@ import type { DeclarationInput, RawDeclaration, RawUser, SimplifiedResponse } fr
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
-import dayjs from "dayjs";
-import { weekNumberToString } from "../utilities/main";
 
 const origin = envVariableWithValidation("VITE_FAST_API_URI");
 async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
@@ -128,5 +126,39 @@ export async function putDomain(userId: number, domain: domain) {
     const response = await fetcher(`${origin}/domain/${userId}?updated_domain=${domain}`, {
         method: "PUT",
     });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function postBufferTable(
+    userId: number,
+    projectId: number,
+    day: number,
+    week: number,
+    year: number
+): Promise<SimplifiedResponse<any>> {
+    const response = await fetcher(`${origin}/favorites`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify([
+            {
+                user_id: userId,
+                project_id: projectId,
+                daily_hours: dayNumberToDayDate(day, week, year),
+            },
+        ]),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getBufferTable(userId: number, week: number, year: number): Promise<SimplifiedResponse<domain>> {
+    const response = await fetcher(
+        `${origin}/buffertable?hoursuserid=${userId}&date_init=${dayNumberToDayDate(
+            0,
+            week,
+            year
+        )}&date_end=${dayNumberToDayDate(4, week, year)}`
+    );
     return { status: response.status, data: await response.json() };
 }

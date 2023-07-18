@@ -68,14 +68,14 @@
 
 .modal-container {
     position: fixed;
-    top: 50%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: white;
     border-radius: var(--card-border-radius);
     max-width: 90%;
     max-height: 90%;
-    overflow: auto;
+    overflow: visible;
     box-shadow: 0 0 8px rgba(0,0,0,0.12), 0 32px 64px rgba(0,0,0,0.14);
     padding: 44px;
 }

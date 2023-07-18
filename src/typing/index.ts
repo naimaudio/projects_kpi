@@ -24,19 +24,13 @@ export interface DeclarationInput {
 }
 
 export type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
-export const stringToDomain = (str: string): domain => {
-    if (str === "Acoustics" || str === "Tests" || str === "Hardware" || str === "Software" || str === "Mechanics") {
-        return str;
-    } else {
-        throw Error("given string is not a domain");
-    }
-};
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>;
 
 export const workDayKeys = [0, 1, 2, 3, 4] as const;
 export type days = (typeof workDayKeys)[number];
 
+export type role = "Employee" | "Business Manager" | "Project Manager";
 export const workDays: Record<days, string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
 export interface ChangeEvent {
@@ -80,6 +74,7 @@ export interface User {
     email: string;
     firstDeclarationDay: Date;
     domain: domain;
+    role: role;
 }
 
 export interface DeclRecord {

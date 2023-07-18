@@ -16,7 +16,7 @@
                         appearance="accent"
                         @click="
                             () => {
-                                userStore.dailyHoursSpend[currentDay] = declaration;
+                                declarationStore.dailyHoursSpend[currentDay] = declaration;
                                 close();
                             }
                         "
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import HoursForm from "@/components/input_hours/HoursForm.vue";
-import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import type { days } from "@/typing";
 import type { DeclarationInput } from "@/typing";
 import { dayNumberToString, dayValidation } from "@/utilities/main";
@@ -39,7 +39,7 @@ import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { workDays } from "@/typing";
 import { onClickOutside } from "@vueuse/core";
-const userStore = useUserStore();
+const declarationStore = useDeclarationStore();
 const router = useRouter();
 const route = useRoute();
 const modal = ref(null);
@@ -60,5 +60,5 @@ const currentDay = computed<days>(() => {
     }
 });
 
-const declaration: DeclarationInput[] = cloneDeep(userStore.dailyHoursSpend[currentDay.value]);
+const declaration: DeclarationInput[] = cloneDeep(declarationStore.dailyHoursSpend[currentDay.value]);
 </script>

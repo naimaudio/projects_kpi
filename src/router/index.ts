@@ -10,6 +10,7 @@ const ProjectView = () => import("@/views/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
 
 import { useAuthStore } from "../stores/authStore";
+import { useUserStore } from "../stores/userStore";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +75,8 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     const authStore = useAuthStore();
+    const userStore = useUserStore();
+
     if (to.name !== "login" && authStore.msalInstance?.getAllAccounts().length === 0) {
         return router.push({ name: "login" });
     }

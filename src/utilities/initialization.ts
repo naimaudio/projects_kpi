@@ -6,12 +6,15 @@ import { useUserStore } from "@/stores/userStore";
 import { getProjects, getFavorites, getDeclarations, getUser } from "@/API/requests";
 import type { RawProject } from "@/typing/project";
 import type { SimplifiedResponse } from "@/typing/index";
+import { declarationsFromRaw } from "@/API/conversions";
+import { projectsFromRaw, userFromRaw } from "../API/conversions";
+import { useDeclarationStore } from "@/stores/declarationStore";
 
 export async function initialization() {
     const projectStore = useProjectStore();
     const userStore = useUserStore();
     const authStore = useAuthStore();
-
+    const declarationStore = useDeclarationStore();
     const msalInstance = new PublicClientApplication(authStore.msalConfig);
     authStore.msalInstance = msalInstance;
     const accounts = msalInstance.getAllAccounts();
@@ -23,7 +26,7 @@ export async function initialization() {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
-                    userStore.setUserFromRaw(response.data);
+                    userStore.setUser(userFromRaw(response.data));
                 }
             })
             .then(() => getProjects())
@@ -31,7 +34,7 @@ export async function initialization() {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
-                    projectStore.setProjectsFromRaw(response.data);
+                    projectStore.setProjects(projectsFromRaw(response.data));
                 }
             })
             .then(() => {
@@ -42,7 +45,7 @@ export async function initialization() {
             })
             .then(({ status: status, data: data }) => {
                 if (status === 200) {
-                    userStore.initFavorites(data);
+                    declarationStore.initFavorites(data);
                 }
             })
             .then(() => {
@@ -55,7 +58,8 @@ export async function initialization() {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
-                    userStore.setDeclarationsFromRaw(response.data);
+                    const { declarations, records } = declarationsFromRaw(response.data, projectStore.projectCodes);
+                    declarationStore.setDeclarations(declarations, records);
                 }
             });
     }
