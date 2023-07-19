@@ -1,64 +1,76 @@
 <template>
-    <Teleport to=".global">
-        <div class="modal">
-            <div ref="modal" class="modal-container column-flex">
-                <span class="sub-title">{{ workDays[currentDay] }}</span>
-                <span
-                    >Hours spend on projects
-                    {{ dayNumberToString(currentDay, Number(route.params.week), Number(route.params.year)) }}</span
-                >
-                <HoursForm
-                    :model-value="declaration"
-                    @update:model-value="(index, value) => (declaration[index].hours = value)"
-                />
-                <div class="footer-buttons">
-                    <fluent-button
-                        appearance="accent"
-                        @click="
-                            () => {
-                                userStore.dailyHoursSpend[currentDay] = declaration;
-                                close();
-                            }
-                        "
-                        >Validate</fluent-button
-                    >
-                </div>
-            </div>
+    <ModalComponent :close-route="{ name: 'declarationDate', year: String(props.year), week: String(props.week) }">
+        <span class="sub-title">{{ workDays[props.day] }}</span>
+        <span
+            >Hours spend on projects
+            {{ dayNumberToString(props.day, Number(route.params.week), Number(route.params.year)) }}</span
+        >
+        <HoursForm
+            :model-value="props.dayDeclaration"
+            @update:model-value="(index, value) => (onGoingDayDeclaration[index].hours = value)"
+        />
+        <div class="footer-buttons">
+            <BaseButton accent :disabled="loading" @click="validation">
+                <template #default> <span> Validate</span> </template>
+                <template v-if="loading" #start>
+                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
+                </template>
+            </BaseButton>
         </div>
-    </Teleport>
+    </ModalComponent>
 </template>
 
 <script setup lang="ts">
 import HoursForm from "@/components/input_hours/HoursForm.vue";
-import { useUserStore } from "@/stores/userStore";
 import type { days } from "@/typing";
 import type { DeclarationInput } from "@/typing";
-import { dayNumberToString, dayValidation } from "@/utilities/main";
-import { cloneDeep } from "lodash";
-import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { dayNumberToString } from "@/utilities/main";
+import { ref } from "vue";
+import { useRoute } from "vue-router";
 import { workDays } from "@/typing";
 import { onClickOutside } from "@vueuse/core";
-const userStore = useUserStore();
-const router = useRouter();
+import { postBufferTable } from "@/API/requests";
+import { useGlobalStore } from "../../stores/globalStore";
+import { cloneDeep } from "lodash";
+import BaseButton from "@/components/BaseButton.vue";
+import ModalComponent from "@/components/ModalComponent.vue";
 const route = useRoute();
 const modal = ref(null);
-const close = () =>
-    router.push({
-        name: "declarationDate",
-        query: route.query,
-        params: { year: route.params.year, week: route.params.week },
-    });
+const close = () => emits("close");
 
 onClickOutside(modal, () => close());
-const currentDay = computed<days>(() => {
-    const day = dayValidation(route.params.day);
-    if (day === null) {
-        throw Error("should not open the daily modal without correct day");
-    } else {
-        return day;
-    }
-});
 
-const declaration: DeclarationInput[] = cloneDeep(userStore.dailyHoursSpend[currentDay.value]);
+const props = defineProps<{
+    dayDeclaration: DeclarationInput[];
+    userId: number;
+    week: number;
+    year: number;
+    day: days;
+}>();
+
+const onGoingDayDeclaration = ref<DeclarationInput[]>(cloneDeep(props.dayDeclaration));
+const loading = ref<boolean>(false);
+const emits = defineEmits<{
+    (event: "change", day: days, declarationIndex: number, value: number): void;
+    (event: "close"): void;
+}>();
+
+const globalStore = useGlobalStore();
+const validation = async () => {
+    loading.value = true;
+    console.log(props.dayDeclaration);
+    postBufferTable(props.userId, onGoingDayDeclaration.value, props.day, props.week, props.year).then((response) => {
+        if (response.status !== 200) {
+            globalStore.notification.content = "Your daily declaration can't be registered, please contact IT";
+            globalStore.notification.display = true;
+            globalStore.notification.type = "FAILURE";
+        } else {
+            globalStore.notification.content = "Your Daily Declaration has been successfully changed";
+            globalStore.notification.display = true;
+            globalStore.notification.type = "SUCCESS";
+            close();
+        }
+        loading.value = false;
+    });
+};
 </script>
