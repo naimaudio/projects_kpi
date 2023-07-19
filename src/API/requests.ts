@@ -1,9 +1,7 @@
-import type { DeclarationInput, RawDeclaration, RawUser, SimplifiedResponse } from "@/typing";
+import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
-import type { domain } from "@/typing/index";
-import dayjs from "dayjs";
-import { weekNumberToString } from "../utilities/main";
+import type { domain, days } from "@/typing/index";
 
 const origin = envVariableWithValidation("VITE_FAST_API_URI");
 async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
@@ -13,7 +11,8 @@ async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined)
     const updatedOptions = { ...init, signal: controller.signal };
     const id = setTimeout(() => {
         controller.abort();
-        console.log("request aborted");
+        console.error("request aborted");
+        return { status: 408, data: undefined };
     }, timeout);
 
     if (objKey !== undefined) {
@@ -128,5 +127,46 @@ export async function putDomain(userId: number, domain: domain) {
     const response = await fetcher(`${origin}/domain/${userId}?updated_domain=${domain}`, {
         method: "PUT",
     });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function postBufferTable(
+    userId: number,
+    timeSpendByProject: { projectId: number; hours: number }[],
+    day: days,
+    week: number,
+    year: number
+): Promise<SimplifiedResponse<any>> {
+    const response = await fetcher(`${origin}/buffertable`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+            timeSpendByProject.map((tsbp) => {
+                return {
+                    user_id: userId,
+                    project_id: tsbp.projectId,
+                    daily_hours: tsbp.hours,
+                    day_date: dayNumberToDayDate(day, week, year),
+                };
+            })
+        ),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getBufferTable(
+    userId: number,
+    week: number,
+    year: number
+): Promise<SimplifiedResponse<RawBufferRecord[]>> {
+    const response = await fetcher(
+        `${origin}/buffertable?hours_user_id=${userId}&date_init=${dayNumberToDayDate(
+            0,
+            week,
+            year
+        )}&date_end=${dayNumberToDayDate(4, week, year)}`
+    );
     return { status: response.status, data: await response.json() };
 }
