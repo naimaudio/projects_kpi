@@ -25,9 +25,9 @@ export const weekNumberToString = (weekNumber: number, year: number) => {
     }
 };
 
-export const dayValidation = (day: string | string[]): days | null => {
+export const dayValidation = (day: string | string[]): days | undefined => {
     const dayNb = Number(day);
-    return dayNb === 0 || dayNb === 1 || dayNb === 2 || dayNb === 3 || dayNb === 4 ? dayNb : null;
+    return dayNb === 0 || dayNb === 1 || dayNb === 2 || dayNb === 3 || dayNb === 4 ? dayNb : undefined;
 };
 
 /**

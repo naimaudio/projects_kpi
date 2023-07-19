@@ -3,7 +3,10 @@
         <div class="column-container">
             <div class="flex-space-between">
                 <div class="raw-container">
-                    <ArrowPreviousIcon class="clickable-icon" @click="() => router.push({ path: '/declare' })" />
+                    <ArrowPreviousIcon
+                        class="clickable-icon"
+                        @click="() => router.push({ name: 'declaration', query: route.query })"
+                    />
                     <h1 class="sub-title">Declaration</h1>
                 </div>
                 <div style="display: flex; flex-direction: column">
@@ -37,11 +40,16 @@
                     <div class="declaration-inputs prefix">
                         <HoursForm
                             deletable
-                            :model-value="ongoingDeclaration"
-                            @update:model-value="(index, value) => (ongoingDeclaration[index].hours = value)"
+                            :model-value="weeklyDeclaration"
+                            @update:model-value="(index, value) => (weeklyDeclaration[index].hours = value)"
                             @remove="
                                 (projectId, _) => {
-                                    userStore.setFavorite(projectId, false);
+                                    () => {
+                                        const userId = userStore.userIdGetter;
+                                        if (userId !== undefined) {
+                                            declarationStore.setFavorite(projectId, false, userId);
+                                        }
+                                    };
                                 }
                             "
                         />
@@ -72,11 +80,10 @@
                         </div>
                         <div class="table-raw-gap" />
                         <div class="footer-buttons">
-                            <fluent-button disabled> Save draft</fluent-button>
                             <BaseButton
                                 accent
                                 :disabled="sumProjectHours != 35 || loading"
-                                @click="validateDeclaration"
+                                @click="confirmationModal = true"
                             >
                                 <template #default> <span> Validate</span> </template>
                                 <template v-if="loading" #start>
@@ -97,7 +104,7 @@
                         <div class="table-legend">
                             <span class="table-cell"></span>
                             <span
-                                v-for="declaration in userStore.getElementaryDeclaration"
+                                v-for="declaration in declarationStore.getElementaryDeclaration"
                                 :key="declaration.projectId"
                                 class="table-cell"
                             >
@@ -105,7 +112,10 @@
                                     clickable
                                     @click="
                                         () => {
-                                            userStore.setFavorite(declaration.projectId, false);
+                                            const userId = userStore.userIdGetter;
+                                            if (userId !== undefined) {
+                                                declarationStore.setFavorite(declaration.projectId, false, userId);
+                                            }
                                         }
                                     "
                                 />
@@ -123,7 +133,7 @@
                         >
                             <span class="table-cell">{{ workDays[day] }}</span>
                             <span
-                                v-for="declaration in userStore.dailyHoursSpend[day]"
+                                v-for="declaration in dailyDeclarationHours[day]"
                                 :key="declaration.name"
                                 class="table-cell"
                             >
@@ -158,8 +168,11 @@
                     </div>
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
-                        <fluent-button disabled> Save draft</fluent-button>
-                        <BaseButton accent :disabled="sumProjectHours != 35 || loading" @click="validateDeclaration">
+                        <BaseButton
+                            accent
+                            :disabled="sumProjectHours != 35 || loading"
+                            @click="confirmationModal = true"
+                        >
                             <template #default> <span> Validate</span> </template>
                             <template v-if="loading" #start>
                                 <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
@@ -172,9 +185,31 @@
                 <div>Oh ! There is something wrong with the declaration week</div>
             </template>
         </div>
-        <RouterView />
     </div>
     <ModalAddFavorites v-if="addFavoritesModal" @close="addFavoritesModal = false" />
+    <DeclConfirmationModal
+        v-if="yearNumber !== undefined && weekNumber !== undefined && confirmationModal"
+        :comment="comment"
+        :declaration="weeklyDeclaration"
+        :year="yearNumber"
+        :week-number="weekNumber"
+        :user-id="userId"
+        :close-route="route"
+    />
+    <ModalHoursView
+        v-if="userId !== undefined && dayNumber !== undefined && yearNumber !== undefined && weekNumber !== undefined"
+        :day="dayNumber"
+        :year="yearNumber"
+        :week="weekNumber"
+        :user-id="userId"
+        :day-declaration="dailyDeclarationHours[dayNumber]"
+        @close="
+            () => {
+                refreshbufferValues(weekNumber, yearNumber, userId);
+                router.push({ name: 'declarationDate', query: route.query });
+            }
+        "
+    />
 </template>
 
 <script setup lang="ts">
@@ -191,8 +226,11 @@ import {
     type InputMethod,
     workDayKeys,
     workDays,
+    type DailyDeclaration,
+    type days,
 } from "@/typing";
 import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
@@ -200,12 +238,20 @@ import { hoursRegistration } from "@/API/requests";
 import BaseButton from "@/components/BaseButton.vue";
 import { useGlobalStore } from "@/stores/globalStore";
 import { initialization } from "@/utilities/initialization";
+import { getBufferTable } from "@/API/requests";
+import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
+import { cloneDeep } from "lodash";
+import { useProjectStore } from "../../stores/projectStore";
+import { rawBuffersToDailyDeclaration } from "@/API/conversions";
+import ModalHoursView from "@/views/declaration/ModalHoursView.vue";
+import { dayValidation } from "../../utilities/main";
 
 const addFavoritesModal = ref(false);
 const router: Router = useRouter();
 const route: RouteLocationNormalizedLoaded = useRoute();
 const globalstore = useGlobalStore();
 const userStore = useUserStore();
+const declarationStore = useDeclarationStore();
 const weekNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.week)
         ? undefined
@@ -220,52 +266,136 @@ const yearNumber = computed<number | undefined>(() => {
         ? undefined
         : Number(route.params.year);
 });
-
+const dayNumber = computed<days | undefined>(() => {
+    return dayValidation(route.params.day);
+});
+const confirmationModal = ref<boolean>(false);
 const comment = ref<string | undefined>();
+const userId = userStore.userIdGetter;
+if (userId === undefined) throw Error("no user Logged");
 
-const ongoingDeclaration = ref<DeclarationInput[]>(userStore.getElementaryDeclaration);
-const defaultDeclaration = computed<DeclarationInput[]>(() => userStore.getElementaryDeclaration);
+const weeklyDeclaration = ref<DeclarationInput[]>(declarationStore.getElementaryDeclaration);
 
+const dailyDeclarationHours = ref<DailyDeclaration>([
+    cloneDeep(declarationStore.getElementaryDeclaration),
+    cloneDeep(declarationStore.getElementaryDeclaration),
+    cloneDeep(declarationStore.getElementaryDeclaration),
+    cloneDeep(declarationStore.getElementaryDeclaration),
+    cloneDeep(declarationStore.getElementaryDeclaration),
+]);
+const projectStore = useProjectStore();
+const defaultDeclaration = computed<DeclarationInput[]>(() => declarationStore.getElementaryDeclaration);
 const loading = ref<boolean>(false);
-
+function refreshbufferValues(week: number | undefined, year: number | undefined, userID: number) {
+    if (week !== undefined && year !== undefined) {
+        getBufferTable(userID, week, year).then((value) => {
+            dailyDeclarationHours.value = rawBuffersToDailyDeclaration(
+                value.data,
+                dailyDeclarationHours.value,
+                week,
+                year
+            );
+        });
+    }
+}
+refreshbufferValues(weekNumber.value, yearNumber.value, userId);
 watch(defaultDeclaration, (value) => {
     const newDeclaration = value;
     newDeclaration.forEach((val) => {
-        const index = ongoingDeclaration.value.findIndex((dec) => dec.projectId === val.projectId);
+        const index = weeklyDeclaration.value.findIndex((dec) => dec.projectId === val.projectId);
         if (index != -1) {
-            val.hours = ongoingDeclaration.value[index].hours;
+            val.hours = weeklyDeclaration.value[index].hours;
         }
     });
-    ongoingDeclaration.value = newDeclaration;
+    weeklyDeclaration.value = newDeclaration;
 });
+
 const methodSelected = ref<InputMethod>(
     route.query.method === "weekly" ? "weekly" : route.query.method === "daily" ? "daily" : "weekly"
 );
 
 watch(methodSelected, (method) => {
-    router.push({ path: route.path, query: { method: method } });
+    router.push({ path: route.path, query: { ...route.query, method: method } });
 });
 
 const sumProjectHours = computed<number>(() => {
     let total: number = 0;
     if (methodSelected.value === "weekly") {
-        ongoingDeclaration.value.forEach((declaration) => {
+        weeklyDeclaration.value.forEach((declaration) => {
             total += Number(declaration.hours);
         });
     } else if (methodSelected.value === "daily") {
-        total = userStore.getDailyDeclarationTotal;
+        total += dailyDeclarationHours.value[0].reduce<number>((sum, declaration) => {
+            return sum + declaration.hours;
+        }, 0);
+        total += dailyDeclarationHours.value[1].reduce<number>((sum, declaration) => {
+            return sum + declaration.hours;
+        }, 0);
+        total += dailyDeclarationHours.value[2].reduce<number>((sum, declaration) => {
+            return sum + declaration.hours;
+        }, 0);
+        total += dailyDeclarationHours.value[3].reduce<number>((sum, declaration) => {
+            return sum + declaration.hours;
+        }, 0);
+        total += dailyDeclarationHours.value[4].reduce<number>((sum, declaration) => {
+            return sum + declaration.hours;
+        }, 0);
+        return total;
     }
     return total;
 });
-
+const getDailyDeclarationToWeekly = computed<DeclarationInput[]>(() => {
+    const declarationInput: DeclarationInput[] = cloneDeep(declarationStore.getElementaryDeclaration);
+    dailyDeclarationHours.value[0].forEach((declaration, index) => {
+        declarationInput[index].hours += declaration.hours;
+    }, 0);
+    dailyDeclarationHours.value[1].forEach((declaration, index) => {
+        declarationInput[index].hours += declaration.hours;
+    }, 0);
+    dailyDeclarationHours.value[2].forEach((declaration, index) => {
+        declarationInput[index].hours += declaration.hours;
+    }, 0);
+    dailyDeclarationHours.value[3].forEach((declaration, index) => {
+        declarationInput[index].hours += declaration.hours;
+    }, 0);
+    dailyDeclarationHours.value[4].forEach((declaration, index) => {
+        declarationInput[index].hours += declaration.hours;
+    }, 0);
+    return declarationInput;
+});
+const favorites = computed<Set<number>>(() => declarationStore.favorites);
+watch(favorites.value, (newValue) => {
+    projectStore.projects.forEach((project) => {
+        if (newValue.has(project.id)) {
+            if (dailyDeclarationHours.value[0].findIndex((decl) => decl.projectId === project.id) === -1) {
+                dailyDeclarationHours.value[0].push({ hours: 0, projectId: project.id, name: project.name });
+                dailyDeclarationHours.value[1].push({ hours: 0, projectId: project.id, name: project.name });
+                dailyDeclarationHours.value[2].push({ hours: 0, projectId: project.id, name: project.name });
+                dailyDeclarationHours.value[3].push({ hours: 0, projectId: project.id, name: project.name });
+                dailyDeclarationHours.value[4].push({ hours: 0, projectId: project.id, name: project.name });
+            } else {
+                // throw new Error("project has not been found");
+            }
+        }
+    });
+    dailyDeclarationHours.value[0].forEach((decl, i) => {
+        if (!newValue.has(decl.projectId)) {
+            dailyDeclarationHours.value[0].splice(i, 1);
+            dailyDeclarationHours.value[1].splice(i, 1);
+            dailyDeclarationHours.value[2].splice(i, 1);
+            dailyDeclarationHours.value[3].splice(i, 1);
+            dailyDeclarationHours.value[4].splice(i, 1);
+        }
+    });
+});
 async function validateDeclaration() {
     loading.value = true;
     globalstore.notification.display = false;
     let sendedDeclaration: DeclarationInput[] | undefined;
     if (methodSelected.value === "daily") {
-        sendedDeclaration = userStore.getDailyDeclarationToWeekly;
+        sendedDeclaration = getDailyDeclarationToWeekly.value;
     } else if (methodSelected.value === "weekly") {
-        sendedDeclaration = ongoingDeclaration.value;
+        sendedDeclaration = weeklyDeclaration.value;
     } else {
         throw Error("no input method Selected");
     }
@@ -285,14 +415,15 @@ async function validateDeclaration() {
             globalstore.notification.content = "Declaration has been registered";
             globalstore.notification.type = "SUCCESS";
             globalstore.notification.display = true;
-            router.push({ name: "declaration" });
+            router.push({ name: "declaration", query: route.query });
         }
         initialization();
     }
     loading.value = false;
 }
 const valideRoute = computed<boolean>(
-    () => userStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
+    () =>
+        declarationStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
 );
 </script>
 

@@ -1,7 +1,7 @@
 <template>
     <Teleport to=".global">
         <div class="modal">
-            <div ref="target" class="modal-container column-flex">
+            <div ref="target" class="modal-container">
                 <slot> </slot>
             </div>
         </div>

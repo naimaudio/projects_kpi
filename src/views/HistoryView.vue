@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import { computed } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
@@ -45,13 +45,13 @@ const commentHeaders: Header[] = [
         width: "3fr",
     },
 ];
-const userStore = useUserStore();
+const declarationStore = useDeclarationStore();
 const declarations = computed(() => {
-    return userStore.getDeclarations;
+    return declarationStore.getDeclarations;
 });
 
 const comments = computed(() => {
-    return userStore.records.map((record) => {
+    return declarationStore.records.map((record) => {
         return { ...record, comment: record.comment === undefined ? "" : record.comment };
     });
 });
