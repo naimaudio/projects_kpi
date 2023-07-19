@@ -68,14 +68,14 @@
 
 .modal-container {
     position: fixed;
-    top: 50%;
+    top: 60px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0%);
     background-color: white;
     border-radius: var(--card-border-radius);
     max-width: 90%;
     max-height: 90%;
-    overflow: auto;
+    overflow: visible;
     box-shadow: 0 0 8px rgba(0,0,0,0.12), 0 32px 64px rgba(0,0,0,0.14);
     padding: 44px;
 }
@@ -124,6 +124,10 @@
   gap: 14px;
 }
 
+.footer-buttons-block {
+  margin-top: 30px;
+  margin-left: 90%;
+}
 .no-selection {
   user-select: none; /* standard syntax */
   -webkit-user-select: none; /* webkit (safari, chrome) browsers */
