@@ -1,10 +1,10 @@
 <template>
     <div class="page-container">
         <h1 class="title">Projects</h1>
-        <div v-if="userStore.getUserProjects.length !== 0">
+        <div v-if="declarationStore.getUserProjects.length !== 0">
             <BaseTable
                 :headers="headers"
-                :items="userStore.getUserProjects"
+                :items="declarationStore.getUserProjects"
                 clickable-row
                 @change="change"
                 @row-click="rowClickHandler"
@@ -23,10 +23,11 @@
 
 <script setup lang="ts">
 import BaseTable from "@/components/BaseTable.vue";
-import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import type { UserProject } from "@/typing/project";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { useUserStore } from "../stores/userStore";
 
 const router = useRouter();
 const headers: Header[] = [
@@ -36,16 +37,17 @@ const headers: Header[] = [
     { name: "Personal time (h)", id: "time_spend", filterable: false },
     { name: "Fav", id: "favorite", filterable: false, width: "80px" },
 ];
+const declarationStore = useDeclarationStore();
 const userStore = useUserStore();
-
 function change<K extends keyof UserProject>(id: number, field: K, value: UserProject[K]) {
-    if (field === "favorite" && typeof value === "boolean") {
-        userStore.setFavorite(id, value);
+    const userId = userStore.userIdGetter;
+    if (field === "favorite" && typeof value === "boolean" && userId !== undefined) {
+        declarationStore.setFavorite(id, value, userId);
     }
 }
-
+const route = useRoute();
 function rowClickHandler(id: number) {
-    router.push({ name: "project", params: { projectId: id } });
+    router.push({ name: "project", params: { projectId: id }, query: route.query });
 }
 </script>
 <style></style>

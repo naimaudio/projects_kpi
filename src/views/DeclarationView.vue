@@ -21,7 +21,14 @@
                 <div v-for="week in weeks" :key="week.week" class="raw-container">
                     <BaseButton
                         style="width: 81px"
-                        @click="() => router.push({ path: `/declare/${week.week}/${week.year}` })"
+                        @click="
+                            () =>
+                                router.push({
+                                    name: 'declarationDate',
+                                    params: { week: week.week, year: week.year },
+                                    query: route.query,
+                                })
+                        "
                         >Week {{ week.week }}
                     </BaseButton>
                     <span
@@ -62,13 +69,16 @@
 import dayjs from "dayjs";
 
 import { range, weekNumberToString } from "@/utilities/main";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import BaseButton from "@/components/BaseButton.vue";
 import type { WeekInYear } from "@/typing/project";
-import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 import { ref, watch, computed } from "vue";
+import { useUserStore } from "@/stores/userStore";
 const router = useRouter();
+const route = useRoute();
+const declarationStore = useDeclarationStore();
 const userStore = useUserStore();
 // Les flows :
 // 1 date de début => Toutes les semaines d'après doivent être renseignées
@@ -76,7 +86,6 @@ const userStore = useUserStore();
 
 const now = dayjs(new Date());
 const currentWeek: WeekInYear = { week: now.week(), year: now.get("year") };
-
 function buildDeclarations(
     weeksDeclared: WeekInYear[],
     firstWeekToDeclare: WeekInYear,
@@ -117,7 +126,7 @@ function buildDeclarations(
     return declarationsToInput;
 }
 const weeksDeclared = computed<WeekInYear[]>(() => {
-    return userStore.weeksDeclared;
+    return declarationStore.weeksDeclared;
 });
 const currentMode = ref<"IN_ADVANCE" | "LATE">("LATE");
 watch(currentMode, (value) => {
@@ -129,7 +138,7 @@ watch(weeksDeclared, () => {
 function updateWeeks(value: "IN_ADVANCE" | "LATE") {
     if (value === "LATE") {
         weeks.value = buildDeclarations(
-            userStore.weeksDeclared,
+            declarationStore.weeksDeclared,
             {
                 year: dayjs(userStore.user?.firstDeclarationDay).get("year"),
                 week: dayjs(userStore.user?.firstDeclarationDay).week(),
@@ -138,7 +147,7 @@ function updateWeeks(value: "IN_ADVANCE" | "LATE") {
         );
     } else if (value === "IN_ADVANCE") {
         weeks.value = buildDeclarations(
-            userStore.weeksDeclared,
+            declarationStore.weeksDeclared,
             {
                 year: currentWeek.year,
                 week: currentWeek.week + 1,
@@ -153,7 +162,7 @@ function updateWeeks(value: "IN_ADVANCE" | "LATE") {
 
 const weeks = ref<WeekInYear[]>(
     buildDeclarations(
-        userStore.weeksDeclared,
+        declarationStore.weeksDeclared,
         {
             year: dayjs(userStore.user?.firstDeclarationDay).get("year"),
             week: dayjs(userStore.user?.firstDeclarationDay).week(),

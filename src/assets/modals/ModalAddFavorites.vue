@@ -15,11 +15,12 @@
 
 <script setup lang="ts">
 import BaseTable from "@/components/BaseTable.vue";
-import { useUserStore } from "@/stores/userStore";
+import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import { type SelectableProject } from "@/typing/project";
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import { useUserStore } from "../../stores/userStore";
 const emit = defineEmits<{
     (event: "close"): void;
 }>();
@@ -29,7 +30,7 @@ const change = (id: number, field: string, value: string | number | boolean | un
         selectionableProjects.value[index][field] = value;
     }
 };
-const userStore = useUserStore();
+const declarationStore = useDeclarationStore();
 const headers: Header[] = [
     {
         id: "selected",
@@ -50,8 +51,9 @@ const headers: Header[] = [
         width: "2fr",
     },
 ];
+const userStore = useUserStore();
 const target = ref(null);
-const projects = userStore.getUserProjects;
+const projects = declarationStore.getUserProjects;
 const selectionableProjects = ref<SelectableProject[]>(
     projects
         .filter((project) => project.favorite === false)
@@ -59,12 +61,15 @@ const selectionableProjects = ref<SelectableProject[]>(
             return { ...project, selected: false };
         })
 );
+const userId = userStore.userIdGetter;
 const addFavoriteProjects = () => {
-    selectionableProjects.value
-        .filter((p) => p.selected)
-        .forEach((p) => {
-            userStore.setFavorite(p.id, true);
-        });
+    if (userId !== undefined) {
+        selectionableProjects.value
+            .filter((p) => p.selected)
+            .forEach((p) => {
+                declarationStore.setFavorite(p.id, true, userId);
+            });
+    }
     emit("close");
 };
 

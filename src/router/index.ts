@@ -3,13 +3,12 @@ const DeclarationView = () => import("@/views/DeclarationView.vue");
 const ProjectsView = () => import("@/views/ProjectsView.vue");
 const ProfileView = () => import("@/views/ProfileView.vue");
 const HistoryView = () => import("@/views/HistoryView.vue");
-const ModalHoursView = () => import("@/views/declaration/ModalHoursView.vue");
 const HoursView = () => import("@/views/declaration/HoursView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
 const ProjectView = () => import("@/views/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
 
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,16 +28,14 @@ const router = createRouter({
                     component: DeclarationView,
                 },
                 {
+                    path: "/declare/:week/:year/:day",
+                    name: "dayDeclaration",
+                    component: HoursView,
+                },
+                {
                     path: "/declare/:week/:year",
                     name: "declarationDate",
                     component: HoursView,
-                    children: [
-                        {
-                            path: ":day",
-                            name: "dayDeclaration",
-                            component: ModalHoursView,
-                        },
-                    ],
                 },
                 {
                     path: "/history",
@@ -74,6 +71,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     const authStore = useAuthStore();
+
     if (to.name !== "login" && authStore.msalInstance?.getAllAccounts().length === 0) {
         return router.push({ name: "login" });
     }
