@@ -122,7 +122,7 @@
                             >
                         </div>
                         <div
-                            v-for="day in workDayKeys"
+                            v-for="day in dayNumbers"
                             :key="day"
                             class="table-column"
                             @click="(event:MouseEvent) => {
@@ -237,10 +237,10 @@ import {
     inputMethodKeys,
     type DeclarationInput,
     type InputMethod,
-    workDayKeys,
+    dayNumbers,
     workDays,
     type DailyDeclaration,
-    type days,
+    type dayNb,
 } from "@/typing";
 import { useUserStore } from "@/stores/userStore";
 import { useDeclarationStore } from "@/stores/declarationStore";
@@ -274,7 +274,7 @@ const yearNumber = computed<number | undefined>(() => {
         ? undefined
         : Number(route.params.year);
 });
-const dayNumber = computed<days | undefined>(() => {
+const dayNumber = computed<dayNb | undefined>(() => {
     return dayValidation(route.params.day);
 });
 const confirmationModal = ref<boolean>(false);

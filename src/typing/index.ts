@@ -27,13 +27,13 @@ export interface DeclarationInput {
 export const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics", "Project Management"] as const;
 export type domain = (typeof domains)[number];
 
-export type DailyDeclaration = Record<days, DeclarationInput[]>;
+export type DailyDeclaration = Record<dayNb, DeclarationInput[]>;
 
-export const workDayKeys = [0, 1, 2, 3, 4] as const;
-export type days = (typeof workDayKeys)[number];
+export const dayNumbers = [0, 1, 2, 3, 4] as const;
+export type dayNb = (typeof dayNumbers)[number];
 
 export type role = "Employee" | "Business Manager" | "Project Manager";
-export const workDays: Record<days, string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
+export const workDays: Record<dayNb, string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
 export interface ChangeEvent {
     target: { value: string; currentChecked: boolean };

@@ -1,5 +1,5 @@
 const now = new Date();
-import type { days } from "@/typing";
+import type { dayNb } from "@/typing";
 import { parse, format } from "date-fns";
 
 /**
@@ -25,7 +25,7 @@ export const weekNumberToString = (weekNumber: number, year: number) => {
     }
 };
 
-export const dayValidation = (day: string | string[]): days | undefined => {
+export const dayValidation = (day: string | string[]): dayNb | undefined => {
     const dayNb = Number(day);
     return dayNb === 0 || dayNb === 1 || dayNb === 2 || dayNb === 3 || dayNb === 4 ? dayNb : undefined;
 };
@@ -36,7 +36,7 @@ export const dayValidation = (day: string | string[]): days | undefined => {
  * @param weekNumber week Number (starting at one)
  * @param year year Number
  */
-export const dayNumberToDayDate = (day: days, weekNumber: number, year: number) => {
+export const dayNumberToDayDate = (day: dayNb, weekNumber: number, year: number) => {
     const dayDate: Date = parse(`${year}-${weekNumber}-${((day + 1) % 7) + 1}`, "Y-w-e", now);
     return format(dayDate, "yyyy-MM-dd");
 };
@@ -47,7 +47,7 @@ export const dayNumberToDayDate = (day: days, weekNumber: number, year: number) 
  * @param weekNumber week Number (starting at one)
  * @param year year Number
  */
-export const dayNumberToString = (day: days, weekNumber: number, year: number) => {
+export const dayNumberToString = (day: dayNb, weekNumber: number, year: number) => {
     const dayDate: Date = parse(`${year}-${weekNumber}-${day + 1}`, "Y-w-e", now);
     return format(dayDate, "MMMM d, yyyy");
 };

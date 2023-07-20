@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import HoursForm from "@/components/input_hours/HoursForm.vue";
-import type { days } from "@/typing";
+import type { dayNb } from "@/typing";
 import type { DeclarationInput } from "@/typing";
 import { dayNumberToString } from "@/utilities/main";
 import { ref } from "vue";
@@ -51,13 +51,13 @@ const props = defineProps<{
     userId: number;
     week: number;
     year: number;
-    day: days;
+    day: dayNb;
 }>();
 
 const onGoingDayDeclaration = ref<DeclarationInput[]>(cloneDeep(props.dayDeclaration));
 const loading = ref<boolean>(false);
 const emits = defineEmits<{
-    (event: "change", day: days, declarationIndex: number, value: number): void;
+    (event: "change", day: dayNb, declarationIndex: number, value: number): void;
     (event: "close"): void;
 }>();
 

@@ -1,4 +1,4 @@
-import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, days } from "@/typing";
+import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, dayNb } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
@@ -133,7 +133,7 @@ export async function putDomain(userId: number, domain: domain) {
 export async function postBufferTable(
     userId: number,
     timeSpendByProject: { projectId: number; hours: number }[],
-    day: days,
+    day: dayNb,
     week: number,
     year: number
 ): Promise<SimplifiedResponse<any>> {
