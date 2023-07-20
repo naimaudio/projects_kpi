@@ -18,9 +18,9 @@
                 />
             </span>
             <div v-if="weeks.length !== 0" class="column-container">
-                <div v-for="week in weeks" :key="week.week" class="raw-container">
+                <span v-for="week in weeks" :key="week.week">
                     <BaseButton
-                        style="width: 81px"
+                        style="width: 81px; display: inline"
                         @click="
                             () =>
                                 router.push({
@@ -32,13 +32,13 @@
                         >Week {{ week.week }}
                     </BaseButton>
                     <span
-                        class="text"
                         :class="{
                             'warning-color':
                                 currentWeek.year === week.year
                                     ? currentWeek.week > week.week
                                     : currentWeek.year > week.year,
                         }"
+                        style="margin-left: 10px"
                     >
                         <ErrorIcon
                             v-if="
@@ -46,10 +46,11 @@
                                     ? currentWeek.week > week.week
                                     : currentWeek.year > week.year
                             "
+                            style="vertical-align: middle"
                         />
                         {{ weekNumberToString(week.week, week.year) }}</span
                     >
-                </div>
+                </span>
             </div>
             <span v-if="weeks.length !== 0" style="font-size: large">Or</span>
             <span v-else style="font-size: large">You can</span>
@@ -190,10 +191,5 @@ const changeWeeks = (mode: "IN_ADVANCE" | "LATE") => {
 
 .warning-color {
     color: #797673;
-}
-
-.text {
-    display: flex;
-    gap: var(--gap-inline);
 }
 </style>

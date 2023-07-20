@@ -9,6 +9,7 @@ import type {
     RawBufferRecord,
     DailyDeclaration,
 } from "@/typing";
+import { domains } from "@/typing";
 import type { Project } from "@/typing/project";
 import type { RawProject } from "@/typing/project";
 import dayjs from "dayjs";
@@ -25,8 +26,9 @@ export function userFromRaw(rawUser: RawUser): User {
     };
 }
 export const stringToDomain = (str: string): domain => {
-    if (str === "Acoustics" || str === "Tests" || str === "Hardware" || str === "Software" || str === "Mechanics") {
-        return str;
+    const domainStr = str as domain;
+    if (domains.includes(domainStr)) {
+        return domainStr;
     } else {
         throw Error("given string is not a domain");
     }
@@ -106,7 +108,7 @@ export function rawBuffersToDailyDeclaration(
         if (date.week() === week && date.get("year") === year) {
             const i = newDailyDeclaration[0].findIndex((decl) => decl.projectId === rawBuf.project_id);
             const day = (date.get("day") - 1) % 7;
-            if ((i !== -1 && day === 0) || day === 1 || day === 2 || day === 3 || day === 4) {
+            if (i !== -1 && (day === 0 || day === 1 || day === 2 || day === 3 || day === 4)) {
                 newDailyDeclaration[day][i].hours = rawBuf.daily_hours;
             }
         }

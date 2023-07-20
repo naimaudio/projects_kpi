@@ -1,15 +1,21 @@
 <template>
-    <ModalComponent :close-route="{ name: 'declarationDate', year: String(props.year), week: String(props.week) }">
-        <span class="sub-title">{{ workDays[props.day] }}</span>
-        <span
-            >Hours spend on projects
-            {{ dayNumberToString(props.day, Number(route.params.week), Number(route.params.year)) }}</span
-        >
+    <ModalComponent
+        :close-route="{
+            name: 'declarationDate',
+            params: { year: String(props.year), week: String(props.week) },
+            query: route.query,
+        }"
+    >
+        <p class="sub-title">{{ workDays[props.day] }}</p>
+        <p>
+            Hours spend on projects
+            {{ dayNumberToString(props.day, Number(route.params.week), Number(route.params.year)) }}
+        </p>
         <HoursForm
             :model-value="props.dayDeclaration"
             @update:model-value="(index, value) => (onGoingDayDeclaration[index].hours = value)"
         />
-        <div class="footer-buttons">
+        <div class="footer-buttons-block">
             <BaseButton accent :disabled="loading" @click="validation">
                 <template #default> <span> Validate</span> </template>
                 <template v-if="loading" #start>

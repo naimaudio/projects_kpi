@@ -12,13 +12,6 @@
                 </svg>
                 Sign in with Microsoft
             </button>
-
-            <div class="divider-soft" />
-            <fluent-text-field>Username</fluent-text-field>
-            <fluent-text-field>Password</fluent-text-field>
-            <div class="footer-buttons">
-                <fluent-button class="larger-button" appearance="accent">Connect</fluent-button>
-            </div>
         </div>
     </div>
     <Transition name="fade">

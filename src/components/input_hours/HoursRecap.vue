@@ -5,9 +5,7 @@
             <span>Hours</span>
         </div>
         <div v-for="declaration in filteredDeclarations" :key="declaration.name" class="table-raw-container">
-            <div class="raw-container">
-                <span class="align-center">{{ declaration.name }}</span>
-            </div>
+            <span class="align-center">{{ declaration.name }}</span>
             <div style="width: 100px">
                 <span>{{ declaration.hours }}</span>
             </div>

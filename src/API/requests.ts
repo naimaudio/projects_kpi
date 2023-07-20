@@ -1,4 +1,4 @@
-import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse } from "@/typing";
+import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, days } from "@/typing";
 import type { RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";

@@ -46,7 +46,7 @@ import { useRoute } from "vue-router";
 
 const names: [string, string][] = [
     ["Declare hours", "/declare"],
-    ["Declaration history", "/history"],
+    ["History", "/history"],
     ["Projects", "/projects"],
 ];
 
@@ -68,10 +68,10 @@ const closeNotif = async () => {
 <style scoped>
 #sidebar {
     position: fixed;
-    top: 80px;
+    top: var(--header-height);
     left: 0;
     bottom: 0;
-    width: 280px;
+    width: 200px;
     background-color: white;
     border-right: 1px solid #e6e6e6;
 }
@@ -83,7 +83,7 @@ const closeNotif = async () => {
     top: 0;
     left: 0;
     right: 0;
-    height: 80px;
+    height: var(--header-height);
     background-color: white;
     border-right: 1px solid #e6e6e6;
     box-shadow: rgb(15, 108, 189) 0px 0px 4px -2px;
@@ -91,8 +91,8 @@ const closeNotif = async () => {
 
 #main-section {
     position: fixed;
-    left: 282px;
-    top: 80px;
+    left: 202px;
+    top: var(--header-height);
     bottom: 0;
     right: 0;
     background-color: white;
@@ -110,7 +110,8 @@ const closeNotif = async () => {
 .avatar-container {
     display: flex;
     justify-content: center;
-    padding: 20px;
+    height: var(--header-height);
+    padding: 0 15px;
     text-decoration: none;
     color: black;
 }
@@ -128,7 +129,7 @@ const closeNotif = async () => {
     text-decoration: none;
     display: block;
     color: black;
-    padding: 6px 36px 6px 36px;
+    padding: 6px 20px 6px 20px;
     border-radius: 5px;
 }
 

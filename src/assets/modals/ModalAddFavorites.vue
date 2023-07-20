@@ -1,16 +1,12 @@
 <template>
-    <Teleport to=".global">
-        <div class="modal">
-            <div ref="target" class="modal-container column-flex">
-                <span class="sub-title">Favorites</span>
-                <span>Please select projects you have spend time in</span>
-                <BaseTable style="width: 100%" :headers="headers" :items="selectionableProjects" @change="change" />
-                <div class="footer-buttons">
-                    <fluent-button appearance="accent" @click="addFavoriteProjects">Add favorites</fluent-button>
-                </div>
-            </div>
+    <ModalComponent @close="emit('close')">
+        <p class="sub-title">Favorites</p>
+        <p>Please select projects you have spend time in</p>
+        <BaseTable style="width: 100%" :headers="headers" :items="selectionableProjects" @change="change" />
+        <div class="footer-buttons-block">
+            <fluent-button appearance="accent" @click="addFavoriteProjects">Add favorites</fluent-button>
         </div>
-    </Teleport>
+    </ModalComponent>
 </template>
 
 <script setup lang="ts">
@@ -21,6 +17,7 @@ import { type SelectableProject } from "@/typing/project";
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useUserStore } from "../../stores/userStore";
+import ModalComponent from "@/components/ModalComponent.vue";
 const emit = defineEmits<{
     (event: "close"): void;
 }>();

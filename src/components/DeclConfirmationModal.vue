@@ -1,10 +1,9 @@
 <template>
-    <ModalComponent :close-route="closeRoute">
-        <span>You will not be able to update the following informations latter :</span>
-        <div class="table-raw-gap" />
+    <ModalComponent @close="() => emits('close')">
+        <span class="sub-title">Week {{ weekNumber }}</span>
+        <p>Please confirm the declaration for the week {{ props.weekNumber }} of {{ props.year }}.</p>
         <div class="table-raw-gap" />
         <div class="declaration-container column-flex">
-            <span class="sub-title">Week {{ weekNumber }}</span>
             <div class="declaration-inputs prefix">
                 <HoursRecap deletable :model-value="props.declaration" />
                 <div class="table-raw-gap" />
@@ -24,6 +23,8 @@
                 </div>
             </div>
         </div>
+        <div class="table-raw-gap" />
+        <p>You will not be able to update this informations latter.</p>
         <div class="footer-buttons-block">
             <BaseButton accent :disabled="sumProjectHours != 35 || loading" @click="validateDeclaration">
                 <template #default> <span> Validate</span> </template>
@@ -59,6 +60,10 @@ const sumProjectHours = computed<number>(() => {
     return props.declaration.reduce<number>((sum, decl) => decl.hours + sum, 0);
 });
 
+const emits = defineEmits<{
+    (event: "close"): void;
+}>();
+
 const loading = ref<boolean>(false);
 const router = useRouter();
 async function validateDeclaration() {
@@ -91,7 +96,7 @@ async function validateDeclaration() {
     border: 1px solid #d1d1d1;
     border-radius: 4px;
     background-color: white;
-    padding: 30px 44px 30px 30px;
+    padding: 14px 44px 10px 30px;
 
     color: #242424;
     box-shadow: 0 2px 4px #00000024, 0 0 2px #0000001f;

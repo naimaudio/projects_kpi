@@ -1,6 +1,7 @@
 <template>
     <div>
         <fluent-search v-model="search" style="width: 100%"></fluent-search>
+        <p />
         <div
             class="table-headers"
             :style="{

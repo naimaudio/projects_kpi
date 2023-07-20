@@ -21,9 +21,11 @@ export interface DeclarationInput {
     projectId: number;
     name: string;
     hours: number;
+    projectCode?: string;
 }
 
-export type domain = "Acoustics" | "Tests" | "Hardware" | "Software" | "Mechanics";
+export const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics", "Project Management"] as const;
+export type domain = (typeof domains)[number];
 
 export type DailyDeclaration = Record<days, DeclarationInput[]>;
 

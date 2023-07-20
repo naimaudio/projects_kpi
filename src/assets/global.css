@@ -2,7 +2,8 @@
     font-family: 'Segoe UI', 'Segoe UI Web (West European)', Roboto, 'Helvetica Neue', sans-serif;
     --gap-inline: 6px;
     --card-border-radius: 8px;
-    --button-border-radius: 4px
+    --button-border-radius: 4px;
+    --header-height: 70px;
 }
 
 
@@ -57,47 +58,10 @@
     gap: 5px;
 }
 
-.modal {
-    background-color: rgba(0, 0, 0, 0.4);
-    position: absolute;
-    right: 0;
-    left: 0;
-    top: 0;
-    bottom: 0;
-  }
 
-.modal-container {
-    position: fixed;
-    top: 60px;
-    left: 50%;
-    transform: translate(-50%, 0%);
-    background-color: white;
-    border-radius: var(--card-border-radius);
-    max-width: 90%;
-    max-height: 90%;
-    overflow: visible;
-    box-shadow: 0 0 8px rgba(0,0,0,0.12), 0 32px 64px rgba(0,0,0,0.14);
-    padding: 44px;
-}
-
-/* Media Query for Responsive Behavior */
-@media (max-width: 768px) {
-    .modal-container {
-      width: 80%;
-    }
-  }
-  
-@media (min-width: 769px) {
-  .modal-container {
-    width: 50%;
-  }
-}
 
 .svg-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 24px;
   height: 24px;
   border-radius: 100%;
@@ -127,6 +91,7 @@
 .footer-buttons-block {
   margin-top: 30px;
   margin-left: 90%;
+  transform: translateX(-70%);
 }
 .no-selection {
   user-select: none; /* standard syntax */

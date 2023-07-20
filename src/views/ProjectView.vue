@@ -6,7 +6,7 @@
         }"
     >
         <h2>{{ project?.name }}</h2>
-        <div class="parent">
+        <div v-if="user.role === 'Project Manager'" class="parent">
             <span class="label1">Name</span>
             <fluent-text-field class="field1" :value="editedProject?.name"></fluent-text-field>
             <span class="label2">Code</span>
@@ -33,7 +33,13 @@
                 </fluent-option>
             </fluent-select>
         </div>
-        <div class="footer-buttons">
+        <div v-else-if="user.role === 'Employee'" class="parent-employee">
+            <span class="label1">Name</span>
+            <span class="field1">{{ editedProject?.name }}</span>
+            <span class="label2">Code</span>
+            <span class="field2">{{ editedProject?.code }}</span>
+        </div>
+        <div v-if="user.role === 'Project Manager'" class="footer-buttons-block">
             <BaseButton accent>
                 <template #default> <span> Validate</span> </template>
                 <template v-if="false" #start>
@@ -51,8 +57,19 @@ import { computed, ref } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
 import type { Project } from "@/typing/project";
 import BaseButton from "@/components/BaseButton.vue";
+import { useUserStore } from "@/stores/userStore";
+import type { User } from "@/typing/index";
 const route = useRoute();
 const projectStore = useProjectStore();
+const userStore = useUserStore();
+const user = computed<User>(() => {
+    const u = userStore.user;
+    if (u === undefined) {
+        throw Error("no User Logged In");
+    } else {
+        return u;
+    }
+});
 const projectId = computed<number | undefined>(() => {
     const pId: number = Number(route.params["projectId"]);
     return isNaN(pId) ? undefined : pId;
@@ -101,6 +118,15 @@ const editedProject = ref<Project>(find);
     display: grid;
     grid-template-columns: 1fr 3fr;
     grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 10px;
+    width: 100%;
+}
+
+.parent-employee {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: repeat(2, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 10px;
     width: 100%;

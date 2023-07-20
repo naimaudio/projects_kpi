@@ -1,6 +1,7 @@
 <template>
     <button
         class="button"
+        :disabled="props.disabled"
         :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled }"
     >
         <div class="button-inside">

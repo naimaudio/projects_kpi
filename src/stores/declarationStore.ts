@@ -35,13 +35,14 @@ export const useDeclarationStore = defineStore("declaration", () => {
         }, []);
     });
 
-    const getElementaryDeclaration = computed<DeclarationInput[]>(() => {
+    const elementaryDeclarationGetter = computed<DeclarationInput[]>(() => {
         return projectStore.projects.reduce<DeclarationInput[]>((declarations, project) => {
             if (favorites.value.has(project.id)) {
                 declarations.push({
                     name: project.name,
                     hours: 0,
                     projectId: project.id,
+                    projectCode: project.code,
                 });
             }
             return declarations;
@@ -115,7 +116,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
         records,
         favorites,
         getUserProjects,
-        getElementaryDeclaration,
+        elementaryDeclarationGetter,
         setDeclarations,
         weeksDeclared,
         isFavorite,

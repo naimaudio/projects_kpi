@@ -41,6 +41,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import type { domain } from "@/typing";
+import { domains } from "@/typing";
+
 import BaseButton from "@/components/BaseButton.vue";
 import { getDomain, putDomain } from "@/API/requests";
 import { useUserStore } from "@/stores/userStore";
@@ -48,7 +50,6 @@ import { useGlobalStore } from "@/stores/globalStore";
 import dayjs from "dayjs";
 import CalendarEmpty from "@/components/icons/CalendarEmpty.vue";
 
-const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics"];
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
