@@ -28,50 +28,28 @@
 
 <script setup lang="ts">
 import { BrowserAuthError } from "@azure/msal-browser";
-import { useAuthStore } from "@/stores/authStore";
-import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { initialization } from "@/utilities/initialization";
 import { useGlobalStore } from "@/stores/globalStore";
 import NotificationCard from "@/components/NotificationCard.vue";
-const authStore = useAuthStore();
+import { msalInstance } from "@/auth_config/auth";
 const globalStore = useGlobalStore();
 const router = useRouter();
-onMounted(() => {
-    if (authStore.msalInstance !== undefined) {
-        const accounts = authStore.msalInstance.getAllAccounts();
-        if (accounts.length === 0) {
-            return;
-        } else if (accounts.length > 1) {
-            // Add choose account code here
-            console.warn("Multiple accounts detected.");
-        } else {
-            authStore.setAccount(accounts[0]);
-        }
-    }
-});
 
 async function signIn() {
-    if (authStore.msalInstance !== undefined) {
-        await authStore.msalInstance
-            .loginPopup({ scopes: ["User.Read"] })
-            .then((response) => {
-                if (response !== null && authStore.msalInstance !== undefined) {
-                    const myAccounts = authStore.msalInstance.getAllAccounts();
-                    authStore.setAccount(myAccounts[0]);
-                }
-            })
-            .then(() => initialization())
-            .then(() => router.push({ name: "declaration" }))
-            .catch((browserAuthError: BrowserAuthError) => {
-                console.error(browserAuthError);
-                globalStore.notification = {
-                    content: "Oh ! An error occurred during authentication, please contact IT if problem persists",
-                    display: true,
-                    type: "FAILURE",
-                };
-            });
-    }
+    await msalInstance
+        .loginPopup({ scopes: ["User.Read"] })
+
+        .then(() => initialization())
+        .then(() => router.push({ name: "declaration" }))
+        .catch((browserAuthError: BrowserAuthError) => {
+            console.error(browserAuthError);
+            globalStore.notification = {
+                content: "Oh ! An error occurred during authentication, please contact IT if problem persists",
+                display: true,
+                type: "FAILURE",
+            };
+        });
 }
 </script>
 

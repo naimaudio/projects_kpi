@@ -2,8 +2,8 @@
     <div class="page-container">
         <div class="column-flex">
             <h1 class="title">Profile</h1>
-            <span class="sub-title">{{ authStore.accountGetter?.name }}</span>
-            <span class="icon-with-text"><EmailIcon />{{ authStore.accountGetter?.username }}</span>
+            <span class="sub-title">{{ userStore.user?.username }}</span>
+            <span class="icon-with-text"><EmailIcon />{{ userStore.user?.email }}</span>
             <span class="icon-with-text">
                 <CalendarEmpty />
                 <span>
@@ -37,7 +37,6 @@
 
 <script setup lang="ts">
 import EmailIcon from "@/components/icons/EmailIcon.vue";
-import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import type { domain } from "@/typing";
@@ -49,8 +48,8 @@ import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
 import dayjs from "dayjs";
 import CalendarEmpty from "@/components/icons/CalendarEmpty.vue";
+import { msalInstance } from "@/auth_config/auth";
 
-const authStore = useAuthStore();
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
 const router = useRouter();
@@ -64,7 +63,7 @@ if (userId !== undefined) {
     });
 }
 async function disconnect() {
-    authStore.msalInstance?.logoutPopup().then(() => router.push("/"));
+    msalInstance.logoutPopup().then(() => router.push("/"));
 }
 
 async function setDomain(domain: domain | "") {

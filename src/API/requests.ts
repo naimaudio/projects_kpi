@@ -170,3 +170,8 @@ export async function getBufferTable(
     );
     return { status: response.status, data: await response.json() };
 }
+
+export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
+    const response = await fetcher(`${origin}/export-records-csv`);
+    return { status: response.status, data: await response.blob() };
+}

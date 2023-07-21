@@ -25,11 +25,23 @@ export interface DeclarationInput {
 }
 
 export const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics", "Project Management"] as const;
+
 export type domain = (typeof domains)[number];
 
+/**
+ * Used in weekly declaration
+ */
 export type DailyDeclaration = Record<dayNb, DeclarationInput[]>;
 
 export const dayNumbers = [0, 1, 2, 3, 4] as const;
+
+/**
+ * 0: Monday
+ * 1: Tuesday
+ * 2: Wednesday
+ * 3: Thursday
+ * 4: Friday
+ */
 export type dayNb = (typeof dayNumbers)[number];
 
 export type role = "Employee" | "Business Manager" | "Project Manager";

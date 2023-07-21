@@ -1,5 +1,3 @@
-import { PublicClientApplication } from "@azure/msal-browser";
-import { useAuthStore } from "@/stores/authStore";
 import { useProjectStore } from "@/stores/projectStore";
 import { useUserStore } from "@/stores/userStore";
 
@@ -9,27 +7,24 @@ import type { SimplifiedResponse } from "@/typing/index";
 import { declarationsFromRaw } from "@/API/conversions";
 import { projectsFromRaw, userFromRaw } from "../API/conversions";
 import { useDeclarationStore } from "@/stores/declarationStore";
+import { msalInstance } from "@/auth_config/auth";
 
 export async function initialization() {
     const projectStore = useProjectStore();
     const userStore = useUserStore();
-    const authStore = useAuthStore();
     const declarationStore = useDeclarationStore();
-    const msalInstance = new PublicClientApplication(authStore.msalConfig);
-    authStore.msalInstance = msalInstance;
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length === 1) {
-        authStore.setAccount(accounts[0]);
-
-        await getUser()
-            .then((response) => {
+        if (userStore.user?.email !== accounts[0].username) {
+            await getUser().then((response) => {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
                     userStore.setUser(userFromRaw(response.data));
                 }
-            })
-            .then(() => getProjects())
+            });
+        }
+        await getProjects()
             .then((response: SimplifiedResponse<RawProject[]>) => {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
