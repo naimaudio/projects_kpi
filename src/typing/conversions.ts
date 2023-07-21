@@ -14,6 +14,7 @@ import type { Project } from "@/typing/project";
 import type { RawProject } from "@/typing/project";
 import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
+import { RawProject } from "./project";
 
 export function userFromRaw(rawUser: RawUser): User {
     return {
@@ -49,10 +50,14 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             code: rawProject.project_code,
             division: rawProject.division,
             name: rawProject.project_name,
-            expansion_renewal: rawProject.type,
-            sub_category: rawProject.sub_category,
+            expansionRenewal: rawProject.type,
+            subCategory: rawProject.sub_category,
             classification: rawProject.classification,
             manager: rawProject.project_manager,
+            entity: rawProject.entity,
+            capitalization: rawProject.capitalization,
+            complexity: rawProject.complexity,
+            currentPhase: rawProject.current_phase,
         };
     });
 }

@@ -1,5 +1,5 @@
 import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, dayNb } from "@/typing";
-import type { RawProject } from "@/typing/project";
+import type { Project, RawProject } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
 
@@ -174,4 +174,43 @@ export async function getBufferTable(
 export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
     const response = await fetcher(`${origin}/export-records-csv`);
     return { status: response.status, data: await response.blob() };
+}
+
+export async function updateProject(project: Project) {
+    interface RequestBody {
+        id: number;
+        entity?: string;
+        division?: string;
+        sub_category?: string;
+        classification?: string;
+        type?: string;
+        project_name: string;
+        project_code: string;
+        project_manager: string | null;
+        current_phase?: string;
+        complexity?: number;
+        capitalization?: boolean;
+    }
+    const requestBody: RequestBody = {
+        id: project.id,
+        entity: project.entity,
+        project_code: project.code,
+        project_name: project.name,
+        capitalization: project.capitalization,
+        complexity: project.complexity,
+        classification: project.classification,
+        current_phase: project.currentPhase,
+        division: project.division,
+        project_manager: project.manager,
+        sub_category: project.subCategory,
+        type: project.expansionRenewal,
+    };
+    const response = await fetcher(`${origin}/project`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+    });
+    return { status: response.status, data: await response.json() };
 }

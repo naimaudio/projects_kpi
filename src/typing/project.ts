@@ -79,11 +79,15 @@ export interface Project {
     id: number;
     code: string;
     division: Division;
-    sub_category: SubCategory;
+    subCategory: SubCategory;
     classification: Classification;
-    expansion_renewal: ExpansionRenewal;
-    manager?: number;
+    expansionRenewal: ExpansionRenewal;
+    manager: string | null;
     name: string;
+    entity: string;
+    capitalization: boolean;
+    complexity: number;
+    currentPhase: string;
 }
 
 export interface RawProject {
@@ -93,8 +97,12 @@ export interface RawProject {
     sub_category: SubCategory;
     classification: Classification;
     type: ExpansionRenewal;
-    project_manager?: number;
+    project_manager: string | null;
     project_name: string;
+    entity: string;
+    capitalization: boolean;
+    current_phase: string;
+    complexity: number;
 }
 
 export interface SelectableProject extends UserProject {

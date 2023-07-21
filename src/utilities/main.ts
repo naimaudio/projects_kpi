@@ -52,12 +52,6 @@ export const dayNumberToString = (day: dayNb, weekNumber: number, year: number) 
     return format(dayDate, "MMMM d, yyyy");
 };
 
-export function assertIsNode(e: EventTarget | null): asserts e is Node {
-    if (!e || !("nodeType" in e)) {
-        throw new Error(`Node expected`);
-    }
-}
-
 /**
  * Function range as the python range function
  * @param begining strating of the array
