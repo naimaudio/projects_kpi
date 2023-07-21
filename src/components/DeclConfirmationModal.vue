@@ -26,11 +26,13 @@
         <div class="table-raw-gap" />
         <p>You will not be able to update this informations latter.</p>
         <div class="footer-buttons-block">
-            <BaseButton accent :disabled="sumProjectHours != 35 || loading" @click="validateDeclaration">
-                <template #default> <span> Validate</span> </template>
-                <template v-if="loading" #start>
-                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
-                </template>
+            <BaseButton
+                :loading="loading"
+                accent
+                :disabled="sumProjectHours != 35 || loading"
+                @click="validateDeclaration"
+            >
+                <span> Validate</span>
             </BaseButton>
         </div>
     </ModalComponent>

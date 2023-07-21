@@ -22,15 +22,13 @@
             </fluent-select>
             <BaseButton
                 accent
+                :loading="loading"
                 :disabled="userDomain === '' || loading"
                 appearance="accent"
                 @click="setDomain(userDomain)"
             >
-                <template v-if="loading" #start>
-                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
-                </template>
-                <template #default>Validate</template></BaseButton
-            >
+                Validate
+            </BaseButton>
         </div>
     </div>
 </template>

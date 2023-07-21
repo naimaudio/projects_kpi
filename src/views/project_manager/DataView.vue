@@ -1,4 +1,3 @@
-import BaseButton from '@/components/BaseButton.vue';
 <template>
     <div class="page-container">
         <h1 class="title">Data</h1>

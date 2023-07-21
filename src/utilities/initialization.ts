@@ -4,8 +4,7 @@ import { useUserStore } from "@/stores/userStore";
 import { getProjects, getFavorites, getDeclarations, getUser } from "@/API/requests";
 import type { RawProject } from "@/typing/project";
 import type { SimplifiedResponse } from "@/typing/index";
-import { declarationsFromRaw } from "@/API/conversions";
-import { projectsFromRaw, userFromRaw } from "../API/conversions";
+import { declarationsFromRaw, projectsFromRaw, userFromRaw } from "@/typing/conversions";
 import { useDeclarationStore } from "@/stores/declarationStore";
 import { msalInstance } from "@/auth_config/auth";
 

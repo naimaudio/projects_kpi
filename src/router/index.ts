@@ -1,22 +1,24 @@
 import { createRouter, createWebHistory } from "vue-router";
-const DeclarationView = () => import("@/views/DeclarationView.vue");
-const KPIView = () => import("@/views/KPIView.vue");
-const ForecastView = () => import("@/views/ForecastView.vue");
-const DataView = () => import("@/views/DataView.vue");
-const ProjectsView = () => import("@/views/ProjectsView.vue");
+const DeclarationView = () => import("@/views/employee/DeclarationView.vue");
+const KPIView = () => import("@/views/project_manager/KPIView.vue");
+const ForecastView = () => import("@/views/project_manager/ForecastView.vue");
+const DataView = () => import("@/views/project_manager/DataView.vue");
+const ProjectsView = () => import("@/views/employee/ProjectsView.vue");
 const ProfileView = () => import("@/views/ProfileView.vue");
-const HistoryView = () => import("@/views/HistoryView.vue");
-const HoursView = () => import("@/views/declaration/HoursView.vue");
+const HistoryView = () => import("@/views/employee/HistoryView.vue");
+const HoursView = () => import("@/views/employee/HoursView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
-const ProjectView = () => import("@/views/ProjectView.vue");
+const ProjectView = () => import("@/views/employee/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
-const DeclarationChangeView = () => import("@/views/DeclarationChangeView.vue");
+const DeclarationChangeView = () => import("@/views/project_manager/DeclarationChangeView.vue");
+const MonthlyReportView = () => import("@/views/business_manager/MonthlyReportView.vue");
+const BusinessKPIView = () => import("@/views/business_manager/BusinessKPIView.vue");
 import { msalInstance } from "@/auth_config/auth";
 
 import type { role } from "@/typing/index";
 import { useUserStore } from "../stores/userStore";
 import { getUser } from "@/API/requests";
-import { userFromRaw } from "../API/conversions";
+import { userFromRaw } from "../typing/conversions";
 
 declare module "vue-router" {
     interface RouteMeta {
@@ -104,6 +106,18 @@ const router = createRouter({
                     name: "data",
                     component: DataView,
                     meta: { minimalAccessRole: "Project Manager" },
+                },
+                {
+                    path: "/business_performance_indicators",
+                    name: "business_kpi",
+                    component: BusinessKPIView,
+                    meta: { minimalAccessRole: "Business Manager" },
+                },
+                {
+                    path: "/monthly_report",
+                    name: "montly_report",
+                    component: MonthlyReportView,
+                    meta: { minimalAccessRole: "Business Manager" },
                 },
             ],
         },

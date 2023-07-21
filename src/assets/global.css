@@ -90,8 +90,8 @@
 
 .footer-buttons-block {
   margin-top: 30px;
-  margin-left: 90%;
-  transform: translateX(-70%);
+  margin-left: 80%;
+  transform: translateX(-100%);
 }
 .no-selection {
   user-select: none; /* standard syntax */

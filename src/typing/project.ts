@@ -7,9 +7,20 @@ export interface UserProject {
     favorite: boolean;
 }
 
-export type Division = "HOME" | "PRO" | "MOTORITIES";
-export type SubCategory = "H_CI" | "H_LSP" | "H_HP" | "M_CAR" | "M_MAR" | "M_OEM" | "P_LSP" | "P_HP" | "ETC" | "H_AMP";
-
+export const divisions = ["ALL", "HOME", "PRO", "MOTORITIES", "RESEARCH"] as const;
+export type Division = (typeof divisions)[number];
+export type SubCategory =
+    | "H_CI"
+    | "H_LSP"
+    | "H_HP"
+    | "M_CAR"
+    | "M_MAR"
+    | "M_OEM"
+    | "P_LSP"
+    | "P_HP"
+    | "ETC"
+    | "H_AMP"
+    | "";
 export const subCategoryLabels: Record<SubCategory, string> = {
     H_CI: "Home CI",
     H_LSP: "Home Loudspeaker",
@@ -21,22 +32,56 @@ export const subCategoryLabels: Record<SubCategory, string> = {
     P_HP: "Pro Headphone",
     ETC: "Others",
     H_AMP: "Home Amplifier",
+    "": "",
 } as const;
 
-export enum Classification {
-    STRATEGIC = 1,
-    TACTICAL = 2,
-    DEFENSIVE = 3,
-}
-export type ExpansionRenewal = "EXPANSION" | "RENEWAL";
+export const divisionOptions: { [key in Division]: { id: key; label: string; subDivisions: SubCategory[] } } = {
+    ALL: {
+        id: "ALL",
+        label: "All",
+        subDivisions: ["ETC", ""],
+    },
+    HOME: {
+        id: "HOME",
+        label: "Home",
+        subDivisions: ["H_CI", "H_LSP", "H_HP", "H_AMP", ""],
+    },
+    MOTORITIES: {
+        id: "MOTORITIES",
+        label: "Motorities",
+        subDivisions: ["M_CAR", "M_MAR", "M_OEM", ""],
+    },
+    PRO: {
+        id: "PRO",
+        label: "Pro",
+        subDivisions: ["P_LSP", "P_HP", ""],
+    },
+    RESEARCH: {
+        id: "RESEARCH",
+
+        label: "Research",
+        subDivisions: [""],
+    },
+};
+export const classifications = ["1 STRATEGIC", "2 TACTICAL", "3 DEFENSIVE", "NC"] as const;
+export type Classification = (typeof classifications)[number];
+
+export const classificationLabels: Record<Classification, string> = {
+    NC: "NC",
+    "1 STRATEGIC": "Strategic",
+    "2 TACTICAL": "Tactical",
+    "3 DEFENSIVE": "Defensive",
+} as const;
+
+export type ExpansionRenewal = "EXPANSION" | "RENEWAL" | "";
 
 export interface Project {
     id: number;
     code: string;
-    division: Division[];
+    division: Division;
     sub_category: SubCategory;
-    classification?: Classification;
-    expansion_renewal?: ExpansionRenewal;
+    classification: Classification;
+    expansion_renewal: ExpansionRenewal;
     manager?: number;
     name: string;
 }
@@ -44,10 +89,10 @@ export interface Project {
 export interface RawProject {
     id: number;
     project_code: string;
-    division: Division[];
+    division: Division;
     sub_category: SubCategory;
-    classification?: Classification;
-    expansion_renewal?: ExpansionRenewal;
+    classification: Classification;
+    type: ExpansionRenewal;
     project_manager?: number;
     project_name: string;
 }

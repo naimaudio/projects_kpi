@@ -81,13 +81,11 @@
                         <div class="footer-buttons">
                             <BaseButton
                                 accent
+                                :loading="loading"
                                 :disabled="sumProjectHours != 35 || loading"
                                 @click="confirmationModal = true"
                             >
-                                <template #default> <span> Validate</span> </template>
-                                <template v-if="loading" #start>
-                                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
-                                </template>
+                                <span> Validate</span>
                             </BaseButton>
                         </div>
                     </div>
@@ -170,12 +168,10 @@
                         <BaseButton
                             accent
                             :disabled="sumProjectHours != 35 || loading"
+                            :loading="loading"
                             @click="confirmationModal = true"
                         >
-                            <template #default> <span> Validate</span> </template>
-                            <template v-if="loading" #start>
-                                <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
-                            </template>
+                            <span> Validate</span>
                         </BaseButton>
                     </div>
                 </div>
@@ -251,7 +247,7 @@ import BaseButton from "@/components/BaseButton.vue";
 import { getBufferTable } from "@/API/requests";
 import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
 import { cloneDeep } from "lodash";
-import { rawBuffersToDailyDeclaration } from "@/API/conversions";
+import { rawBuffersToDailyDeclaration } from "@/typing/conversions";
 import ModalHoursView from "@/views/declaration/ModalHoursView.vue";
 import { dayValidation } from "../../utilities/main";
 

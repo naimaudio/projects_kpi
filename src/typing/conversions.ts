@@ -43,15 +43,15 @@ export const stringToRole = (str: string): role => {
 };
 
 export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
-    return rawProjects.map<Project>((rawProject) => {
+    return rawProjects.map<Project>((rawProject: RawProject) => {
         return {
             id: rawProject.id,
             code: rawProject.project_code,
             division: rawProject.division,
             name: rawProject.project_name,
+            expansion_renewal: rawProject.type,
             sub_category: rawProject.sub_category,
             classification: rawProject.classification,
-            expansion_renewal: rawProject.expansion_renewal,
             manager: rawProject.project_manager,
         };
     });

@@ -27,7 +27,7 @@ import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import type { UserProject } from "@/typing/project";
 import { useRouter, useRoute } from "vue-router";
-import { useUserStore } from "../stores/userStore";
+import { useUserStore } from "@/stores/userStore";
 
 const router = useRouter();
 const headers: Header[] = [

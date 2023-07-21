@@ -6,30 +6,43 @@
         }"
     >
         <h2>{{ project?.name }}</h2>
-        <div v-if="user.role === 'Project Manager'" class="parent">
+        <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent">
             <span class="label1">Name</span>
             <fluent-text-field class="field1" :value="editedProject?.name"></fluent-text-field>
             <span class="label2">Code</span>
             <fluent-text-field class="field2" :value="editedProject?.code"></fluent-text-field>
-            <span class="label3">Sub-category</span>
-            <fluent-select v-model="editedProject.sub_category" class="field3">
-                <fluent-option v-for="option in options" :key="option.id" :value="option.id">
-                    <span>{{ option.id }}</span>
-                    <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px"> {{ option.label }}</span>
+            <span class="label3">Category</span>
+            <fluent-select
+                v-model="editedProject.division"
+                class="field3"
+                @change="
+                    () => {
+                        editedProject.sub_category = '';
+                        selectKey += 1;
+                    }
+                "
+            >
+                <fluent-option v-for="division in divisions" :key="division" :value="division">
+                    <span>{{ divisionOptions[division].label }}</span>
+                </fluent-option>
+            </fluent-select>
+            <span class="label4">Sub-category</span>
+            <fluent-select :key="selectKey" v-model="editedProject.sub_category" class="field4">
+                <fluent-option
+                    v-for="subCategory in divisionOptions[editedProject.division].subDivisions"
+                    :key="subCategory"
+                    :value="subCategory"
+                >
+                    <span>{{ subCategoryLabels[subCategory] }}</span>
+                    <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px"> {{ subCategory }}</span>
                 </fluent-option>
                 <span slot="selected-value">{{ editedProject.sub_category }}</span>
-            </fluent-select>
-            <span class="label4">Division</span>
-            <fluent-select v-model="editedProject.division" class="field4">
-                <fluent-option v-for="option in divisions" :key="option.id" :value="option.id">
-                    <span>{{ option.label }}</span>
-                </fluent-option>
             </fluent-select>
 
             <span class="label5">Classification</span>
             <fluent-select v-model="editedProject.classification" class="field5">
-                <fluent-option v-for="option in classifications" :key="option.id" :value="option.id">
-                    <span>{{ option.label }}</span>
+                <fluent-option v-for="classification in classifications" :key="classification" :value="classification">
+                    <span>{{ classificationLabels[classification] }}</span>
                 </fluent-option>
             </fluent-select>
         </div>
@@ -47,6 +60,10 @@
                 </template>
             </BaseButton>
         </div>
+        <br />
+        <span class="footer-buttons-block">
+            <BaseButton accent>Update Project</BaseButton>
+        </span>
     </ModalComponent>
 </template>
 
@@ -55,7 +72,14 @@ import ModalComponent from "@/components/ModalComponent.vue";
 import { useRoute } from "vue-router";
 import { computed, ref } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
-import type { Project } from "@/typing/project";
+import {
+    type Project,
+    divisionOptions,
+    divisions,
+    subCategoryLabels,
+    classifications,
+    classificationLabels,
+} from "@/typing/project";
 import BaseButton from "@/components/BaseButton.vue";
 import { useUserStore } from "@/stores/userStore";
 import type { User } from "@/typing/index";
@@ -74,32 +98,7 @@ const projectId = computed<number | undefined>(() => {
     const pId: number = Number(route.params["projectId"]);
     return isNaN(pId) ? undefined : pId;
 });
-
-const options = [
-    { id: "H_CI", label: "Home CI" },
-    { id: "H_LSP", label: "Home Loudspeaker" },
-    { id: "H_HP", label: "Home Headphone" },
-    { id: "M_CAR", label: "Motorities Car" },
-    { id: "M_MAR", label: "Motorities Marine" },
-    { id: "M_OEM", label: "Motorities OEM" },
-    { id: "P_LSP", label: "Pro Loudspeaker" },
-    { id: "P_HP", label: "Pro Headphone" },
-    { id: "ETC", label: "Others" },
-    { id: "H_AMP", label: "Home Amplifier" },
-];
-const divisions = [
-    { id: "ALL", label: "All" },
-    { id: "HOME", label: "Home" },
-    { id: "MOTORITIES", label: "Motorities" },
-    { id: "PRO", label: "Pro" },
-    { id: "RESEARCH", label: "Research" },
-];
-const classifications = [
-    { id: "NC", label: "All" },
-    { id: "1 STRATEGIC", label: "Strategic" },
-    { id: "2 TACTICAL", label: "Tactical" },
-    { id: "3 DEFENSIVE", label: "Defensive" },
-];
+const selectKey = ref(0);
 const project = computed<Project | undefined>(() => {
     return projectStore.projects.find((p) => p.id === projectId.value);
 });
@@ -109,6 +108,7 @@ if (find === undefined) {
 }
 const editedProject = ref<Project>(find);
 </script>
+
 <style>
 .inline-field {
     display: inline-block;

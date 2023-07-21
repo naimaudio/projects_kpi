@@ -16,11 +16,8 @@
             @update:model-value="(index, value) => (onGoingDayDeclaration[index].hours = value)"
         />
         <div class="footer-buttons-block">
-            <BaseButton accent :disabled="loading" @click="validation">
-                <template #default> <span> Validate</span> </template>
-                <template v-if="loading" #start>
-                    <fluent-progress-ring style="width: 14px; height: 14px; stroke: lightblue" />
-                </template>
+            <BaseButton :loading="loading" accent :disabled="loading" @click="validation">
+                <span> Validate</span>
             </BaseButton>
         </div>
     </ModalComponent>

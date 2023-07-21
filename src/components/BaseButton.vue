@@ -5,7 +5,9 @@
         :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled }"
     >
         <div class="button-inside">
-            <slot name="start"></slot>
+            <slot name="start">
+                <fluent-progress-ring v-if="props.loading" style="width: 14px; height: 14px; stroke: lightblue" />
+            </slot>
             <slot name="default"></slot>
         </div>
     </button>
@@ -16,10 +18,12 @@ const props = withDefaults(
     defineProps<{
         disabled?: boolean;
         accent?: boolean;
+        loading?: boolean;
     }>(),
     {
         accent: false,
         disabled: false,
+        loading: false,
     }
 );
 </script>
