@@ -69,6 +69,7 @@
                     class="cell-text"
                 >
                     <StarOutlineIcon
+                        v-if="cell['code'] !== 'ABS'"
                         clickable
                         :checked="cell.favorite"
                         @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
@@ -97,7 +98,7 @@
     </div>
 </template>
 
-<script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean}">
+<script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string}">
 import StarOutlineIcon from "@/components/icons/StarOutlineIcon.vue";
 import type { ChangeEvent, Header } from "@/typing";
 import ArrowUpIcon from "@/components/icons/ArrowUpIcon.vue";

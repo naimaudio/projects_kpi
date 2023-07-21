@@ -16,11 +16,12 @@
             :class="{ 'table-raw-container-delete': deletable, 'table-raw-container': !deletable }"
         >
             <DeleteOutlineIcon
-                v-if="deletable"
+                v-if="deletable && declaration.projectCode !== 'ABS'"
                 style="display: inline-block"
                 clickable
                 @click="emits('remove', declaration.projectId, index)"
             />
+            <div v-else-if="declaration.projectCode === 'ABS'"></div>
             <span>{{ declaration.projectCode }}</span>
             <span>{{ declaration.name }}</span>
             <div style="width: 100%">
