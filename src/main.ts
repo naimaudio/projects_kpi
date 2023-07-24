@@ -24,6 +24,7 @@ import { extend } from "dayjs";
 import isoWeekInYear from "dayjs/plugin/isoWeeksInYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 import weekOfYear from "dayjs/plugin/weekOfYear";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 extend(weekOfYear);
 extend(isoWeekInYear);

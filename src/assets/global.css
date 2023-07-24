@@ -56,6 +56,7 @@
     display: flex;
     flex-direction: row;
     gap: 5px;
+    width: max-content;
 }
 
 
@@ -89,9 +90,10 @@
 }
 
 .footer-buttons-block {
+  display: block;
   margin-top: 30px;
-  margin-left: 80%;
-  transform: translateX(-100%);
+  width: fit-content;
+  margin-left: auto;
 }
 .no-selection {
   user-select: none; /* standard syntax */

@@ -17,6 +17,7 @@
     "@floating-ui/vue": "^1.0.1",
     "@fluentui/web-components": "^2.5.15",
     "@microsoft/fast-element": "^1.12.0",
+    "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^10.2.1",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.9",
