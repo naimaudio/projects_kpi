@@ -35,7 +35,7 @@ import { onClickOutside } from "@vueuse/core";
 import { postBufferTable } from "@/API/requests";
 import { useGlobalStore } from "../../stores/globalStore";
 import { cloneDeep } from "lodash";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
 const route = useRoute();
 const modal = ref(null);

@@ -14,7 +14,6 @@ import type { Project } from "@/typing/project";
 import type { RawProject } from "@/typing/project";
 import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
-import { RawProject } from "./project";
 
 export function userFromRaw(rawUser: RawUser): User {
     return {

@@ -8,7 +8,7 @@ const ProfileView = () => import("@/views/ProfileView.vue");
 const HistoryView = () => import("@/views/employee/HistoryView.vue");
 const HoursView = () => import("@/views/employee/HoursView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
-const ProjectView = () => import("@/views/employee/ProjectView.vue");
+const ProjectView = () => import("@/views/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
 const DeclarationChangeView = () => import("@/views/project_manager/DeclarationChangeView.vue");
 const MonthlyReportView = () => import("@/views/business_manager/MonthlyReportView.vue");

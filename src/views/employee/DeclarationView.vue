@@ -71,7 +71,7 @@ import dayjs from "dayjs";
 
 import { range, weekNumberToString } from "@/utilities/main";
 import { useRoute, useRouter } from "vue-router";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import type { WeekInYear } from "@/typing/project";
 import { useDeclarationStore } from "@/stores/declarationStore";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";

@@ -227,7 +227,7 @@ import ArrowPreviousIcon from "@/components/icons/ArrowPreviousIcon.vue";
 import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type Router } from "vue-router";
 import HoursForm from "@/components/input_hours/HoursForm.vue";
 import { weekNumberToString } from "@/utilities/main";
-import BaseTooltip from "@/components/BaseTooltip.vue";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
     inputMethods,
     inputMethodKeys,
@@ -243,12 +243,12 @@ import { useDeclarationStore } from "@/stores/declarationStore";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { getBufferTable } from "@/API/requests";
 import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
 import { cloneDeep } from "lodash";
 import { rawBuffersToDailyDeclaration } from "@/typing/conversions";
-import ModalHoursView from "@/views/declaration/ModalHoursView.vue";
+import ModalHoursView from "@/views/employee/ModalHoursView.vue";
 import { dayValidation } from "../../utilities/main";
 
 const addFavoritesModal = ref(false);

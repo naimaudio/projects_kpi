@@ -6,7 +6,7 @@
 </template>
 <script setup lang="ts">
 import { getCSVFile } from "@/API/requests";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 async function exportCSV() {
     const response = await getCSVFile();

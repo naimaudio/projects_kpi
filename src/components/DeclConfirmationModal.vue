@@ -48,7 +48,7 @@ import { useGlobalStore } from "../stores/globalStore";
 import { useRouter } from "vue-router";
 import { initialization } from "@/utilities/initialization";
 import HoursRecap from "@/components/input_hours/HoursRecap.vue";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 const props = defineProps<{
     declaration: DeclarationInput[];
     comment?: string;

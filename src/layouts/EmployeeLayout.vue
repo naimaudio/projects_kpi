@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import BaseAvatar from "@/components/BaseAvatar.vue";
+import BaseAvatar from "@/components/base/BaseAvatar.vue";
 import { useUserStore } from "@/stores/userStore";
 import { computed } from "vue";
 import NotificationCard from "@/components/NotificationCard.vue";

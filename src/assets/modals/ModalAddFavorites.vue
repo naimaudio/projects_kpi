@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import BaseTable from "@/components/BaseTable.vue";
+import BaseTable from "@/components/base/BaseTable.vue";
 import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import { type SelectableProject } from "@/typing/project";

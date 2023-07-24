@@ -40,7 +40,7 @@ import { ref } from "vue";
 import type { domain } from "@/typing";
 import { domains } from "@/typing";
 
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { getDomain, putDomain } from "@/API/requests";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";

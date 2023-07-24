@@ -17,7 +17,7 @@
 import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
 import { computed } from "vue";
-import BaseTable from "@/components/BaseTable.vue";
+import BaseTable from "@/components/base/BaseTable.vue";
 
 const commentHeaders: Header[] = [
     {
