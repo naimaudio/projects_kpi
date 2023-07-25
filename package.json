@@ -21,6 +21,7 @@
     "@vueuse/core": "^10.2.1",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.9",
+    "echarts": "^5.4.3",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.4",

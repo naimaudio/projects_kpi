@@ -19,16 +19,34 @@ import {
     fluentTabPanel,
     fluentTab,
 } from "@fluentui/web-components";
-
+import type { ComposeOption } from "echarts/core";
 import { extend } from "dayjs";
 import isoWeekInYear from "dayjs/plugin/isoWeeksInYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import "@vuepic/vue-datepicker/dist/main.css";
+import * as echarts from "echarts/core";
+
+import { TitleComponent, GridComponent, LegendComponent, TooltipComponent, ToolboxComponent } from "echarts/components";
+import { type BarSeriesOption, BarChart, LineChart } from "echarts/charts";
+import { SVGRenderer } from "echarts/renderers";
 
 extend(weekOfYear);
 extend(isoWeekInYear);
 extend(isLeapYear);
+
+export type ECOption = ComposeOption<BarSeriesOption>;
+
+echarts.use([
+    TitleComponent,
+    SVGRenderer,
+    GridComponent,
+    BarChart,
+    LegendComponent,
+    TooltipComponent,
+    ToolboxComponent,
+    LineChart,
+]);
 
 const app = createApp(App);
 // registration of the store
