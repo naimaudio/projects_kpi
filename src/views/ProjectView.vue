@@ -126,7 +126,7 @@ import {
     classificationLabels,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
-
+import { phases } from "@/stores/nonReactiveStore";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
@@ -158,16 +158,6 @@ const subDivisions = computed<SubCategory[]>(() => {
     return division !== undefined ? divisionOptions[division].subDivisions : [];
 });
 
-const phases: { code: string; name: string }[] = [
-    { code: "NPI", name: "Phase 0" },
-    { code: "DMU", name: "concept" },
-    { code: "POC/PF", name: "feasability" },
-    { code: "ES", name: "Development 2" },
-    { code: "EVT", name: "Development 1" },
-    { code: "DVT", name: "Pre-production" },
-    { code: "PVT", name: "Mass production" },
-    { code: "STOP", name: "Project closure" },
-];
 const projectPhases = ref<{ date: string | undefined }[]>([]);
 
 const globalStore = useGlobalStore();
