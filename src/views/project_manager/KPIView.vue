@@ -17,6 +17,7 @@ const barOption = {
     legend: {
         data: ["NPI", "DMU", "POC/PF", "ES", "EVT", "DVT", "PVT", "STOP"],
     },
+    title: { text: "TDE by project phase" },
     series: [
         {
             data: [10, 22],
@@ -73,16 +74,15 @@ const barOption = {
 
 const lineOption = {
     title: {
-        text: "Forecast",
+        text: "Total TDE",
     },
     tooltip: {
         trigger: "axis",
     },
     legend: {
-        data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"],
+        data: ["Spend", "Forecast"],
     },
     grid: {
-        left: "3%",
         right: "4%",
         bottom: "3%",
         containLabel: true,
@@ -95,41 +95,21 @@ const lineOption = {
     xAxis: {
         type: "category",
         boundaryGap: false,
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data: ["Feb 22", "Mar 22", "Apr 22", "Mai 22", "Jun 22", "Jul 22", "Aug 22"],
     },
     yAxis: {
         type: "value",
     },
     series: [
         {
-            name: "Email",
+            name: "Spend",
             type: "line",
-            stack: "Total",
-            data: [120, 132, 101, 134, 90, 230, 210],
+            data: [0, 14, 25, 30, 60, 85, 103],
         },
         {
-            name: "Union Ads",
+            name: "Forecast",
             type: "line",
-            stack: "Total",
-            data: [220, 182, 191, 234, 290, 330, 310],
-        },
-        {
-            name: "Video Ads",
-            type: "line",
-            stack: "Total",
-            data: [150, 232, 201, 154, 190, 330, 410],
-        },
-        {
-            name: "Direct",
-            type: "line",
-            stack: "Total",
-            data: [320, 332, 301, 334, 390, 330, 320],
-        },
-        {
-            name: "Search Engine",
-            type: "line",
-            stack: "Total",
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            data: [0, 15, 23, 28, 32, 48, 73],
         },
     ],
 };
