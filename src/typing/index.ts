@@ -3,6 +3,7 @@ export interface Header {
     id: string;
     filterable?: boolean;
     width?: string;
+    clickable?: boolean;
 }
 
 export interface Preferences {

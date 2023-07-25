@@ -1,13 +1,23 @@
 <template>
     <div class="page-container">
-        <h1 class="title">Projects</h1>
+        <div class="title-container">
+            <div>
+                <span class="title">Projects</span>
+            </div>
+            <BaseButton big @click="router.push({ name: 'newProject', query: route.query })">
+                <template #start>
+                    <AddOutlineIcon big />
+                </template>
+                <template #default> New project</template></BaseButton
+            >
+        </div>
         <div v-if="declarationStore.getUserProjects.length !== 0">
             <BaseTable
                 :headers="headers"
                 :items="declarationStore.getUserProjects"
                 clickable-row
                 @change="change"
-                @row-click="rowClickHandler"
+                @raw-click="rowClickHandler"
             />
         </div>
         <div v-else class="column-flex">
@@ -17,7 +27,6 @@
                 <img src="@/assets/icons/neutral-face.png" alt="Neutral Face" width="60" height="60" />
             </div>
         </div>
-        <RouterView></RouterView>
     </div>
 </template>
 
@@ -28,11 +37,13 @@ import type { Header } from "@/typing";
 import type { UserProject } from "@/typing/project";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
+import BaseButton from "@/components/base/BaseButton.vue";
+import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 
 const router = useRouter();
 const headers: Header[] = [
-    { name: "Code", id: "code", filterable: false },
-    { name: "Name", id: "name", filterable: false },
+    { name: "Code", id: "code", filterable: false, width: "80px" },
+    { name: "Name", id: "name", filterable: false, clickable: true },
     { name: "Manager", id: "manager", filterable: false },
     { name: "Personal time (h)", id: "time_spend", filterable: false },
     { name: "Fav", id: "favorite", filterable: false, width: "80px" },
@@ -50,4 +61,19 @@ function rowClickHandler(id: number) {
     router.push({ name: "project", params: { projectId: id }, query: route.query });
 }
 </script>
-<style></style>
+<style>
+.end {
+    display: block;
+    margin-left: auto;
+    width: fit-content;
+}
+
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    line-height: 52px;
+    margin: 26.8px 0;
+}
+</style>

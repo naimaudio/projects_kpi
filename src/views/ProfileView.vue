@@ -7,9 +7,9 @@
             <span class="icon-with-text">
                 <CalendarEmpty />
                 <span>
-                    joining the company on {{ dayjs(userStore.user?.firstDeclarationDay).format("YYYY/MM/DD") }}
-                </span></span
-            >
+                    First declaration registred on {{ dayjs(userStore.user?.firstDeclarationDay).format("YYYY/MM/DD") }}
+                </span>
+            </span>
             <br />
             <fluent-button @click="disconnect">Disconnect</fluent-button>
             <br />

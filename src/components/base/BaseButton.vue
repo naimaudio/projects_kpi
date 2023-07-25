@@ -2,7 +2,7 @@
     <button
         class="button"
         :disabled="props.disabled"
-        :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled }"
+        :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled, big: big }"
     >
         <div class="button-inside">
             <slot name="start">
@@ -19,11 +19,13 @@ const props = withDefaults(
         disabled?: boolean;
         accent?: boolean;
         loading?: boolean;
+        big?: boolean;
     }>(),
     {
         accent: false,
         disabled: false,
         loading: false,
+        big: false,
     }
 );
 </script>
@@ -74,4 +76,9 @@ const props = withDefaults(
 /* .disabled:hover {
     cursor: not-allowed;
 } */
+
+.big {
+    font-size: 25px;
+    line-height: normal;
+}
 </style>

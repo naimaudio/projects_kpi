@@ -85,7 +85,6 @@ export interface Project {
     manager: string | null;
     name: string;
     entity: string;
-    capitalization: boolean;
     complexity: number;
     currentPhase: string;
 }
@@ -100,9 +99,21 @@ export interface RawProject {
     project_manager: string | null;
     project_name: string;
     entity: string;
-    capitalization: boolean;
     current_phase: string;
     complexity: number;
+}
+
+export interface BlankProject {
+    code?: string;
+    division?: Division;
+    subCategory?: SubCategory;
+    classification?: Classification;
+    expansionRenewal?: ExpansionRenewal;
+    manager?: string | null;
+    name?: string;
+    entity?: string;
+    complexity?: number;
+    currentPhase?: string;
 }
 
 export interface SelectableProject extends UserProject {

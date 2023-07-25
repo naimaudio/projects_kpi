@@ -54,7 +54,6 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             classification: rawProject.classification,
             manager: rawProject.project_manager,
             entity: rawProject.entity,
-            capitalization: rawProject.capitalization,
             complexity: rawProject.complexity,
             currentPhase: rawProject.current_phase,
         };

@@ -28,6 +28,12 @@ declare module "vue-router" {
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
+    scrollBehavior() {
+        const element = document.getElementById("main-section");
+        if (element !== null) {
+            element.scroll(0, 0);
+        }
+    },
     routes: [
         {
             path: "/",
@@ -67,14 +73,18 @@ const router = createRouter({
                     name: "projects",
                     component: ProjectsView,
                     meta: { minimalAccessRole: "Employee" },
-                    children: [
-                        {
-                            path: ":projectId",
-                            name: "project",
-                            component: ProjectView,
-                            meta: { minimalAccessRole: "Employee" },
-                        },
-                    ],
+                },
+                {
+                    path: "/projects/new",
+                    name: "newProject",
+                    component: ProjectView,
+                    meta: { minimalAccessRole: "Employee" },
+                },
+                {
+                    path: "/projects/:projectId",
+                    name: "project",
+                    component: ProjectView,
+                    meta: { minimalAccessRole: "Employee" },
                 },
                 {
                     path: "/profile",

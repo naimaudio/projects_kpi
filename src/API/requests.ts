@@ -189,14 +189,49 @@ export async function updateProject(project: Project) {
         project_manager: string | null;
         current_phase?: string;
         complexity?: number;
-        capitalization?: boolean;
     }
     const requestBody: RequestBody = {
         id: project.id,
         entity: project.entity,
         project_code: project.code,
         project_name: project.name,
-        capitalization: project.capitalization,
+        complexity: project.complexity,
+        classification: project.classification,
+        current_phase: project.currentPhase,
+        division: project.division,
+        project_manager: project.manager,
+        sub_category: project.subCategory,
+        type: project.expansionRenewal,
+    };
+    const response = await fetcher(`${origin}/project`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function postProject(project: Project) {
+    interface RequestBody {
+        id: number;
+        entity?: string;
+        division?: string;
+        sub_category?: string;
+        classification?: string;
+        type?: string;
+        project_name: string;
+        project_code: string;
+        project_manager: string | null;
+        current_phase?: string;
+        complexity?: number;
+    }
+    const requestBody: RequestBody = {
+        id: project.id,
+        entity: project.entity,
+        project_code: project.code,
+        project_name: project.name,
         complexity: project.complexity,
         classification: project.classification,
         current_phase: project.currentPhase,

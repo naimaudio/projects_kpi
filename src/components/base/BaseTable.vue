@@ -44,11 +44,11 @@
                 v-for="header in props.headers"
                 :key="header.id"
                 class="table-cell"
-                :class="{ clickable: header.id != 'selected' && header.id != 'favorite' && clickableRow }"
+                :class="{ clickable: header.clickable === true && clickableRow }"
                 @click="
                     () => {
-                        if (header.id != 'selected' && header.id != 'favorite') {
-                            emit('rowClick', cell.id);
+                        if (header.clickable === true && clickableRow) {
+                            emit('rawClick', cell.id);
                         }
                     }
                 "
@@ -140,7 +140,7 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
     (e: "change", index: number, field: keyof T, value: T[keyof T]): void;
-    (e: "rowClick", rowId: number): void;
+    (e: "rawClick", rowId: number): void;
 }>();
 
 const currentPage = ref(1);
@@ -297,5 +297,7 @@ const changeSelect = (id: number, event: ChangeEvent) => {
 
 .clickable:hover {
     cursor: pointer;
+    color: #0078d4;
+    text-decoration: underline;
 }
 </style>
