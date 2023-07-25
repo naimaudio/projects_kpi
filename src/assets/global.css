@@ -3,7 +3,7 @@
     --gap-inline: 6px;
     --card-border-radius: 8px;
     --button-border-radius: 4px;
-    --header-height: 70px;
+    --header-height: 60px;
 }
 
 
@@ -32,6 +32,12 @@
     flex-direction: column;
     gap: 14px;
     align-items: flex-start;
+}
+
+.button-style-reset {
+  background: none;
+  border: none;
+  padding: 0;
 }
 
 .raw-container {
