@@ -52,7 +52,6 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             expansionRenewal: rawProject.type,
             subCategory: rawProject.sub_category,
             classification: rawProject.classification,
-            manager: rawProject.project_manager,
             entity: rawProject.entity,
             complexity: rawProject.complexity,
             currentPhase: rawProject.current_phase,

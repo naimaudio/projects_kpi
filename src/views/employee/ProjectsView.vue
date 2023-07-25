@@ -44,7 +44,6 @@ const router = useRouter();
 const headers: Header[] = [
     { name: "Code", id: "code", filterable: false, width: "80px" },
     { name: "Name", id: "name", filterable: false, clickable: true },
-    { name: "Manager", id: "manager", filterable: false },
     { name: "Personal time (h)", id: "time_spend", filterable: false },
     { name: "Fav", id: "favorite", filterable: false, width: "80px" },
 ];

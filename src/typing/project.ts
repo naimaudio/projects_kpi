@@ -2,7 +2,6 @@ export interface UserProject {
     id: number;
     code: string;
     name: string;
-    manager?: number;
     time_spend: number;
     favorite: boolean;
 }
@@ -82,7 +81,6 @@ export interface Project {
     subCategory: SubCategory;
     classification: Classification;
     expansionRenewal: ExpansionRenewal;
-    manager: string | null;
     name: string;
     entity: string;
     complexity: number;
@@ -96,7 +94,6 @@ export interface RawProject {
     sub_category: SubCategory;
     classification: Classification;
     type: ExpansionRenewal;
-    project_manager: string | null;
     project_name: string;
     entity: string;
     current_phase: string;
@@ -109,7 +106,6 @@ export interface BlankProject {
     subCategory?: SubCategory;
     classification?: Classification;
     expansionRenewal?: ExpansionRenewal;
-    manager?: string | null;
     name?: string;
     entity?: string;
     complexity?: number;

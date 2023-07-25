@@ -97,7 +97,6 @@
                     :max-date="i !== projectPhases.length - 1 ? projectPhases[i + 1].date : undefined"
                     ignore-time-validation
                     format="dd/MM/yyyy"
-                    :clearable="false"
                     :auto-apply="true"
                     :enable-time-picker="false"
                 ></VueDatePicker>

@@ -68,7 +68,6 @@ export const useDeclarationStore = defineStore("declaration", () => {
         const userProjects = projectStore.projects.map((project) => {
             const displayableProject: UserProject = {
                 id: project.id,
-                manager: project?.manager,
                 favorite: isFavorite(project.id),
                 name: project.name,
                 code: project.code,

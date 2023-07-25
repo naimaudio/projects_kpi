@@ -186,7 +186,6 @@ export async function updateProject(project: Project) {
         type?: string;
         project_name: string;
         project_code: string;
-        project_manager: string | null;
         current_phase?: string;
         complexity?: number;
     }
@@ -199,7 +198,6 @@ export async function updateProject(project: Project) {
         classification: project.classification,
         current_phase: project.currentPhase,
         division: project.division,
-        project_manager: project.manager,
         sub_category: project.subCategory,
         type: project.expansionRenewal,
     };
@@ -223,7 +221,6 @@ export async function postProject(project: Project) {
         type?: string;
         project_name: string;
         project_code: string;
-        project_manager: string | null;
         current_phase?: string;
         complexity?: number;
     }
@@ -236,7 +233,6 @@ export async function postProject(project: Project) {
         classification: project.classification,
         current_phase: project.currentPhase,
         division: project.division,
-        project_manager: project.manager,
         sub_category: project.subCategory,
         type: project.expansionRenewal,
     };
