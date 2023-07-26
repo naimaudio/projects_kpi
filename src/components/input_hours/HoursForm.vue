@@ -21,7 +21,7 @@
                 clickable
                 @click="emits('remove', declaration.projectId, index)"
             />
-            <div v-else-if="declaration.projectCode === 'ABS'"></div>
+            <div v-else-if="declaration.projectCode === 'ABS' && deletable"></div>
             <span>{{ declaration.projectCode }}</span>
             <span>{{ declaration.name }}</span>
             <div style="width: 100%">
