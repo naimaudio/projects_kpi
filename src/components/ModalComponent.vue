@@ -47,6 +47,7 @@ const close = () => {
     background-color: rgba(0, 0, 0, 0.4);
     position: absolute;
     overflow-y: auto;
+    z-index: 10;
 
     right: 0;
     left: 0;
