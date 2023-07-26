@@ -21,6 +21,7 @@ export const useProjectStore = defineStore("project", () => {
         });
         return projectCodes;
     });
+
     function addProject(project: Project) {
         projects.value.push(project);
     }

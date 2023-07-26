@@ -1,5 +1,5 @@
 import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, dayNb } from "@/typing";
-import type { Project, RawProject } from "@/typing/project";
+import type { CompleteProject, RawProject, RawProjectAndPhases, RawProjectPhase } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
 
@@ -34,6 +34,15 @@ async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined)
 
 export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
     const response = await fetcher(`${origin}/projects`, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getProject(projectCode: string): Promise<SimplifiedResponse<RawProjectAndPhases>> {
+    const response = await fetcher(`${origin}/project?projectcode=${projectCode}`, {
         headers: {
             "Content-Type": "application/json",
         },
@@ -176,30 +185,23 @@ export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
     return { status: response.status, data: await response.blob() };
 }
 
-export async function updateProject(project: Project) {
-    interface RequestBody {
-        id: number;
-        entity?: string;
-        division?: string;
-        sub_category?: string;
-        classification?: string;
-        type?: string;
-        project_name: string;
-        project_code: string;
-        current_phase?: string;
-        complexity?: number;
-    }
+export async function updateProject(project: CompleteProject) {
+    interface RequestBody extends RawProjectAndPhases {}
     const requestBody: RequestBody = {
-        id: project.id,
-        entity: project.entity,
-        project_code: project.code,
-        project_name: project.name,
-        complexity: project.complexity,
-        classification: project.classification,
-        current_phase: project.currentPhase,
-        division: project.division,
-        sub_category: project.subCategory,
-        type: project.expansionRenewal,
+        project: {
+            id: project.id,
+            entity: project.entity,
+            project_code: project.code,
+            project_name: project.name,
+            complexity: project.complexity,
+            classification: project.classification,
+            division: project.division,
+            sub_category: project.subCategory,
+            type: project.expansionRenewal,
+        },
+        phases: project.phases.map<RawProjectPhase>((p) => {
+            return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
+        }),
     };
     const response = await fetcher(`${origin}/project`, {
         method: "PUT",
@@ -211,33 +213,28 @@ export async function updateProject(project: Project) {
     return { status: response.status, data: await response.json() };
 }
 
-export async function postProject(project: Project) {
+export async function postProject(project: Omit<CompleteProject, "id">) {
     interface RequestBody {
-        id: number;
-        entity?: string;
-        division?: string;
-        sub_category?: string;
-        classification?: string;
-        type?: string;
-        project_name: string;
-        project_code: string;
-        current_phase?: string;
-        complexity?: number;
+        project: Omit<RawProject, "id">;
+        phases: RawProjectPhase[];
     }
     const requestBody: RequestBody = {
-        id: project.id,
-        entity: project.entity,
-        project_code: project.code,
-        project_name: project.name,
-        complexity: project.complexity,
-        classification: project.classification,
-        current_phase: project.currentPhase,
-        division: project.division,
-        sub_category: project.subCategory,
-        type: project.expansionRenewal,
+        project: {
+            entity: project.entity,
+            project_code: project?.code,
+            project_name: project?.name,
+            complexity: project.complexity,
+            classification: project.classification,
+            division: project.division,
+            sub_category: project.subCategory,
+            type: project.expansionRenewal,
+        },
+        phases: project.phases.map<RawProjectPhase>((p) => {
+            return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
+        }),
     };
     const response = await fetcher(`${origin}/project`, {
-        method: "PUT",
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
         },

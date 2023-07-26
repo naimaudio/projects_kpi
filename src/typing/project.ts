@@ -84,7 +84,6 @@ export interface Project {
     name: string;
     entity: string;
     complexity: number;
-    currentPhase: string;
 }
 
 export interface RawProject {
@@ -96,10 +95,34 @@ export interface RawProject {
     type: ExpansionRenewal;
     project_name: string;
     entity: string;
-    current_phase: string;
     complexity: number;
 }
 
+export interface RawProjectPhase {
+    project_phase: number;
+    start_date: string;
+    end_date: string;
+}
+
+export interface ProjectPhase {
+    projectPhase: number;
+    startDate: string;
+    endDate: string;
+}
+
+export interface BlankProjectPhase {
+    projectPhase?: number;
+    startDate?: string;
+    endDate?: string;
+}
+
+export interface RawProjectAndPhases {
+    project: RawProject;
+    phases: RawProjectPhase[];
+}
+export interface CompleteProject extends Project {
+    phases: ProjectPhase[];
+}
 export interface BlankProject {
     code?: string;
     division?: Division;
@@ -109,7 +132,7 @@ export interface BlankProject {
     name?: string;
     entity?: string;
     complexity?: number;
-    currentPhase?: string;
+    phases: BlankProjectPhase[];
 }
 
 export interface SelectableProject extends UserProject {

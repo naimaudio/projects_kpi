@@ -10,10 +10,17 @@ import type {
     DailyDeclaration,
 } from "@/typing";
 import { domains } from "@/typing";
-import type { Project } from "@/typing/project";
-import type { RawProject } from "@/typing/project";
+import type {
+    Project,
+    RawProjectAndPhases,
+    CompleteProject,
+    RawProjectPhase,
+    ProjectPhase,
+    RawProject,
+} from "@/typing/project";
 import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
+import {} from "./project";
 
 export function userFromRaw(rawUser: RawUser): User {
     return {
@@ -54,7 +61,6 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             classification: rawProject.classification,
             entity: rawProject.entity,
             complexity: rawProject.complexity,
-            currentPhase: rawProject.current_phase,
         };
     });
 }
@@ -116,4 +122,29 @@ export function rawBuffersToDailyDeclaration(
         }
     });
     return newDailyDeclaration;
+}
+
+export function rawPhasesToPhase(phases: RawProjectPhase[]): ProjectPhase[] {
+    return phases.map<ProjectPhase>((phase) => {
+        return {
+            endDate: phase.end_date,
+            startDate: phase.start_date,
+            projectPhase: phase.project_phase,
+        };
+    });
+}
+
+export function rawProjectToProjectComplete(project: RawProjectAndPhases): CompleteProject {
+    return {
+        id: project.project.id,
+        code: project.project.project_code,
+        division: project.project.division,
+        classification: project.project.classification,
+        complexity: project.project.complexity,
+        entity: project.project.entity,
+        expansionRenewal: project.project.type,
+        name: project.project.project_name,
+        subCategory: project.project.sub_category,
+        phases: rawPhasesToPhase(project.phases),
+    };
 }

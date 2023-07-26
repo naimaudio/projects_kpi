@@ -8,23 +8,25 @@
             Projects
         </button>
         <span>></span>
-        <span class="breadcrumb-item">{{ project === undefined ? "New project" : project.name }}</span>
+        <span class="breadcrumb-item">{{
+            project === undefined || newProject === true ? "New project" : project.name
+        }}</span>
         <h2>{{ newProject ? "New project" : project?.name }}</h2>
         <h3>Project properties</h3>
 
         <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent">
             <span>Name</span>
-            <fluent-text-field :value="editedProject?.name"></fluent-text-field>
+            <fluent-text-field v-model="editedProject.name"></fluent-text-field>
             <span>Organization</span>
-            <fluent-select :value="editedProject?.entity">
+            <fluent-select v-model="editedProject.entity">
                 <fluent-option v-for="org in organizationNames" :key="org">{{ org }}</fluent-option>
             </fluent-select>
             <span>Code</span>
-            <fluent-text-field :value="editedProject?.code"></fluent-text-field>
+            <fluent-text-field v-model="editedProject.code"></fluent-text-field>
             <span>Category</span>
             <fluent-select
                 v-model="editedProject.division"
-                @change="
+                @input="
                     () => {
                         editedProject.subCategory = '';
                         selectKey += 1;
@@ -43,10 +45,25 @@
                 </fluent-option>
                 <span slot="selected-value">{{ editedProject.subCategory }}</span>
             </fluent-select>
+            <span>Type</span>
+            <fluent-select v-model="editedProject.expansionRenewal">
+                <fluent-option>Renewal</fluent-option>
+                <fluent-option>Expansion</fluent-option>
+                <fluent-option>NC</fluent-option>
+            </fluent-select>
             <span>Classification</span>
             <fluent-select v-model="editedProject.classification">
                 <fluent-option v-for="classification in classifications" :key="classification" :value="classification">
                     <span>{{ classificationLabels[classification] }}</span>
+                </fluent-option>
+            </fluent-select>
+            <span>Complexity</span>
+            <fluent-select
+                :value="String(editedProject.complexity)"
+                @change="(event: any) => {editedProject.complexity = Number(event.target.value)}"
+            >
+                <fluent-option v-for="(complexity, index) in complexities" :key="index" :value="Number(index)">
+                    <span>{{ complexity }}</span>
                 </fluent-option>
             </fluent-select>
         </div>
@@ -59,24 +76,28 @@
             <span>{{ editedProject?.entity }}</span>
         </div>
         <h3>Project phases</h3>
-        <div v-if="projectPhases.length < phases.length" class="icon-with-text">
+        <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
             <AddOutlineIcon
                 clickable
                 @click="
                     (event) => {
-                        projectPhases.push({ date: undefined });
+                        editedProject.phases.push({
+                            projectPhase: editedProject.phases.length,
+                            startDate: undefined,
+                            endDate: undefined,
+                        });
                     }
                 "
             />
             <span class="prefix align-center italic">add a phase</span>
         </div>
         <div v-else style="height: 24px"></div>
-        <div v-if="projectPhases.length >= 1" class="icon-with-text">
+        <div v-if="editedProject.phases.length >= 1" class="icon-with-text">
             <SubtractOutlineIcon
                 clickable
                 @click="
                     (event) => {
-                        projectPhases.pop();
+                        editedProject.phases.pop();
                     }
                 "
             />
@@ -88,23 +109,47 @@
             <span>Phase code</span>
             <span>Phase name</span>
             <span>Phase start date</span>
-            <template v-for="(projectPhase, i) in projectPhases" :key="i">
+            <span>Phase end date</span>
+            <template v-for="(projectPhase, i) in editedProject.phases" :key="i">
                 <span>{{ phases[i].code }}</span>
                 <span>{{ phases[i].name }}</span>
                 <VueDatePicker
-                    v-model="projectPhase.date"
-                    :min-date="i !== 0 ? projectPhases[i - 1].date : undefined"
-                    :max-date="i !== projectPhases.length - 1 ? projectPhases[i + 1].date : undefined"
+                    :model-value="projectPhase.startDate"
+                    :min-date="i !== 0 ? editedProject.phases[i - 1].startDate : undefined"
+                    :max-date="
+                        i !== editedProject.phases.length - 1 ? editedProject.phases[i + 1].startDate : undefined
+                    "
                     ignore-time-validation
                     format="dd/MM/yyyy"
+                    model-type="yyyy-MM-dd"
                     :auto-apply="true"
                     :enable-time-picker="false"
+                    @update:model-value="
+                        (val) => {
+                            projectPhase.startDate = val;
+                            if (i !== 0) {
+                                editedProject.phases[i - 1].endDate = val;
+                            }
+                        }
+                    "
+                ></VueDatePicker>
+                <VueDatePicker
+                    v-model="projectPhase.endDate"
+                    :min-date="i !== 0 ? projectPhase.startDate : undefined"
+                    ignore-time-validation
+                    format="dd/MM/yyyy"
+                    model-type="yyyy-MM-dd"
+                    :auto-apply="true"
+                    :enable-time-picker="false"
+                    :disabled="i !== editedProject.phases.length - 1"
                 ></VueDatePicker>
             </template>
         </div>
         <br />
-        <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="footer-buttons-block">
-            <BaseButton :disabled="loading" :loading="loading" accent @click="clickHandler">Update Project</BaseButton>
+        <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
+            <BaseButton :disabled="loading" :loading="loading" accent @click="clickHandler">{{
+                newProject ? "Create Project" : "Update Project"
+            }}</BaseButton>
         </div>
         <br />
     </div>
@@ -115,7 +160,6 @@ import { useRoute, useRouter } from "vue-router";
 import { computed, ref } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
 import {
-    type Project,
     type BlankProject,
     type SubCategory,
     divisionOptions,
@@ -123,6 +167,7 @@ import {
     subCategoryLabels,
     classifications,
     classificationLabels,
+    type CompleteProject,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { phases } from "@/stores/nonReactiveStore";
@@ -131,9 +176,10 @@ import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
 import type { User } from "@/typing/index";
 import { organizationNames } from "@/stores/nonReactiveStore";
-import { updateProject } from "@/API/requests";
+import { getProject, postProject, updateProject } from "@/API/requests";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import SubtractOutlineIcon from "@/components/icons/SubtractOutlineIcon.vue";
+import { rawProjectToProjectComplete } from "@/typing/conversions";
 const route = useRoute();
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -157,26 +203,36 @@ const subDivisions = computed<SubCategory[]>(() => {
     return division !== undefined ? divisionOptions[division].subDivisions : [];
 });
 
-const projectPhases = ref<{ date: string | undefined }[]>([]);
-
+const complexities = ["", "★", "★★", "★★★", "★★★★", "★★★★★"];
 const globalStore = useGlobalStore();
-const selectKey = ref(0);
-const project = computed<Project | undefined>(() => {
-    return projectStore.projects.find((p) => p.id === projectId.value);
-});
+const selectKey = ref(1294821749);
+const loadingInitialRequest = ref<boolean>(false);
+const project = ref<CompleteProject | undefined>();
 const find = projectStore.projects.find((p) => p.id === projectId.value);
+console.log("aa", find);
 if (find === undefined) {
     newProject.value = true;
+} else {
+    loadingInitialRequest.value = true;
+    getProject(find.code).then((response) => {
+        console.log(response);
+        project.value = rawProjectToProjectComplete(response.data);
+        editedProject.value = rawProjectToProjectComplete(response.data);
+        console.log(project.value);
+    });
 }
-
-const editedProject = ref<Project | BlankProject>(
-    find || { entity: organizationNames[0], division: "ALL", classification: "NC" }
-);
+const editedProject = ref<BlankProject>({
+    entity: organizationNames[0],
+    division: "ALL",
+    classification: "NC",
+    complexity: 3,
+    phases: [],
+});
 const loading = ref<boolean>(false);
 const clickHandler = () => {
     loading.value = true;
     if (!newProject.value && "id" in editedProject.value)
-        updateProject(editedProject.value).then((response) => {
+        updateProject(editedProject.value as CompleteProject).then((response) => {
             if (response.status === 200) {
                 globalStore.notification.content = "Project successfully updated";
                 globalStore.notification.display = true;
@@ -188,6 +244,20 @@ const clickHandler = () => {
                 close();
             }
         });
+    else {
+        postProject(editedProject.value as CompleteProject).then((response) => {
+            if (response.status === 200) {
+                globalStore.notification.content = "Project successfully updated";
+                globalStore.notification.display = true;
+                globalStore.notification.type = "SUCCESS";
+            } else {
+                globalStore.notification.content = "Oh no, there was an error";
+                globalStore.notification.display = true;
+                globalStore.notification.type = "FAILURE";
+                close();
+            }
+        });
+    }
     loading.value = false;
 };
 </script>
@@ -208,7 +278,7 @@ const clickHandler = () => {
 
 .parent-phases {
     display: grid;
-    grid-template-columns: 1fr 2fr 3fr;
+    grid-template-columns: 1fr 2fr 2fr 2fr;
     grid-template-rows: repeat(9, 38px);
     grid-column-gap: 0px;
     grid-row-gap: 10px;
