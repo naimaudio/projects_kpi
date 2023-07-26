@@ -141,7 +141,6 @@ const showSideBar = ref<boolean>(true);
 <style scoped>
 .button-style-reset:hover {
     cursor: pointer;
-    fill: blue;
 }
 
 #sidebar {
@@ -167,9 +166,8 @@ const showSideBar = ref<boolean>(true);
 }
 
 #main-section {
-    position: relative;
+    position: static;
     width: 100%;
-    background-color: white;
     overflow-y: auto;
 }
 

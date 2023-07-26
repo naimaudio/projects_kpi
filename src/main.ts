@@ -28,7 +28,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import * as echarts from "echarts/core";
 
 import { TitleComponent, GridComponent, LegendComponent, TooltipComponent, ToolboxComponent } from "echarts/components";
-import { type BarSeriesOption, BarChart, LineChart } from "echarts/charts";
+import { type BarSeriesOption, BarChart, LineChart, PieChart } from "echarts/charts";
 import { SVGRenderer } from "echarts/renderers";
 
 extend(weekOfYear);
@@ -46,6 +46,7 @@ echarts.use([
     TooltipComponent,
     ToolboxComponent,
     LineChart,
+    PieChart,
 ]);
 
 const app = createApp(App);
