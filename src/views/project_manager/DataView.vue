@@ -12,7 +12,7 @@ async function exportCSV() {
     const response = await getCSVFile();
     const link = document.createElement("a");
     link.href = URL.createObjectURL(response.data);
-    link.download = "tartiflou";
+    link.download = "declaration export";
     link.click();
 }
 </script>
