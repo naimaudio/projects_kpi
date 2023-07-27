@@ -7,7 +7,7 @@
                 :id="graph.id"
                 :key="graph.id"
                 class="graph-container"
-                :style="{ width: graph.width, height: graph.height }"
+                :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
                 draggable="true"
                 @drop="(event) => onDropHandler(event, index)"
             ></div>
@@ -137,10 +137,7 @@ const options = {
         tooltip: {
             trigger: "item",
         },
-        legend: {
-            orient: "vertical",
-            left: "left",
-        },
+
         series: [
             {
                 name: "Access From",
@@ -165,31 +162,52 @@ const options = {
         ],
     },
 };
-const graphs = ref<{ id: string; width: string; height: string; option: "barOption" | "lineOption" | "pieOption" }[]>([
-    { id: "barChart", width: "600px", height: "300px", option: "barOption" },
-    { id: "lineChart", width: "600px", height: "300px", option: "lineOption" },
-    { id: "pieChart", width: "600px", height: "600px", option: "pieOption" },
+const graphs = ref<
+    {
+        id: string;
+        minWidth: string;
+        minHeight: string;
+        defaultWidth?: string;
+        defaultHeight?: string;
+        option: "barOption" | "lineOption" | "pieOption";
+    }[]
+>([
+    { id: "barChart", minWidth: "600px", minHeight: "300px", defaultWidth: "1070px", option: "barOption" },
+    { id: "lineChart", minWidth: "600px", minHeight: "300px", option: "lineOption" },
+    { id: "pieChart", minWidth: "400px", minHeight: "300px", option: "pieOption" },
 ]);
 
 // const pieChart = ref<ComponentPublicInstance | null>(null);
 onMounted(() => {
     graphs.value.forEach((graphInfo, index) => {
         const graph = document.getElementById(graphInfo.id);
-        const stackedBarChartE = echarts.init(graph);
-        stackedBarChartE.setOption(options[graphInfo.option]);
-        graph?.addEventListener("dragstart", function (event) {
-            event.dataTransfer?.setData("text/plain", this.id);
-            const crt = this;
-            // crt.style.opacity = "0.5";
-            event.dataTransfer?.setDragImage(crt, 0, 0);
-        });
-        graph?.addEventListener("dragenter", (event) => {
-            event.preventDefault();
-        });
-        graph?.addEventListener("dragover", function (event) {
-            event.preventDefault();
-            // this.style.opacity = "1";
-        });
+        const chartE = echarts.init(graph);
+        if (graph !== null) {
+            if (graphInfo.defaultWidth) {
+                graph.style.width = graphInfo.defaultWidth;
+            }
+            if (graphInfo.defaultHeight) {
+                graph.style.height = graphInfo.defaultHeight;
+            }
+            chartE.setOption(options[graphInfo.option]);
+            graph.addEventListener("dragstart", function (event) {
+                event.dataTransfer?.setData("text/plain", this.id);
+                const crt = this;
+                // crt.style.opacity = "0.5";
+                event.dataTransfer?.setDragImage(crt, 0, 0);
+            });
+            graph.addEventListener("dragenter", (event) => {
+                event.preventDefault();
+            });
+            graph.addEventListener("dragover", function (event) {
+                event.preventDefault();
+                // this.style.opacity = "1";
+            });
+            const resizeObserver = new ResizeObserver(() => {
+                chartE?.resize();
+            });
+            resizeObserver.observe(graph);
+        }
     });
 });
 
@@ -207,7 +225,9 @@ const onDropHandler = (event: DragEvent, j: number) => {
 <style scoped>
 .graph-container {
     padding: 30px;
-    border-radius: 15px;
+    border-radius: 15px 15px 0 15px;
     border: 4px darkgray solid;
+    resize: both;
+    overflow: hidden;
 }
 </style>

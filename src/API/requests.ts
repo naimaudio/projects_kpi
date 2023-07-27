@@ -185,7 +185,7 @@ export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
     return { status: response.status, data: await response.blob() };
 }
 
-export async function updateProject(project: CompleteProject) {
+export async function updateProject(project: CompleteProject): Promise<SimplifiedResponse<{ detail: string }>> {
     interface RequestBody extends RawProjectAndPhases {}
     const requestBody: RequestBody = {
         project: {

@@ -15,15 +15,20 @@
         <h3>Project properties</h3>
 
         <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent">
-            <span>Name</span>
-            <fluent-text-field v-model="editedProject.name"></fluent-text-field>
-            <span>Organization</span>
+            <span>* Name</span>
+            <fluent-text-field v-model="editedProject.name" required></fluent-text-field>
+            <span>* Organization</span>
             <fluent-select v-model="editedProject.entity">
                 <fluent-option v-for="org in organizationNames" :key="org">{{ org }}</fluent-option>
             </fluent-select>
-            <span>Code</span>
-            <fluent-text-field v-model="editedProject.code"></fluent-text-field>
-            <span>Category</span>
+            <span>* Code</span>
+            <div class="field-with-validation">
+                <fluent-text-field v-model="editedProject.code" @input="codeValidation = undefined"></fluent-text-field>
+                <span v-if="codeValidation !== undefined" class="icon-with-text" style="color: #f04e85"
+                    ><ErrorIcon /> {{ codeValidation }}</span
+                >
+            </div>
+            <span>* Category</span>
             <fluent-select
                 v-model="editedProject.division"
                 @input="
@@ -37,7 +42,7 @@
                     <span>{{ divisionOptions[division].label }}</span>
                 </fluent-option>
             </fluent-select>
-            <span>Sub-category</span>
+            <span>* Sub-category</span>
             <fluent-select :key="selectKey" v-model="editedProject.subCategory">
                 <fluent-option v-for="subCategory in subDivisions" :key="subCategory" :value="subCategory">
                     <span>{{ subCategoryLabels[subCategory] }}</span>
@@ -45,13 +50,13 @@
                 </fluent-option>
                 <span slot="selected-value">{{ editedProject.subCategory }}</span>
             </fluent-select>
-            <span>Type</span>
+            <span>* Type</span>
             <fluent-select v-model="editedProject.expansionRenewal">
-                <fluent-option>Renewal</fluent-option>
-                <fluent-option>Expansion</fluent-option>
-                <fluent-option>NC</fluent-option>
+                <fluent-option v-for="expRen in expansionRenewalArray" :key="expRen" :value="expRen">{{
+                    expansionRenewalLabels[expRen]
+                }}</fluent-option>
             </fluent-select>
-            <span>Classification</span>
+            <span>* Classification</span>
             <fluent-select v-model="editedProject.classification">
                 <fluent-option v-for="classification in classifications" :key="classification" :value="classification">
                     <span>{{ classificationLabels[classification] }}</span>
@@ -168,6 +173,8 @@ import {
     classifications,
     classificationLabels,
     type CompleteProject,
+    expansionRenewalLabels,
+    expansionRenewalArray,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { phases } from "@/stores/nonReactiveStore";
@@ -180,6 +187,7 @@ import { getProject, postProject, updateProject } from "@/API/requests";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import SubtractOutlineIcon from "@/components/icons/SubtractOutlineIcon.vue";
 import { rawProjectToProjectComplete } from "@/typing/conversions";
+import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 const route = useRoute();
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -225,18 +233,24 @@ const editedProject = ref<BlankProject>({
     entity: organizationNames[0],
     division: "ALL",
     classification: "NC",
-    complexity: 3,
+    complexity: 0,
     phases: [],
+    expansionRenewal: "",
 });
 const loading = ref<boolean>(false);
+const codeValidation = ref<string | undefined>();
+
 const clickHandler = () => {
     loading.value = true;
     if (!newProject.value && "id" in editedProject.value)
         updateProject(editedProject.value as CompleteProject).then((response) => {
+            console.log(response);
             if (response.status === 200) {
                 globalStore.notification.content = "Project successfully updated";
                 globalStore.notification.display = true;
                 globalStore.notification.type = "SUCCESS";
+            } else if (response.status === 400 && response.data.detail === "Project code already exists") {
+                codeValidation.value = "Project code already exists";
             } else {
                 globalStore.notification.content = "Oh no, there was an error";
                 globalStore.notification.display = true;
@@ -250,6 +264,8 @@ const clickHandler = () => {
                 globalStore.notification.content = "Project successfully updated";
                 globalStore.notification.display = true;
                 globalStore.notification.type = "SUCCESS";
+            } else if (response.status === 400 && response.data.detail === "Project code already exists") {
+                codeValidation.value = "Project code already exists";
             } else {
                 globalStore.notification.content = "Oh no, there was an error";
                 globalStore.notification.display = true;
@@ -270,7 +286,6 @@ const clickHandler = () => {
 .parent {
     display: grid;
     grid-template-columns: minmax(200px, 1fr) 3fr;
-    grid-template-rows: repeat(6, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 10px;
     max-width: 1000px;
@@ -309,5 +324,12 @@ const clickHandler = () => {
     border: none;
     padding: 0;
     font-size: 16px;
+}
+
+.field-with-validation {
+    width: 100%;
+    gap: 5px;
+    display: flex;
+    flex-direction: column;
 }
 </style>

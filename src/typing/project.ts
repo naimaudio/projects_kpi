@@ -20,6 +20,7 @@ export type SubCategory =
     | "ETC"
     | "H_AMP"
     | "";
+
 export const subCategoryLabels: Record<SubCategory, string> = {
     H_CI: "Home CI",
     H_LSP: "Home Loudspeaker",
@@ -62,9 +63,9 @@ export const divisionOptions: { [key in Division]: { id: key; label: string; sub
         subDivisions: [""],
     },
 };
+
 export const classifications = ["1 STRATEGIC", "2 TACTICAL", "3 DEFENSIVE", "NC"] as const;
 export type Classification = (typeof classifications)[number];
-
 export const classificationLabels: Record<Classification, string> = {
     NC: "NC",
     "1 STRATEGIC": "Strategic",
@@ -72,7 +73,14 @@ export const classificationLabels: Record<Classification, string> = {
     "3 DEFENSIVE": "Defensive",
 } as const;
 
-export type ExpansionRenewal = "EXPANSION" | "RENEWAL" | "";
+export const expansionRenewalArray = ["Expansion", "Renewal", "NC", ""] as const;
+export type ExpansionRenewal = (typeof expansionRenewalArray)[number];
+export const expansionRenewalLabels: { [key in ExpansionRenewal]: string } = {
+    Expansion: "Expansion",
+    Renewal: "Renewal",
+    NC: "NC",
+    "": "",
+} as const;
 
 export interface Project {
     id: number;
@@ -120,9 +128,11 @@ export interface RawProjectAndPhases {
     project: RawProject;
     phases: RawProjectPhase[];
 }
+
 export interface CompleteProject extends Project {
     phases: ProjectPhase[];
 }
+
 export interface BlankProject {
     code?: string;
     division?: Division;
