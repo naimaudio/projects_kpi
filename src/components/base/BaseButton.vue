@@ -78,7 +78,7 @@ const props = withDefaults(
 } */
 
 .big {
-    font-size: 25px;
+    font-size: 23px;
     line-height: normal;
 }
 </style>

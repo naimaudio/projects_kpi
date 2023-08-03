@@ -1,7 +1,7 @@
 <template>
     <ModalComponent @close="emit('close')">
         <p class="sub-title">Favorites</p>
-        <p>Please select projects you have spend time in</p>
+        <p>Please select projects you have spent time in</p>
         <BaseTable style="width: 100%" :headers="headers" :items="selectionableProjects" @change="change" />
         <div class="footer-buttons-block">
             <fluent-button appearance="accent" @click="addFavoriteProjects">Add favorites</fluent-button>
