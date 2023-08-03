@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-deprecated-slot-attribute -->
 <template>
-    <div class="page-container">
+    <div v-if="done" class="page-container">
         <button
             class="breadcrumb-item button-style-reset clickable"
             @click="router.push({ name: 'projects', query: route.query })"
@@ -77,87 +77,94 @@
             <span>{{ editedProject?.name }}</span>
             <span>Code</span>
             <span>{{ editedProject?.code }}</span>
+            <span>Division</span>
+            <span>{{ editedProject?.division }}</span>
+            <span>Sub division</span>
+            <span>{{ editedProject?.subCategory }}</span>
             <span>Organization</span>
             <span>{{ editedProject?.entity }}</span>
         </div>
-        <h3>Project phases</h3>
-        <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
-            <AddOutlineIcon
-                clickable
-                @click="
-                    (event) => {
-                        editedProject.phases.push({
-                            projectPhase: editedProject.phases.length,
-                            startDate: undefined,
-                            endDate: undefined,
-                        });
-                    }
-                "
-            />
-            <span class="prefix align-center italic">add a phase</span>
-        </div>
-        <div v-else style="height: 24px"></div>
-        <div v-if="editedProject.phases.length >= 1" class="icon-with-text">
-            <SubtractOutlineIcon
-                clickable
-                @click="
-                    (event) => {
-                        editedProject.phases.pop();
-                    }
-                "
-            />
-            <span class="prefix align-center italic">remove a phase</span>
-        </div>
-        <div v-else style="height: 24px"></div>
-        <br />
-        <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent-phases">
-            <span>Phase code</span>
-            <span>Phase name</span>
-            <span>Phase start date</span>
-            <span>Phase end date</span>
-            <template v-for="(projectPhase, i) in editedProject.phases" :key="i">
-                <span>{{ phases[i].code }}</span>
-                <span>{{ phases[i].name }}</span>
-                <VueDatePicker
-                    :model-value="projectPhase.startDate"
-                    :min-date="i !== 0 ? editedProject.phases[i - 1].startDate : undefined"
-                    :max-date="
-                        i !== editedProject.phases.length - 1 ? editedProject.phases[i + 1].startDate : undefined
-                    "
-                    ignore-time-validation
-                    format="dd/MM/yyyy"
-                    model-type="yyyy-MM-dd"
-                    :auto-apply="true"
-                    :enable-time-picker="false"
-                    @update:model-value="
-                        (val) => {
-                            projectPhase.startDate = val;
-                            if (i !== 0) {
-                                editedProject.phases[i - 1].endDate = val;
-                            }
+        <template v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
+            <h3>Project phases</h3>
+            <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
+                <AddOutlineIcon
+                    clickable
+                    @click="
+                        (event) => {
+                            editedProject.phases.push({
+                                projectPhase: editedProject.phases.length,
+                                startDate: undefined,
+                                endDate: undefined,
+                            });
                         }
                     "
-                ></VueDatePicker>
-                <VueDatePicker
-                    v-model="projectPhase.endDate"
-                    :min-date="i !== 0 ? projectPhase.startDate : undefined"
-                    ignore-time-validation
-                    format="dd/MM/yyyy"
-                    model-type="yyyy-MM-dd"
-                    :auto-apply="true"
-                    :enable-time-picker="false"
-                    :disabled="i !== editedProject.phases.length - 1"
-                ></VueDatePicker>
-            </template>
-        </div>
-        <br />
-        <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
-            <BaseButton :disabled="loading" :loading="loading" accent @click="clickHandler">{{
-                newProject ? "Create Project" : "Update Project"
-            }}</BaseButton>
-        </div>
+                />
+                <span class="prefix align-center italic">add a phase</span>
+            </div>
+            <div v-else style="height: 24px"></div>
+            <div v-if="editedProject.phases.length >= 1" class="icon-with-text">
+                <SubtractOutlineIcon
+                    clickable
+                    @click="
+                        (event) => {
+                            editedProject.phases.pop();
+                        }
+                    "
+                />
+                <span class="prefix align-center italic">remove a phase</span>
+            </div>
+            <div v-else style="height: 24px"></div>
+            <br />
+            <div class="parent-phases">
+                <span>Phase code</span>
+                <span>Phase name</span>
+                <span>Phase start date</span>
+                <span>Phase end date</span>
+                <template v-for="(projectPhase, i) in editedProject.phases" :key="i">
+                    <span>{{ phases[i].code }}</span>
+                    <span>{{ phases[i].name }}</span>
+                    <VueDatePicker
+                        :model-value="projectPhase.startDate"
+                        :min-date="i !== 0 ? editedProject.phases[i - 1].startDate : undefined"
+                        :max-date="
+                            i !== editedProject.phases.length - 1 ? editedProject.phases[i + 1].startDate : undefined
+                        "
+                        ignore-time-validation
+                        format="dd/MM/yyyy"
+                        model-type="yyyy-MM-dd"
+                        :auto-apply="true"
+                        :enable-time-picker="false"
+                        @update:model-value="
+                            (val) => {
+                                projectPhase.startDate = val;
+                                if (i !== 0) {
+                                    editedProject.phases[i - 1].endDate = val;
+                                }
+                            }
+                        "
+                    ></VueDatePicker>
+                    <VueDatePicker
+                        v-model="projectPhase.endDate"
+                        :min-date="i !== 0 ? projectPhase.startDate : undefined"
+                        ignore-time-validation
+                        format="dd/MM/yyyy"
+                        model-type="yyyy-MM-dd"
+                        :auto-apply="true"
+                        :enable-time-picker="false"
+                        :disabled="i !== editedProject.phases.length - 1"
+                    ></VueDatePicker>
+                </template>
+            </div>
+            <br />
+            <div>
+                <BaseButton :disabled="loading" :loading="loading" accent @click="clickHandler">{{
+                    newProject ? "Create Project" : "Update Project"
+                }}</BaseButton>
+            </div>
+        </template>
         <br />
     </div>
+    <div v-else class="centered"><fluent-progress-ring /></div>
 </template>
 
 <script setup lang="ts">
@@ -217,16 +224,17 @@ const selectKey = ref(1294821749);
 const loadingInitialRequest = ref<boolean>(false);
 const project = ref<CompleteProject | undefined>();
 const find = projectStore.projects.find((p) => p.id === projectId.value);
+const done = ref<boolean>(false);
 console.log("aa", find);
 if (find === undefined) {
     newProject.value = true;
+    done.value = true;
 } else {
     loadingInitialRequest.value = true;
     getProject(find.code).then((response) => {
-        console.log(response);
         project.value = rawProjectToProjectComplete(response.data);
         editedProject.value = rawProjectToProjectComplete(response.data);
-        console.log(project.value);
+        done.value = true;
     });
 }
 const editedProject = ref<BlankProject>({
@@ -279,6 +287,13 @@ const clickHandler = () => {
 </script>
 
 <style>
+.centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: fit-content;
+}
 .inline-field {
     display: inline-block;
     margin: auto;
