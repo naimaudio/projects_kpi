@@ -1,87 +1,100 @@
 <template>
     <div class="page-container">
         <h1 class="title">KPI</h1>
-        <div id="drop-target" style="display: flex; gap: 5px; flex-wrap: wrap">
-            <div
-                v-for="(graph, index) in graphs"
-                :id="graph.id"
-                :key="graph.id"
-                class="graph-container"
-                :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
-                draggable="true"
-                @drop="(event) => onDropHandler(event, index)"
-            ></div>
+        <h2 v-if="project !== undefined">
+            <span>{{ project.name }}</span>
+            <span style="font-weight: 400; margin-left: 15px">{{ project.code }}</span>
+        </h2>
+        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 20px">
+            <div v-for="(graph, index) in graphs" :key="graph.id">
+                <div
+                    v-show="projectId !== undefined"
+                    :id="graph.id"
+                    class="graph-container"
+                    :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
+                    draggable="true"
+                    @drop="(event) => onDropHandler(event, index)"
+                ></div>
+            </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import * as echarts from "echarts/core";
-import { onMounted, ref } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { cloneDeep } from "lodash";
-
-const options = {
+import { type chartType } from "@/typing";
+import { getKPI } from "@/API/kpi_requests";
+import { phases } from "@/stores/nonReactiveStore";
+import { useRoute } from "vue-router";
+import { type Project } from "@/typing/project";
+import { useProjectStore } from "../../stores/projectStore";
+const options = ref({
     barOption: {
         xAxis: {},
         yAxis: {
             data: ["Forecast", "Reality"],
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+                dataView: {},
+            },
+        },
+        tooltip: {
+            trigger: null,
         },
         grid: {
             top: "30%",
             containLabel: true,
         },
         legend: {
-            data: ["NPI", "DMU", "POC/PF", "ES", "EVT", "DVT", "PVT", "STOP"],
+            data: phases.map((val) => val.code),
             top: "14%",
         },
         title: { text: "TDE by project phase" },
         series: [
             {
                 data: [10, 22],
-                name: "NPI",
+                name: phases[0].code,
                 stack: "y",
                 type: "bar",
             },
             {
                 data: [5, 4],
-                name: "DMU",
+                name: phases[1].code,
                 stack: "y",
                 type: "bar",
             },
             {
                 data: [5, 4],
-                name: "POC/PF",
+                name: phases[2].code,
                 stack: "y",
                 type: "bar",
             },
             {
                 data: [5, 4],
-                name: "ES",
+                name: phases[3].code,
                 stack: "y",
                 type: "bar",
             },
             {
                 data: [5, 4],
-                name: "EVT",
-                stack: "y",
-                type: "bar",
-            },
-
-            {
-                data: [5, 4],
-                name: "DVT",
+                name: phases[4].code,
                 stack: "y",
                 type: "bar",
             },
 
             {
                 data: [5, 4],
-                name: "PVT",
+                name: phases[5].code,
                 stack: "y",
                 type: "bar",
             },
+
             {
                 data: [5, 4],
-                name: "STOP",
+                name: phases[6].code,
                 stack: "y",
                 type: "bar",
             },
@@ -89,13 +102,13 @@ const options = {
     },
     lineOption: {
         title: {
-            text: "Total TDE",
+            text: "Total hours spent",
         },
         tooltip: {
             trigger: "axis",
         },
         legend: {
-            data: ["Spend", "Forecast"],
+            data: ["Spent"],
         },
         grid: {
             right: "4%",
@@ -105,6 +118,7 @@ const options = {
         toolbox: {
             feature: {
                 saveAsImage: {},
+                dataView: {},
             },
         },
         xAxis: {
@@ -117,40 +131,32 @@ const options = {
         },
         series: [
             {
-                name: "Spend",
+                name: "Spent",
                 type: "line",
                 data: [0, 14, 25, 30, 60, 85, 103],
             },
-            {
-                name: "Forecast",
-                type: "line",
-                data: [0, 15, 23, 28, 32, 48, 73],
-            },
         ],
     },
-    pieOption: {
+    TDEDomainPieOption: {
         title: {
             text: "TDE by Domain",
-            subtext: "Fake Data",
             left: "center",
         },
         tooltip: {
             trigger: "item",
         },
-
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+                dataView: {},
+            },
+        },
         series: [
             {
-                name: "Access From",
+                name: "Domain   hours",
                 type: "pie",
                 radius: "50%",
-                data: [
-                    { value: 1048, name: "Tests" },
-                    { value: 735, name: "Mechanics" },
-                    { value: 580, name: "Acoustics" },
-                    { value: 484, name: "Project Management" },
-                    { value: 300, name: "Software" },
-                    { value: 300, name: "Hardware" },
-                ],
+
                 emphasis: {
                     itemStyle: {
                         shadowBlur: 10,
@@ -161,7 +167,8 @@ const options = {
             },
         ],
     },
-};
+});
+
 const graphs = ref<
     {
         id: string;
@@ -169,27 +176,75 @@ const graphs = ref<
         minHeight: string;
         defaultWidth?: string;
         defaultHeight?: string;
-        option: "barOption" | "lineOption" | "pieOption";
+        option: "barOption" | "lineOption" | "TDEDomainPieOption";
+        fetch_uri?: string;
+        type: chartType;
     }[]
 >([
-    { id: "barChart", minWidth: "600px", minHeight: "300px", defaultWidth: "1070px", option: "barOption" },
-    { id: "lineChart", minWidth: "600px", minHeight: "300px", option: "lineOption" },
-    { id: "pieChart", minWidth: "400px", minHeight: "300px", option: "pieOption" },
+    {
+        id: "lineChart",
+        minWidth: "600px",
+        minHeight: "300px",
+        option: "lineOption",
+        type: "line",
+        fetch_uri: `kpi/line/hour_expenditure`,
+    },
+    {
+        id: "pieChart",
+        minWidth: "400px",
+        minHeight: "300px",
+        option: "TDEDomainPieOption",
+        type: "pie",
+        fetch_uri: "kpi/pie/hours_by_domain",
+    },
+    {
+        id: "barChart",
+        minWidth: "600px",
+        minHeight: "300px",
+        defaultWidth: "1070px",
+        option: "barOption",
+        type: "bar",
+    },
 ]);
+const route = useRoute();
+const projectStore = useProjectStore();
+const projectId = computed<number | undefined>(() => {
+    const pId = Number(route.query.projectId);
+    return isNaN(pId) ? undefined : pId;
+});
 
-// const pieChart = ref<ComponentPublicInstance | null>(null);
+const project = computed<Project | undefined>(() => {
+    return projectStore.projects.find((p) => p.id === projectId.value);
+});
+
+watch(projectId, (pId) => {
+    graphUpdate(pId);
+});
 onMounted(() => {
-    graphs.value.forEach((graphInfo, index) => {
+    graphUpdate(projectId.value);
+});
+
+function graphUpdate(pId: number) {
+    graphs.value.forEach(async (graphInfo) => {
         const graph = document.getElementById(graphInfo.id);
-        const chartE = echarts.init(graph);
         if (graph !== null) {
+            let chartE: echarts.ECharts;
+            const chartE2 = echarts.getInstanceByDom(graph);
+            chartE = chartE2 === undefined ? echarts.init(graph) : chartE2;
             if (graphInfo.defaultWidth) {
                 graph.style.width = graphInfo.defaultWidth;
             }
             if (graphInfo.defaultHeight) {
                 graph.style.height = graphInfo.defaultHeight;
             }
-            chartE.setOption(options[graphInfo.option]);
+            if (graphInfo.fetch_uri) {
+                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, pId, true);
+                options.value[graphInfo.option] = {
+                    ...options.value[graphInfo.option],
+                    ...updatedOptions,
+                };
+            }
+            chartE.setOption(options.value[graphInfo.option]);
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
                 const crt = this;
@@ -209,7 +264,7 @@ onMounted(() => {
             resizeObserver.observe(graph);
         }
     });
-});
+}
 
 const onDropHandler = (event: DragEvent, j: number) => {
     const i = graphs.value.findIndex((graph) => {
