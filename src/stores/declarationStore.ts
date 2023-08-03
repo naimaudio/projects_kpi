@@ -71,7 +71,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
                 favorite: isFavorite(project.id),
                 name: project.name,
                 code: project.code,
-                time_spend: 0,
+                time_spent: 0,
             };
             return displayableProject;
         });
@@ -81,7 +81,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
 
         sortedProjects.forEach((p) => {
             if (cumulTDE[p.id] !== undefined) {
-                p.time_spend = cumulTDE[p.id];
+                p.time_spent = cumulTDE[p.id];
             }
         });
         return sortedProjects;

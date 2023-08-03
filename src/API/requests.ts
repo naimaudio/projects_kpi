@@ -3,8 +3,8 @@ import type { CompleteProject, RawProject, RawProjectAndPhases, RawProjectPhase 
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
 
-const origin = envVariableWithValidation("VITE_FAST_API_URI");
-async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
+export const origin = envVariableWithValidation("VITE_FAST_API_URI");
+export async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
     const objKey = localStorage[`msal.token.keys.${envVariableWithValidation("VITE_CLIENT_ID")}`];
     const timeout = 10000;
     const controller = new AbortController();
@@ -141,7 +141,7 @@ export async function putDomain(userId: number, domain: domain) {
 
 export async function postBufferTable(
     userId: number,
-    timeSpendByProject: { projectId: number; hours: number }[],
+    timeSpentByProject: { projectId: number; hours: number }[],
     day: dayNb,
     week: number,
     year: number
@@ -152,7 +152,7 @@ export async function postBufferTable(
             "Content-Type": "application/json",
         },
         body: JSON.stringify(
-            timeSpendByProject.map((tsbp) => {
+            timeSpentByProject.map((tsbp) => {
                 return {
                     user_id: userId,
                     project_id: tsbp.projectId,

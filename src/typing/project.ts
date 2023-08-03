@@ -2,7 +2,7 @@ export interface UserProject {
     id: number;
     code: string;
     name: string;
-    time_spend: number;
+    time_spent: number;
     favorite: boolean;
 }
 

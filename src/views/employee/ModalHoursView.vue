@@ -8,7 +8,7 @@
     >
         <p class="sub-title">{{ workDays[props.day] }}</p>
         <p>
-            Hours spend on projects
+            Project hours on
             {{ dayNumberToString(props.day, Number(route.params.week), Number(route.params.year)) }}
         </p>
         <HoursForm

@@ -4,11 +4,15 @@
             <div>
                 <span class="title">Projects</span>
             </div>
-            <BaseButton big @click="router.push({ name: 'newProject', query: route.query })">
+            <BaseButton
+                v-if="userStore.userRoleGetter === 'Project Manager' || userStore.userRoleGetter === 'Business Manager'"
+                big
+                @click="router.push({ name: 'newProject', query: route.query })"
+            >
                 <template #start>
                     <AddOutlineIcon big />
                 </template>
-                <template #default> New project</template></BaseButton
+                <template #default> <span>New project</span></template></BaseButton
             >
         </div>
         <div v-if="declarationStore.getUserProjects.length !== 0">
@@ -44,7 +48,7 @@ const router = useRouter();
 const headers: Header[] = [
     { name: "Code", id: "code", filterable: false, width: "80px" },
     { name: "Name", id: "name", filterable: false, clickable: true },
-    { name: "Personal time (h)", id: "time_spend", filterable: false },
+    { name: "Personal time (h)", id: "time_spent", filterable: false },
     { name: "Fav", id: "favorite", filterable: false, width: "80px" },
 ];
 const declarationStore = useDeclarationStore();
