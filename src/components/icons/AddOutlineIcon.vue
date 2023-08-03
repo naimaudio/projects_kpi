@@ -2,8 +2,8 @@
     <div :class="{ clickable: props.clickable, 'svg-container': !big, 'big-svg-container': big }">
         <svg
             class="center"
-            :width="big ? 40 : 18"
-            :height="big ? 40 : 18"
+            :width="big ? 30 : 18"
+            :height="big ? 30 : 18"
             fill="none"
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"

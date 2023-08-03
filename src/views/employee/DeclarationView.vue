@@ -20,7 +20,7 @@
             <div v-if="weeks.length !== 0" class="column-container">
                 <span v-for="week in weeks" :key="week.week">
                     <BaseButton
-                        style="width: 81px; display: inline"
+                        style="width: 90px; display: inline"
                         @click="
                             () =>
                                 router.push({

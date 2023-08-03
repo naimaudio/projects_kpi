@@ -60,13 +60,13 @@ const emits = defineEmits<{
 <style scoped>
 .table-raw-container-delete {
     display: grid;
-    grid-template-columns: 20px 1fr 2fr 6fr;
+    grid-template-columns: 20px 1fr 2fr 3fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }
 .table-raw-container {
     display: grid;
-    grid-template-columns: 1fr 2fr 6fr;
+    grid-template-columns: 1fr 2fr 3fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }

@@ -3,7 +3,8 @@
     --gap-inline: 6px;
     --card-border-radius: 8px;
     --button-border-radius: 4px;
-    --header-height: 60px;
+    --header-height: 70px;
+    --sidebar-width: 300px
 }
 
 
@@ -39,7 +40,9 @@
   border: none;
   padding: 0;
 }
-
+.button-style-reset:hover {
+  cursor: pointer;
+}
 .raw-container {
     display: flex;
     gap: 14px;
@@ -76,8 +79,8 @@
 
 .big-svg-container {
   display: flex;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   border-radius: 100%;
   user-select: none;
 }

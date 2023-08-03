@@ -2,9 +2,11 @@
     <div class="declaration-inputs">
         <div class="table-raw-container table-header">
             <div></div>
+            <div></div>
             <span>Hours</span>
         </div>
         <div v-for="declaration in filteredDeclarations" :key="declaration.name" class="table-raw-container">
+            <span class="align-center">{{ declaration.projectCode }}</span>
             <span class="align-center">{{ declaration.name }}</span>
             <div style="width: 100px">
                 <span>{{ declaration.hours }}</span>
@@ -27,7 +29,7 @@ const filteredDeclarations = computed<DeclarationInput[]>(() => props.modelValue
 <style scoped>
 .table-raw-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 2fr 2fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }
