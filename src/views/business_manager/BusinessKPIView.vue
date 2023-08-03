@@ -21,7 +21,8 @@ import { onMounted, ref } from "vue";
 import { cloneDeep } from "lodash";
 import { type chartType } from "@/typing";
 import { getKPI } from "@/API/kpi_requests";
-const options = ref({
+import type { ECOption } from "@/main";
+const options = ref<Record<string, ECOption>>({
     lineOption: {
         title: {
             text: "Total hours spent",
@@ -140,13 +141,12 @@ onMounted(() => {
             }
             if (graphInfo.fetch_uri) {
                 const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, undefined, false);
-                console.log(updatedOptions);
                 options.value[graphInfo.option] = {
                     ...options.value[graphInfo.option],
                     ...updatedOptions,
                 };
             }
-            console.log(options.value[graphInfo.option]);
+
             chartE.setOption(options.value[graphInfo.option]);
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);

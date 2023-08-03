@@ -1,7 +1,8 @@
-import type { EChartsOption } from "echarts/types/dist/shared";
 import { fetcher, origin } from "./requests";
 import { phases } from "@/stores/nonReactiveStore";
 import { type chartType } from "@/typing";
+import type { ECOption } from "@/main";
+import type { PieSeriesOption } from "echarts/charts";
 
 interface KPISeries<T extends chartType> {
     unit: "h" | "FTE";
@@ -24,7 +25,7 @@ export async function getKPI(
     fetch_uri: string,
     projectId?: number,
     cumulative?: boolean
-): Promise<EChartsOption> {
+): Promise<ECOption> {
     const complete_fetch_uri =
         projectId !== undefined && cumulative !== undefined
             ? `${origin}/${fetch_uri}?project_id=${projectId}&cumulative=${cumulative}`
@@ -45,7 +46,7 @@ export async function getKPI(
         return {
             series: [
                 {
-                    data: Object.entries(data.series[0].data).map((value) => {
+                    data: Object.entries(data.series[0].data).map<PieSeriesOption>((value) => {
                         return { value: value[1], name: value[0] };
                     }),
                     emphasis: {

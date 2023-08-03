@@ -48,7 +48,6 @@ import { hoursRegistration } from "@/API/requests";
 import ModalComponent from "@/components/ModalComponent.vue";
 import type { DeclarationInput } from "@/typing/index";
 import { computed, ref } from "vue";
-import type { RouteLocationRaw } from "vue-router";
 import { useGlobalStore } from "../stores/globalStore";
 import { useRouter } from "vue-router";
 import { initialization } from "@/utilities/initialization";
@@ -57,10 +56,9 @@ import BaseButton from "@/components/base/BaseButton.vue";
 const props = defineProps<{
     declaration: DeclarationInput[];
     comment?: string;
-    userId: number;
+    userId?: number;
     weekNumber: number;
     year: number;
-    closeRoute: RouteLocationRaw;
     confirmation: boolean;
 }>();
 const globalStore = useGlobalStore();
@@ -75,27 +73,31 @@ const emits = defineEmits<{
 const loading = ref<boolean>(false);
 const router = useRouter();
 async function validateDeclaration() {
-    loading.value = true;
-    globalStore.notification.display = false;
-    const response = await hoursRegistration(
-        props.declaration,
-        props.userId,
-        props.weekNumber,
-        props.year,
-        props.comment
-    );
-    if (response.status !== 200) {
-        globalStore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
-        globalStore.notification.type = "FAILURE";
-        globalStore.notification.display = true;
+    if (props.userId !== undefined) {
+        loading.value = true;
+        globalStore.notification.display = false;
+        const response = await hoursRegistration(
+            props.declaration,
+            props.userId,
+            props.weekNumber,
+            props.year,
+            props.comment
+        );
+        if (response.status !== 200) {
+            globalStore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
+            globalStore.notification.type = "FAILURE";
+            globalStore.notification.display = true;
+        } else {
+            globalStore.notification.content = "Declaration has been registered";
+            globalStore.notification.type = "SUCCESS";
+            globalStore.notification.display = true;
+            router.push({ name: "declaration" });
+        }
+        initialization();
+        loading.value = false;
     } else {
-        globalStore.notification.content = "Declaration has been registered";
-        globalStore.notification.type = "SUCCESS";
-        globalStore.notification.display = true;
-        router.push({ name: "declaration" });
+        console.warn("userId was not provided");
     }
-    initialization();
-    loading.value = false;
 }
 </script>
 

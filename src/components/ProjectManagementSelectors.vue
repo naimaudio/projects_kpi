@@ -3,7 +3,7 @@
         <div class="field-with-legend">
             <span>Project</span>
             <Combobox
-                :model-value="projectStore.projectCodes[projectId]"
+                :model-value="projectId === undefined ? undefined : projectStore.projectCodes[projectId]"
                 @update:model-value="(pId) => onProjectChange(pId)"
             >
                 <ComboboxInput
@@ -117,11 +117,14 @@ const projectId = computed<undefined | number>(() => {
 function onProjectChange(pCode: string) {
     router.push({ ...route, query: { ...route.query, projectId: projectStore.projectCodeIds[pCode] } });
 }
-function onDateRangeChange(period: { year: number; month: number }[]) {
+function onDateRangeChange(period: string[]) {
     router.push({ ...route, query: { ...route.query, period: period } });
 }
 function onUnitChange(event: any) {
-    router.push({ name: route.name, query: { ...route.query, unit: event.target.value } });
+    router.push({
+        name: route.name === null ? undefined : route.name,
+        query: { ...route.query, unit: event.target.value },
+    });
 }
 </script>
 <style scoped>

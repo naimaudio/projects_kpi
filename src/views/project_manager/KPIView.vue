@@ -29,7 +29,9 @@ import { phases } from "@/stores/nonReactiveStore";
 import { useRoute } from "vue-router";
 import { type Project } from "@/typing/project";
 import { useProjectStore } from "../../stores/projectStore";
-const options = ref({
+import type { ECOption } from "@/main";
+
+const options = ref<Record<string, ECOption>>({
     barOption: {
         xAxis: {},
         yAxis: {
@@ -42,7 +44,7 @@ const options = ref({
             },
         },
         tooltip: {
-            trigger: null,
+            trigger: undefined,
         },
         grid: {
             top: "30%",
@@ -218,10 +220,14 @@ const project = computed<Project | undefined>(() => {
 });
 
 watch(projectId, (pId) => {
-    graphUpdate(pId);
+    if (pId !== undefined) {
+        graphUpdate(pId);
+    }
 });
 onMounted(() => {
-    graphUpdate(projectId.value);
+    if (projectId.value !== undefined) {
+        graphUpdate(projectId.value);
+    }
 });
 
 function graphUpdate(pId: number) {

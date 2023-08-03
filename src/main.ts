@@ -28,14 +28,31 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import * as echarts from "echarts/core";
 
 import { TitleComponent, GridComponent, LegendComponent, TooltipComponent, ToolboxComponent } from "echarts/components";
-import { type BarSeriesOption, BarChart, LineChart, PieChart } from "echarts/charts";
+import type {
+    TitleComponentOption,
+    GridComponentOption,
+    LegendComponentOption,
+    TooltipComponentOption,
+    ToolboxComponentOption,
+} from "echarts/components";
+import { BarChart, LineChart, PieChart } from "echarts/charts";
+import type { BarSeriesOption, LineSeriesOption, PieSeriesOption } from "echarts/charts";
 import { SVGRenderer } from "echarts/renderers";
 
 extend(weekOfYear);
 extend(isoWeekInYear);
 extend(isLeapYear);
 
-export type ECOption = ComposeOption<BarSeriesOption>;
+export type ECOption = ComposeOption<
+    | BarSeriesOption
+    | LineSeriesOption
+    | PieSeriesOption
+    | TitleComponentOption
+    | GridComponentOption
+    | LegendComponentOption
+    | TooltipComponentOption
+    | ToolboxComponentOption
+>;
 
 echarts.use([
     TitleComponent,

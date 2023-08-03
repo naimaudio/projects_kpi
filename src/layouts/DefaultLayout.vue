@@ -14,7 +14,9 @@
                     style="image-rendering: high-quality; margin-left: 10px; height: 100%"
                 />
             </div>
-            <ProjectManagementSelectors v-if="['KPI', 'forecast', 'data'].includes(route.name)" />
+            <ProjectManagementSelectors
+                v-if="route.name === 'KPI' || route.name === 'forecast' || route.name === 'data'"
+            />
             <div>
                 <RouterLink class="avatar-container raw-container" :to="{ name: 'profile', query: route.query }">
                     <span>{{ userStore.user?.username }}</span>
@@ -69,7 +71,7 @@ import { useUserStore } from "@/stores/userStore";
 import { computed, ref } from "vue";
 import NotificationCard from "@/components/NotificationCard.vue";
 import { useGlobalStore } from "@/stores/globalStore";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import PanelExpendIcon from "@/components/icons/PanelExpendIcon.vue";
 import PanelContractIcon from "@/components/icons/PanelContractIcon.vue";
 import { routes_by_access } from "@/stores/nonReactiveStore";

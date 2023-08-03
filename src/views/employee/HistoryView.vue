@@ -75,10 +75,16 @@ const currentDeclarationData = computed<DeclarationInput[]>(() => {
                 ? false
                 : value.week === currentDeclaration.value.week && value.year === currentDeclaration.value.year
         )
-        .map((decl) => {
+        .map<DeclarationInput>((decl) => {
+            const name = projectStore.projects.find((project) => project.id === decl.projectId)?.name;
+            if (name === undefined) {
+                throw Error("Invalid project ID");
+            }
             return {
-                ...decl,
-                name: projectStore.projects.find((project) => project.id === decl.projectId)?.name,
+                hours: decl.hours,
+                projectId: decl.projectId,
+                projectCode: decl.projectCode,
+                name: name,
             };
         });
 });
