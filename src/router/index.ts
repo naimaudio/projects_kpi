@@ -92,7 +92,6 @@ const router = createRouter({
                     component: ProfileView,
                     meta: { minimalAccessRole: "Employee" },
                 },
-
                 {
                     path: "/declaration_change",
                     name: "change",
@@ -152,7 +151,6 @@ router.beforeEach(async (to) => {
                 });
             }
             const role = userStore.userRoleGetter;
-            console.log(role);
 
             if (role === undefined) {
                 throw Error("Can't happen");
@@ -167,6 +165,7 @@ router.beforeEach(async (to) => {
                 return;
             }
         }
+        userStore.lastRoute = to;
         return router.push({ name: "login" });
     }
 });

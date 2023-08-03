@@ -33,15 +33,26 @@ import { initialization } from "@/utilities/initialization";
 import { useGlobalStore } from "@/stores/globalStore";
 import NotificationCard from "@/components/NotificationCard.vue";
 import { msalInstance } from "@/auth_config/auth";
+import { useUserStore } from "@/stores/userStore";
+import { cloneDeep } from "lodash";
 const globalStore = useGlobalStore();
 const router = useRouter();
-
+const userStore = useUserStore();
 async function signIn() {
     await msalInstance
         .loginPopup({ scopes: ["User.Read"] })
 
         .then(() => initialization())
-        .then(() => router.push({ name: "declaration" }))
+        .then(() => {
+            console.log(1);
+            if (userStore.lastRoute !== undefined) {
+                const lastRoute = cloneDeep(userStore.lastRoute);
+                userStore.lastRoute = undefined;
+                router.push(lastRoute);
+            } else {
+                router.push({ name: "declaration" });
+            }
+        })
         .catch((browserAuthError: BrowserAuthError) => {
             console.error(browserAuthError);
             globalStore.notification = {
