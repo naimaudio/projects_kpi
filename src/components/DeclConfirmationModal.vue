@@ -1,7 +1,10 @@
 <template>
     <ModalComponent @close="() => emits('close')">
         <span class="sub-title">Week {{ weekNumber }}</span>
-        <p>Please confirm the declaration for the week {{ props.weekNumber }} of {{ props.year }}.</p>
+        <p v-if="confirmation">
+            Please confirm the declaration for the week {{ props.weekNumber }} of {{ props.year }}.
+        </p>
+        <p v-else>Declaration for the week {{ props.weekNumber }} of {{ props.year }}.</p>
         <div class="table-raw-gap" />
         <div class="declaration-container column-flex">
             <div class="declaration-inputs prefix">
@@ -11,6 +14,7 @@
                 <div class="table-raw-gap" />
                 <div class="table-raw-container">
                     <span>Total</span>
+                    <div></div>
                     <div>
                         <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
                         <span> / 35</span>
@@ -20,12 +24,13 @@
                 <div v-if="props.comment !== undefined && props.comment !== ''" class="table-raw-container-2">
                     <span>Commentary</span>
                     <span> {{ props.comment }} </span>
+                    <br />
                 </div>
             </div>
         </div>
         <div class="table-raw-gap" />
-        <p>You will not be able to update this informations latter.</p>
-        <div class="footer-buttons-block">
+        <p v-if="confirmation">You will not be able to update this information later.</p>
+        <div v-if="confirmation" class="footer-buttons-block">
             <BaseButton
                 :loading="loading"
                 accent
@@ -56,6 +61,7 @@ const props = defineProps<{
     weekNumber: number;
     year: number;
     closeRoute: RouteLocationRaw;
+    confirmation: boolean;
 }>();
 const globalStore = useGlobalStore();
 const sumProjectHours = computed<number>(() => {
@@ -106,7 +112,7 @@ async function validateDeclaration() {
 
 .table-raw-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 2fr 2fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }
@@ -117,7 +123,7 @@ async function validateDeclaration() {
 
 .table-raw-container-2 {
     display: grid;
-    grid-template-columns: 1fr 3fr;
+    grid-template-columns: 1fr 4fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }

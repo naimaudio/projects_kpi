@@ -3,7 +3,12 @@
         <h1 class="title">History</h1>
         <div style="display: flex; width: auto; height: 15px" />
         <div v-if="declarations.length !== 0">
-            <BaseTable :headers="commentHeaders" :items="comments" />
+            <BaseTable
+                :headers="commentHeaders"
+                clickable-row
+                :items="declarations"
+                @raw-click="(rowId: number) => (currentDeclaration = declarations.find((decl) => decl.id === rowId))"
+            />
         </div>
         <div v-else class="centered-flex">
             <div class="divider"></div>
@@ -11,13 +16,26 @@
             <img src="@/assets/icons/slightly-smiling-face.png" alt="Slightly Smiling Face" width="60" height="60" />
         </div>
     </div>
+    <DeclConfirmationModal
+        v-if="currentDeclaration !== undefined"
+        :comment="currentDeclaration.comment"
+        :user-id="userStore.userIdGetter"
+        :declaration="currentDeclarationData"
+        :week-number="currentDeclaration.week"
+        :year="currentDeclaration.year"
+        :confirmation="false"
+        @close="currentDeclaration = undefined"
+    />
 </template>
 
 <script setup lang="ts">
 import { useDeclarationStore } from "@/stores/declarationStore";
-import type { Header } from "@/typing";
-import { computed } from "vue";
+import type { Header, DeclRecord, DeclarationInput } from "@/typing";
+import { computed, ref } from "vue";
 import BaseTable from "@/components/base/BaseTable.vue";
+import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
+import { useUserStore } from "../../stores/userStore";
+import { useProjectStore } from "../../stores/projectStore";
 
 const commentHeaders: Header[] = [
     {
@@ -37,6 +55,7 @@ const commentHeaders: Header[] = [
         name: "Project codes",
         filterable: false,
         width: "2fr",
+        clickable: true,
     },
     {
         id: "comment",
@@ -45,12 +64,25 @@ const commentHeaders: Header[] = [
         width: "3fr",
     },
 ];
+const projectStore = useProjectStore();
 const declarationStore = useDeclarationStore();
-const declarations = computed(() => {
-    return declarationStore.getDeclarations;
+const userStore = useUserStore();
+const currentDeclaration = ref<undefined | DeclRecord>();
+const currentDeclarationData = computed<DeclarationInput[]>(() => {
+    return declarationStore.getDeclarations
+        .filter((value) =>
+            currentDeclaration.value === undefined
+                ? false
+                : value.week === currentDeclaration.value.week && value.year === currentDeclaration.value.year
+        )
+        .map((decl) => {
+            return {
+                ...decl,
+                name: projectStore.projects.find((project) => project.id === decl.projectId)?.name,
+            };
+        });
 });
-
-const comments = computed(() => {
+const declarations = computed(() => {
     return declarationStore.records.map((record) => {
         return { ...record, comment: record.comment === undefined ? "" : record.comment };
     });

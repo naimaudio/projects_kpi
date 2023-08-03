@@ -106,6 +106,7 @@
                                 class="table-cell-left"
                             >
                                 <DeleteOutlineIcon
+                                    v-if="declaration.projectId !== 186"
                                     clickable
                                     @click="
                                         () => {
@@ -197,6 +198,7 @@
         :week-number="weekNumber"
         :user-id="userId"
         :close-route="route"
+        :confirmation="true"
         @close="confirmationModal = false"
     />
     <ModalHoursView
