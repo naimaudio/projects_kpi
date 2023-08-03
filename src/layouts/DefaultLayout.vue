@@ -1,7 +1,7 @@
 <template>
     <div style="position: absolute; top: 0; bottom: 0; right: 0; left: 0">
         <div id="headerbar">
-            <div style="display: flex; align-items: center">
+            <div style="display: flex; align-items: center; width: var(--sidebar-width)">
                 <PanelExpendIcon v-if="!showSideBar" style="margin-left: 25px" clickable @click="showSideBar = true" />
                 <PanelContractIcon
                     v-if="showSideBar"
@@ -14,8 +14,9 @@
                     style="image-rendering: high-quality; margin-left: 10px; height: 100%"
                 />
             </div>
+            <ProjectManagementSelectors v-if="['KPI', 'forecast', 'data'].includes(route.name)" />
             <div>
-                <RouterLink class="avatar-container raw-container" to="/profile">
+                <RouterLink class="avatar-container raw-container" :to="{ name: 'profile', query: route.query }">
                     <span>{{ userStore.user?.username }}</span>
                     <BaseAvatar v-if="initials !== undefined" :initials="initials" />
                 </RouterLink>
@@ -28,11 +29,15 @@
                         <div v-for="routes in routeLinks" :key="routes.label" class="sub-menu">
                             <span class="group-link">{{ routes.label }}</span>
                             <RouterLink
-                                v-for="{ label, link } in routes.subgroup"
+                                v-for="{ label, link, secondaryLinks } in routes.subgroup"
                                 :key="label"
                                 class="base-links"
-                                :to="link"
-                                :class="{ 'selected-link': link.includes(currentRoute) }"
+                                :to="{ name: link, query: route.query }"
+                                :class="{
+                                    'selected-link':
+                                        route.name === link ||
+                                        (secondaryLinks !== undefined && secondaryLinks.find((l) => l === route.name)),
+                                }"
                             >
                                 {{ label }}
                             </RouterLink>
@@ -64,11 +69,11 @@ import { useUserStore } from "@/stores/userStore";
 import { computed, ref } from "vue";
 import NotificationCard from "@/components/NotificationCard.vue";
 import { useGlobalStore } from "@/stores/globalStore";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import PanelExpendIcon from "@/components/icons/PanelExpendIcon.vue";
 import PanelContractIcon from "@/components/icons/PanelContractIcon.vue";
 import { routes_by_access } from "@/stores/nonReactiveStore";
-
+import ProjectManagementSelectors from "@/components/ProjectManagementSelectors.vue";
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
 const initials = computed<string | undefined>(() =>
@@ -78,8 +83,9 @@ const initials = computed<string | undefined>(() =>
         .join("")
 );
 const route = useRoute();
-const currentRoute = computed<string>(() => route.path);
-const routeLinks = computed<{ label: string; subgroup: { label: string; link: string }[] }[]>(() => {
+const routeLinks = computed<
+    { label: string; subgroup: { label: string; link: string; secondaryLinks?: string[] }[] }[]
+>(() => {
     if (userStore.userRoleGetter !== undefined) {
         return routes_by_access[userStore.userRoleGetter];
     } else {
@@ -90,18 +96,15 @@ const routeLinks = computed<{ label: string; subgroup: { label: string; link: st
 const closeNotif = async () => {
     globalStore.notification.display = false;
 };
-
+console.log(route.name);
 const showSideBar = ref<boolean>(true);
 </script>
 
 <style scoped>
-.button-style-reset:hover {
-    cursor: pointer;
-}
-
 #sidebar {
-    position: relative;
-    width: 280px;
+    position: static;
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
     background-color: white;
     border-right: 1px solid #e6e6e6;
     overflow-y: auto;
@@ -117,12 +120,11 @@ const showSideBar = ref<boolean>(true);
     z-index: 2;
     height: var(--header-height);
     background-color: white;
-    border-right: 1px solid #e6e6e6;
     box-shadow: rgb(15, 108, 189) 0px 0px 4px -2px;
 }
 
 #main-section {
-    position: static;
+    position: relative;
     width: 100%;
     overflow-y: auto;
 }

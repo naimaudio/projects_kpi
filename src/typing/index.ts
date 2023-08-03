@@ -112,3 +112,5 @@ export interface RawBufferRecord {
     project_id: number;
     daily_hours: number;
 }
+
+export type chartType = "pie" | "line" | "bar";
