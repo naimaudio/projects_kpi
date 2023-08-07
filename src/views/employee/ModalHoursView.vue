@@ -61,7 +61,6 @@ const emits = defineEmits<{
 const globalStore = useGlobalStore();
 const validation = async () => {
     loading.value = true;
-    console.log(props.dayDeclaration);
     postBufferTable(props.userId, onGoingDayDeclaration.value, props.day, props.week, props.year).then((response) => {
         if (response.status !== 200) {
             globalStore.notification.content = "Your daily declaration can't be registered, please contact IT";

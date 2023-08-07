@@ -44,7 +44,6 @@ async function signIn() {
 
         .then(() => initialization())
         .then(() => {
-            console.log(1);
             if (userStore.lastRoute !== undefined) {
                 const lastRoute = cloneDeep(userStore.lastRoute);
                 userStore.lastRoute = undefined;

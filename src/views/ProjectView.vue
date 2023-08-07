@@ -157,6 +157,9 @@
             </div>
             <br />
             <div>
+                <BaseButton style="margin-right: 10px" @click="router.push({ name: 'projects', query: route.query })"
+                    >Back to projects</BaseButton
+                >
                 <BaseButton :disabled="loading" :loading="loading" accent @click="clickHandler">{{
                     newProject ? "Create Project" : "Update Project"
                 }}</BaseButton>
@@ -225,7 +228,6 @@ const loadingInitialRequest = ref<boolean>(false);
 const project = ref<CompleteProject | undefined>();
 const find = projectStore.projects.find((p) => p.id === projectId.value);
 const done = ref<boolean>(false);
-console.log("aa", find);
 if (find === undefined) {
     newProject.value = true;
     done.value = true;
@@ -252,7 +254,6 @@ const clickHandler = () => {
     loading.value = true;
     if (!newProject.value && "id" in editedProject.value)
         updateProject(editedProject.value as CompleteProject).then((response) => {
-            console.log(response);
             if (response.status === 200) {
                 globalStore.notification.content = "Project successfully updated";
                 globalStore.notification.display = true;

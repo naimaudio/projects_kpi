@@ -98,7 +98,6 @@ const routeLinks = computed<
 const closeNotif = async () => {
     globalStore.notification.display = false;
 };
-console.log(route.name);
 const showSideBar = ref<boolean>(true);
 </script>
 
