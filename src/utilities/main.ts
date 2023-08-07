@@ -81,3 +81,15 @@ export function envVariableWithValidation(envVariableKey: string) {
     }
     return envVariable;
 }
+
+export function queryBuilder(query: Record<string, string | boolean | undefined | number>): string {
+    const queryArray = Object.entries(query);
+    let str = "";
+    if (queryArray.length !== 0 && queryArray[0][1] !== undefined) {
+        str = `?${queryArray[0][0]}=${queryArray[0][1]}`;
+    }
+    for (let i = 1; i < queryArray.length; i++) {
+        str += `&${queryArray[i][0]}=${queryArray[i][1]}`;
+    }
+    return str;
+}
