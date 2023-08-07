@@ -1,4 +1,12 @@
-import type { DeclarationInput, RawBufferRecord, RawDeclaration, RawUser, SimplifiedResponse, dayNb } from "@/typing";
+import type {
+    DeclarationInput,
+    MonthlyHours,
+    RawBufferRecord,
+    RawDeclaration,
+    RawUser,
+    SimplifiedResponse,
+    dayNb,
+} from "@/typing";
 import type { CompleteProject, RawProject, RawProjectAndPhases, RawProjectPhase } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 import type { domain } from "@/typing/index";
@@ -101,7 +109,7 @@ export async function hoursRegistration(
         projects: [],
         record: {
             comment: comment === undefined ? null : comment,
-            date_rec: dayNumberToDayDate(4, week, year),
+            date_rec: dayNumberToDayDate(2, week, year),
             user_id: userId,
         },
     };
@@ -240,5 +248,13 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
         },
         body: JSON.stringify(requestBody),
     });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getMonthlyHours(date: {
+    year: number;
+    month: number;
+}): Promise<SimplifiedResponse<MonthlyHours[]>> {
+    const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {});
     return { status: response.status, data: await response.json() };
 }

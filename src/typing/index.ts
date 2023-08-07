@@ -5,7 +5,10 @@ export interface Header {
     width?: string;
     clickable?: boolean;
 }
-
+export interface MatrixHeader {
+    name: string;
+    id: number;
+}
 export interface Preferences {
     preferedMethod: InputMethod;
 }
@@ -114,3 +117,9 @@ export interface RawBufferRecord {
 }
 
 export type chartType = "pie" | "line" | "bar";
+
+export interface MonthlyHours {
+    user_id: number;
+    user_name: string;
+    hours: { project_id: number; hours: number }[];
+}
