@@ -2,6 +2,10 @@
     <div class="page-container">
         <div class="column-flex">
             <h1 class="title">Declaration</h1>
+            <BaseButton v-if="currentMode === 'IN_ADVANCE'" @click="changeWeeks('LATE')">
+                <ArrowPreviousIcon size="small" color="#000" />
+                <span>Declare hours of current week</span>
+            </BaseButton>
             <span v-if="currentMode === 'LATE' && weeks.length !== 0" style="font-size: large"
                 >Please fill in the schedules for the week :</span
             >
@@ -52,14 +56,11 @@
                     >
                 </span>
             </div>
-            <span v-if="weeks.length !== 0" style="font-size: large">Or</span>
-            <span v-else style="font-size: large">You can</span>
+            <span v-if="weeks.length !== 0 && currentMode === 'LATE'" style="font-size: large">Or</span>
+            <span v-else-if="currentMode === 'LATE'" style="font-size: large">You can</span>
             <div class="column-container">
                 <BaseButton v-if="currentMode === 'LATE'" @click="changeWeeks('IN_ADVANCE')"
                     >Declare hours in advance</BaseButton
-                >
-                <BaseButton v-else-if="currentMode === 'IN_ADVANCE'" @click="changeWeeks('LATE')"
-                    >Declare hours of current week</BaseButton
                 >
             </div>
         </div>
@@ -77,6 +78,7 @@ import { useDeclarationStore } from "@/stores/declarationStore";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 import { ref, watch, computed } from "vue";
 import { useUserStore } from "@/stores/userStore";
+import ArrowPreviousIcon from "@/components/icons/ArrowPreviousIcon.vue";
 const router = useRouter();
 const route = useRoute();
 const declarationStore = useDeclarationStore();

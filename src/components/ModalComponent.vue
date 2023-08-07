@@ -27,10 +27,9 @@ onClickOutside(target, () => {
 });
 
 const close = () => {
+    emits("close");
     if (props.closeRoute !== undefined) {
         router.push(props.closeRoute);
-    } else {
-        emits("close");
     }
 };
 </script>
