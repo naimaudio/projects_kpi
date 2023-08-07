@@ -140,7 +140,7 @@ onMounted(() => {
                 graph.style.height = graphInfo.defaultHeight;
             }
             if (graphInfo.fetch_uri) {
-                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, undefined, false);
+                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, { cumulative: true });
                 options.value[graphInfo.option] = {
                     ...options.value[graphInfo.option],
                     ...updatedOptions,

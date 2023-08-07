@@ -3,6 +3,7 @@ import { phases } from "@/stores/nonReactiveStore";
 import { type chartType } from "@/typing";
 import type { ECOption } from "@/main";
 import type { PieSeriesOption } from "echarts/charts";
+import { queryBuilder } from "@/utilities/main";
 
 interface KPISeries<T extends chartType> {
     unit: "h" | "FTE";
@@ -12,6 +13,7 @@ interface KPISeries<T extends chartType> {
         type: chartType;
     }[];
     xAxis?: { data: string[] };
+    legend?: { data: (string | number)[] };
 }
 
 interface KPIData {
@@ -23,24 +25,17 @@ interface KPIData {
 export async function getKPI(
     type: chartType,
     fetch_uri: string,
-    projectId?: number,
-    cumulative?: boolean
+    query: Record<string, string | boolean | number | undefined>
 ): Promise<ECOption> {
-    const complete_fetch_uri =
-        projectId !== undefined && cumulative !== undefined
-            ? `${origin}/${fetch_uri}?project_id=${projectId}&cumulative=${cumulative}`
-            : projectId !== undefined
-            ? `${origin}/${fetch_uri}?project_id=${projectId}`
-            : cumulative !== undefined
-            ? `${origin}/${fetch_uri}?cumulative=${cumulative}`
-            : `${origin}/${fetch_uri}`;
+    const complete_fetch_uri = `${origin}/${fetch_uri}${queryBuilder(query)}`;
     const response = await fetcher(complete_fetch_uri);
     const data: KPISeries<typeof type> = await response.json();
-    if (type === "bar") {
+    if (type === "bar" && fetch_uri === "kpi/stackedbar/hour_expenditure_by_project") {
         return {
             series: data.series.map((value) => {
-                return { ...value, stack: "y", name: phases[Number(value.name)].name };
+                return { ...value, stack: "y", name: phases[Number(value.name)].code };
             }),
+            legend: { data: data.legend?.data.map((n) => phases[Number(n)].code) },
         };
     } else if (type === "pie") {
         return {

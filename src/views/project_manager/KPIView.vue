@@ -35,7 +35,7 @@ const options = ref<Record<string, ECOption>>({
     barOption: {
         xAxis: {},
         yAxis: {
-            data: ["Forecast", "Reality"],
+            data: ["Time spent"],
         },
         toolbox: {
             feature: {
@@ -51,56 +51,10 @@ const options = ref<Record<string, ECOption>>({
             containLabel: true,
         },
         legend: {
-            data: phases.map((val) => val.code),
             top: "14%",
         },
         title: { text: "TDE by project phase" },
-        series: [
-            {
-                data: [10, 22],
-                name: phases[0].code,
-                stack: "y",
-                type: "bar",
-            },
-            {
-                data: [5, 4],
-                name: phases[1].code,
-                stack: "y",
-                type: "bar",
-            },
-            {
-                data: [5, 4],
-                name: phases[2].code,
-                stack: "y",
-                type: "bar",
-            },
-            {
-                data: [5, 4],
-                name: phases[3].code,
-                stack: "y",
-                type: "bar",
-            },
-            {
-                data: [5, 4],
-                name: phases[4].code,
-                stack: "y",
-                type: "bar",
-            },
-
-            {
-                data: [5, 4],
-                name: phases[5].code,
-                stack: "y",
-                type: "bar",
-            },
-
-            {
-                data: [5, 4],
-                name: phases[6].code,
-                stack: "y",
-                type: "bar",
-            },
-        ],
+        series: [],
     },
     lineOption: {
         title: {
@@ -206,6 +160,7 @@ const graphs = ref<
         defaultWidth: "1070px",
         option: "barOption",
         type: "bar",
+        fetch_uri: "kpi/stackedbar/hour_expenditure_by_project",
     },
 ]);
 const route = useRoute();
@@ -215,22 +170,48 @@ const projectId = computed<number | undefined>(() => {
     return isNaN(pId) ? undefined : pId;
 });
 
+const period = computed<string[] | undefined>(() => {
+    const val = route.query.period;
+    if (Array.isArray(val) && val.length === 2 && val.every((v) => v !== null)) {
+        return val as string[];
+    } else {
+        return undefined;
+    }
+});
+
+const unit = computed<string>(() => {
+    const u = route.query.unit;
+    if (u !== "hours" && u !== "TDE" && u !== "cost") {
+        return "h";
+    } else {
+        return u === "hours" ? "h" : u;
+    }
+});
+
+const cummulated = computed<string>(() => {
+    const u = route.query.cummulated;
+    if (u !== "monthly" && u !== "cummulated") {
+        return "cummulated";
+    } else {
+        return u;
+    }
+});
 const project = computed<Project | undefined>(() => {
     return projectStore.projects.find((p) => p.id === projectId.value);
 });
 
-watch(projectId, (pId) => {
+watch([projectId, unit, period, cummulated], ([pId]) => {
     if (pId !== undefined) {
-        graphUpdate(pId);
+        graphUpdate();
     }
 });
 onMounted(() => {
     if (projectId.value !== undefined) {
-        graphUpdate(projectId.value);
+        graphUpdate();
     }
 });
 
-function graphUpdate(pId: number) {
+function graphUpdate() {
     graphs.value.forEach(async (graphInfo) => {
         const graph = document.getElementById(graphInfo.id);
         if (graph !== null) {
@@ -244,13 +225,23 @@ function graphUpdate(pId: number) {
                 graph.style.height = graphInfo.defaultHeight;
             }
             if (graphInfo.fetch_uri) {
-                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, pId, true);
+                const query: Record<string, string | number | undefined | boolean> = {};
+                if (period.value !== undefined) {
+                    query.month1 = Number(period.value[0].split("-")[0]) + 1;
+                    query.year1 = Number(period.value[0].split("-")[1]);
+                    query.month2 = Number(period.value[1].split("-")[0]) + 1;
+                    query.year2 = Number(period.value[1].split("-")[1]);
+                }
+                query.project_id = project.value?.id;
+                query.cumulative = cummulated.value === "cummulated";
+                query.unit = unit.value;
+                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, query);
                 options.value[graphInfo.option] = {
                     ...options.value[graphInfo.option],
                     ...updatedOptions,
                 };
             }
-            chartE.setOption(options.value[graphInfo.option]);
+            chartE.setOption(options.value[graphInfo.option], true);
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
                 const crt = this;
