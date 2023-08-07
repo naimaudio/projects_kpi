@@ -13,7 +13,7 @@
                     class="combobox-input"
                     @change="query = $event.target.value"
                 />
-                <ComboboxOptions class="combobox-options" :unmount="false" @vnode-unmounted="console.log('end')">
+                <ComboboxOptions class="combobox-options">
                     <ComboboxOption
                         v-for="project in filteredProjects"
                         :key="project.id"
@@ -41,7 +41,7 @@
                             class="button-style-reset combobox-button"
                             :class="{ active: active, selected: selected }"
                         >
-                            <span>{{ project.name }}</span>
+                            <span style="font-weight: 300">{{ project.name }}</span>
                             <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px">{{ project.code }}</span>
                         </button>
                     </ComboboxOption>
@@ -53,7 +53,6 @@
             <VueDatePicker
                 :model-value="period"
                 range
-                model-type="MM-yyyy"
                 month-picker
                 @update:model-value="onDateRangeChange"
             ></VueDatePicker>
@@ -63,11 +62,18 @@
             <fluent-select :value="unit" style="height: 36px" @change="onUnitChange">
                 <fluent-option>hours</fluent-option>
                 <fluent-option>TDE</fluent-option>
-                <fluent-option>cost</fluent-option>
+            </fluent-select>
+        </div>
+        <div class="field-with-legend">
+            <span>Accumulated</span>
+            <fluent-select :value="cummulated" style="height: 36px" @change="onCummulateChange">
+                <fluent-option>cummulated</fluent-option>
+                <fluent-option>monthly</fluent-option>
             </fluent-select>
         </div>
     </div>
 </template>
+
 <script lang="ts" setup>
 import { useProjectStore } from "@/stores/projectStore";
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from "@headlessui/vue";
@@ -99,12 +105,24 @@ const unit = computed<string>(() => {
         return u;
     }
 });
+
+const cummulated = computed<string>(() => {
+    const c = route.query.cummulated;
+    if (c !== "monthly" && c !== "cummulated") {
+        return "cummulated";
+    } else {
+        return c;
+    }
+});
 const router = useRouter();
 const route = useRoute();
 const period = computed<string[] | undefined>(() => {
     const val = route.query.period;
     if (Array.isArray(val) && val.length === 2 && val.every((v) => v !== null)) {
-        return val as string[];
+        return [
+            { month: Number(val[0]?.split("-")[0]), year: Number(val[0]?.split("-")[1]) },
+            { month: Number(val[1]?.split("-")[0]), year: Number(val[1]?.split("-")[1]) },
+        ];
     } else {
         return undefined;
     }
@@ -117,8 +135,24 @@ const projectId = computed<undefined | number>(() => {
 function onProjectChange(pCode: string) {
     router.push({ ...route, query: { ...route.query, projectId: projectStore.projectCodeIds[pCode] } });
 }
-function onDateRangeChange(period: string[]) {
-    router.push({ ...route, query: { ...route.query, period: period } });
+function onDateRangeChange(period: { month: number; year: number }[] | null) {
+    if (period !== null) {
+        router.push({
+            ...route,
+            query: {
+                ...route.query,
+                period: [`${period[0].month}-${period[0].year}`, `${period[1].month}-${period[1].year}`],
+            },
+        });
+    } else {
+        router.push({
+            ...route,
+            query: {
+                ...route.query,
+                period: undefined,
+            },
+        });
+    }
 }
 function onUnitChange(event: any) {
     router.push({
@@ -126,7 +160,14 @@ function onUnitChange(event: any) {
         query: { ...route.query, unit: event.target.value },
     });
 }
+function onCummulateChange(event: any) {
+    router.push({
+        name: route.name === null ? undefined : route.name,
+        query: { ...route.query, cummulated: event.target.value },
+    });
+}
 </script>
+
 <style scoped>
 .selector-container {
     justify-content: space-between;
