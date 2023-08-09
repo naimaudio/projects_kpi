@@ -14,11 +14,9 @@
                     return `${str} 150px`;
                 }, '250px '),
             }"
-            style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 100"
+            style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
         >
-            <div
-                style="border-right: 1px #e0e0e0 solid; position: sticky; top: 0px; left: -1px; background-color: white"
-            ></div>
+            <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="table-cell"></div>
             <div v-for="header in props.columnHeaders" :key="header.id" class="table-cell header-cell">
                 <span style="margin-left: 8px">{{ header.name }}</span>
             </div>
@@ -33,27 +31,33 @@
                 }, '250px'),
             }"
         >
-            <div
-                style="
-                    position: sticky;
-                    left: -1px;
-                    padding-left: 10px;
-                    background-color: white;
-                    border-right: 1px #e0e0e0 solid;
-                "
-            >
+            <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
                 {{ rowHeader.name }}
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="table-cell">
                 <input
                     ref="inputs"
+                    :value="cells[i][j] || undefined"
                     type="number"
-                    :value="cells.length === props.rowHeaders.length ? (cells[i][j] === 0 ? null : cells[i][j]) : null"
                     class="input-cell"
                     min="0"
                     style="background-color: #f6f6f6; padding-left: 8px"
                     :style="{ 'background-color': initialCells[i][j] !== cells[i][j] ? '#f6f6f6' : 'white' }"
-                    @change="(e) => (cells[i][j] = Number(e.target.value))"
+                    @change="
+                        (e) => {
+                            if (Number(e.target?.value) === initialCells[i][j]) {
+                                emit('remove', modifiedItemsIndexGetter[`${rowHeader.id}_${header.id}`]);
+                            } else {
+                                emit(
+                                    'change',
+                                    rowHeader.id,
+                                    header.id,
+                                    modifiedItemsIndexGetter[`${rowHeader.id}_${header.id}`],
+                                    Number(e.target?.value)
+                                );
+                            }
+                        }
+                    "
                     @keydown.up="(e: KeyboardEvent) => {e.preventDefault()}"
                     @keydown.right="(e: KeyboardEvent) => {e.preventDefault()}"
                     @keydown.down="(e: KeyboardEvent) => {e.preventDefault()}"
@@ -90,11 +94,12 @@
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
         </div>
+        <span>{{ props.modifiedItems }}</span>
     </div>
 </template>
 
-<script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string}">
-import type { MatrixHeader, MonthlyHours } from "@/typing";
+<script setup lang="ts">
+import type { InputItem, MatrixHeader } from "@/typing";
 import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
 
@@ -102,18 +107,14 @@ const props = withDefaults(
     defineProps<{
         columnHeaders: MatrixHeader[];
         rowHeaders: MatrixHeader[];
-        items: MonthlyHours[];
-        selectable?: boolean;
-        clickableRow?: boolean;
+        items: InputItem[];
+        modifiedItems?: InputItem[];
     }>(),
-    {
-        selectable: false,
-        clickableRow: false,
-    }
+    { modifiedItems: () => [] }
 );
 const emit = defineEmits<{
-    (e: "change", index: number, field: keyof T, value: T[keyof T]): void;
-    (e: "rawClick", rowId: number): void;
+    (e: "change", rowId: number, columnId: number, index: number, value: number): void;
+    (e: "remove", index: number): void;
 }>();
 
 const focused = ref<number>(0);
@@ -146,45 +147,47 @@ function handleFocus(direction: "left" | "right" | "up" | "down") {
         }
     }
 }
-const columnIndexgetter = computed<Record<number, number>>(() => {
+const columnIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
     props.columnHeaders.forEach((col, i) => {
         rec[col.id] = i;
     });
     return rec;
 });
-const rowIndexgetter = computed<Record<number, number>>(() => {
+const modifiedItemsIndexGetter = computed<Record<string, number>>(() => {
+    const rec: Record<string, number> = {};
+    props.modifiedItems.forEach((item, i) => {
+        rec[`${item.row_id}_${item.column_id}`] = i;
+    });
+    return rec;
+});
+
+const rowIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
     props.rowHeaders.forEach((col, i) => {
         rec[col.id] = i;
     });
     return rec;
 });
-watch([props.columnHeaders, props.rowHeaders], ([ch, rh]) => {
-    cells.value = Array(rh.length)
+
+const cells = computed<number[][]>(() => {
+    const a = cloneDeep(initialCells.value);
+    props.modifiedItems.forEach((val) => {
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = val.value;
+    });
+    return a;
+});
+const initialCells = computed<number[][]>(() => {
+    const a = Array(props.rowHeaders.length)
         .fill(0)
         .map(() => {
-            return Array(ch.length).fill(0);
+            return Array(props.columnHeaders.length).fill(0);
         });
+    props.items.forEach((val) => {
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = val.value;
+    });
+    return a;
 });
-
-watch(
-    props.items,
-    (newItems) => {
-        newItems.forEach((item) => {
-            item.hours.forEach((hour) => {
-                cells.value[rowIndexgetter.value[hour.project_id]][columnIndexgetter.value[item.user_id]] = hour.hours;
-            });
-        });
-        initialCells.value = cloneDeep(cells.value);
-    },
-    { deep: true }
-);
-const cells = ref<number[][]>([]);
-const initialCells = ref<number[][]>([]);
-function emitGlobal<K extends keyof T>(event: "change", id: number, field: K, value: T[K]) {
-    return emit(event, id, field, value);
-}
 </script>
 
 <style scoped>
@@ -198,7 +201,6 @@ function emitGlobal<K extends keyof T>(event: "change", id: number, field: K, va
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     color: #242424;
-    border-bottom: 1px #e0e0e0 solid;
 }
 
 .header-cell {
@@ -213,6 +215,8 @@ function emitGlobal<K extends keyof T>(event: "change", id: number, field: K, va
     margin-bottom: auto;
     display: flex;
     overflow-y: auto;
+    border-right: 1px #e0e0e0 solid;
+    border-bottom: 1px #e0e0e0 solid;
 }
 
 .input-cell {

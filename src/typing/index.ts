@@ -120,6 +120,19 @@ export type chartType = "pie" | "line" | "bar";
 
 export interface MonthlyHours {
     user_id: number;
-    user_name: string;
+    user_name?: string;
     hours: { project_id: number; hours: number }[];
+}
+
+export interface MonthlyHoursItem {
+    user_id: number;
+    user_name?: string;
+    project_id: number;
+    hours: number;
+}
+
+export interface InputItem {
+    column_id: number;
+    row_id: number;
+    value: number;
 }

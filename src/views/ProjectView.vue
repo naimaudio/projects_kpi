@@ -155,7 +155,20 @@
                     ></VueDatePicker>
                 </template>
             </div>
-            <br />
+            <h3>Project forecast</h3>
+            <div>
+                <div id="forecast-line-chart" ref="forecastLineChart"></div>
+                <InputTableCells
+                    :cells="cells"
+                    :row-headers="years"
+                    :column-headers="months"
+                    @change="
+                        (rowIndex, columnInded, value) => {
+                            cells[rowIndex][columnInded] = value;
+                        }
+                    "
+                />
+            </div>
             <div>
                 <BaseButton style="margin-right: 10px" @click="router.push({ name: 'projects', query: route.query })"
                     >Back to projects</BaseButton
@@ -172,7 +185,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
 import {
     type BlankProject,
@@ -198,6 +211,10 @@ import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import SubtractOutlineIcon from "@/components/icons/SubtractOutlineIcon.vue";
 import { rawProjectToProjectComplete } from "@/typing/conversions";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
+import InputTableCells from "@/components/base/InputTableCells.vue";
+import * as echarts from "echarts/core";
+import type { ECOption } from "@/main";
+import { range } from "../utilities/main";
 const route = useRoute();
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -285,6 +302,98 @@ const clickHandler = () => {
     }
     loading.value = false;
 };
+
+const months: string[] = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
+const wholeXAxis = range(2020, 2025).flatMap((year) => {
+    const monthNumbers = range(1, 13).map((i) => (i < 10 ? `0${i}` : `${i}`));
+    return monthNumbers.map<string>((m) => {
+        return `${m}-${year}`;
+    });
+});
+const xAxis = computed(() => {
+    const flatten = cells.value.flatMap((a) => a);
+    return wholeXAxis.slice(
+        flatten.findIndex((val) => val !== 0),
+        flatten.findLastIndex((val) => val !== 0) + 1
+    );
+});
+
+const series = computed<number[]>(() => {
+    const flatten = cells.value.flatMap((a) => a);
+    return flatten
+        .reduce<number[]>((acc, curr, index) => {
+            acc.push((acc[index - 1] || 0) + curr);
+            return acc;
+        }, [])
+        .slice(
+            flatten.findIndex((val) => val !== 0),
+            flatten.findLastIndex((val) => val !== 0) + 1
+        );
+});
+const lineChartOption = computed<ECOption>(() => {
+    return {
+        xAxis: {
+            type: "category",
+            data: xAxis.value,
+        },
+        yAxis: {
+            type: "value",
+        },
+        series: [
+            {
+                type: "line",
+                data: series.value,
+            },
+        ],
+        tooltip: {
+            trigger: "axis",
+        },
+    };
+});
+
+const years: string[] = ["2020", "2021", "2022", "2023", "2024"];
+
+const forecastLineChart = ref<HTMLElement | null>(null);
+
+const cells = ref<number[][]>(
+    Array(years.length)
+        .fill(0)
+        .map(() => {
+            return Array(months.length).fill(0);
+        })
+);
+watch(forecastLineChart, (newValue, oldValue) => {
+    if (newValue !== null && oldValue === null) {
+        newValue.style.width = "2000px";
+        newValue.style.height = "600px";
+        const eChart = echarts.init(forecastLineChart.value);
+        eChart.setOption(lineChartOption.value);
+    }
+});
+watch(lineChartOption, () => {
+    if (forecastLineChart.value !== null) {
+        const eChart = echarts.getInstanceByDom(forecastLineChart.value);
+        if (eChart !== undefined) {
+            eChart.setOption(lineChartOption.value);
+        }
+    }
+});
+onMounted(() => {
+    console.log(forecastLineChart.value);
+});
 </script>
 
 <style>

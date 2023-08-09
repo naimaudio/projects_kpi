@@ -5,6 +5,7 @@ import type {
     RawDeclaration,
     RawUser,
     SimplifiedResponse,
+    MonthlyHoursItem,
     dayNb,
 } from "@/typing";
 import type { CompleteProject, RawProject, RawProjectAndPhases, RawProjectPhase } from "@/typing/project";
@@ -256,5 +257,46 @@ export async function getMonthlyHours(date: {
     month: number;
 }): Promise<SimplifiedResponse<MonthlyHours[]>> {
     const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {});
+    return { status: response.status, data: await response.json() };
+}
+
+export async function putMonthlyHours(
+    date: {
+        year: number;
+        month: number;
+    },
+    monthlyHoursItems: MonthlyHoursItem[]
+): Promise<SimplifiedResponse<MonthlyHours[]>> {
+    const monthlyHours: MonthlyHours[] = [];
+    monthlyHoursItems.forEach((mhItem) => {
+        const index = monthlyHours.findIndex((val) => {
+            val.user_id === mhItem.user_id;
+        });
+        if (index !== -1) {
+            monthlyHours[index].hours.push({ project_id: mhItem.project_id, hours: mhItem.hours });
+        } else {
+            monthlyHours.push({
+                hours: [{ project_id: mhItem.project_id, hours: mhItem.hours }],
+                user_id: mhItem.user_id,
+            });
+        }
+    });
+    const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(monthlyHours),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function postMonthlyHours(date: {
+    year: number;
+    month: number;
+}): Promise<SimplifiedResponse<MonthlyHours[]>> {
+    const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {
+        method: "POST",
+    });
     return { status: response.status, data: await response.json() };
 }

@@ -3,25 +3,108 @@ import VueDatePicker from '@vuepic/vue-datepicker';
     <div class="page-container">
         <h1 class="title">Monthly report</h1>
         <VueDatePicker v-model="selectedDate" month-picker style="width: 300px" format="MMMM yyyy"></VueDatePicker>
-        <InputTable :items="items" :column-headers="columnHeaders" :row-headers="rowHeaders" />
+        <BaseButton @click="refreshConfirmation = true">Refresh values</BaseButton>
+        <ModalComponent v-if="refreshConfirmation" @close="refreshConfirmation = false">
+            <p>This will erase your previous modifications, are you sure ?</p>
+            <BaseButton accent style="margin-left: auto; display: block" @click="refreshValues">Confirm</BaseButton>
+        </ModalComponent>
+        <InputTableItems
+            :items="
+                items.map((i) => {
+                    return {
+                        value: i.hours,
+                        column_id: i.user_id,
+                        row_id: i.project_id,
+                    };
+                })
+            "
+            :modified-items="
+                modifiedItems.map((i) => {
+                    return {
+                        value: i.hours,
+                        column_id: i.user_id,
+                        row_id: i.project_id,
+                    };
+                })
+            "
+            :column-headers="columnHeaders"
+            :row-headers="rowHeaders"
+            @change="
+                (rowId, columnId, index, value) => {
+                    console.log(rowId, columnId, index, value);
+                    if (index !== undefined) {
+                        modifiedItems[index] = {
+                            hours: value,
+                            project_id: rowId,
+                            user_id: columnId,
+                        };
+                    } else {
+                        modifiedItems.push({
+                            hours: value,
+                            project_id: rowId,
+                            user_id: columnId,
+                        });
+                    }
+                }
+            "
+            @remove="
+                (index) => {
+                    modifiedItems.splice(index, 1);
+                }
+            "
+        />
+        <BaseButton style="margin-right: 10px" @click="modifyHours">Modify hours</BaseButton>
     </div>
 </template>
 <script setup lang="ts">
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { ref, watch } from "vue";
-import InputTable from "@/components/base/InputTable.vue";
-import { getMonthlyHours } from "@/API/requests";
-import type { MonthlyHours } from "@/typing";
+import BaseButton from "@/components/base/BaseButton.vue";
+import { ref, watch, onMounted } from "vue";
+import InputTableItems from "@/components/base/InputTableItems.vue";
+import { getMonthlyHours, putMonthlyHours, postMonthlyHours } from "@/API/requests";
+import type { MonthlyHoursItem } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
 import type { MatrixHeader } from "@/typing";
+import ModalComponent from "@/components/ModalComponent.vue";
 const selectedDate = ref<{ month: number; year: number }>();
 const projectStore = useProjectStore();
+onMounted(() => {
+    selectedDate.value = {
+        month: new Date().getMonth(),
+        year: new Date().getFullYear(),
+    };
+});
+
+const refreshConfirmation = ref<boolean>(false);
 watch(selectedDate, (date) => {
+    updateReportMonth(date);
+});
+
+function modifyHours() {
+    if (selectedDate.value !== undefined) {
+        putMonthlyHours(selectedDate.value, modifiedItems.value).then(() => {
+            updateReportMonth(selectedDate.value);
+            modifiedItems.value.splice(0);
+        });
+    }
+}
+
+function refreshValues() {
+    if (selectedDate.value !== undefined) {
+        postMonthlyHours(selectedDate.value).then(() => {
+            updateReportMonth(selectedDate.value).then(() => {
+                refreshConfirmation.value = false;
+            });
+        });
+    }
+}
+
+async function updateReportMonth(date: { month: number; year: number } | undefined) {
     items.value.splice(0);
     columnHeaders.value.splice(0);
     rowHeaders.value.splice(0);
     if (date !== undefined) {
-        getMonthlyHours(date).then((response) => {
+        await getMonthlyHours(date).then((response) => {
             const projectIds = new Set<number>();
             const l = response.data.length;
             for (let i = 0; i < l; i++) {
@@ -37,14 +120,26 @@ watch(selectedDate, (date) => {
 
             const userCount = response.data.length;
             for (let i = 0; i < userCount; i++) {
-                columnHeaders.value.push({ name: response.data[i].user_name, id: response.data[i].user_id });
+                columnHeaders.value.push({ name: response.data[i].user_name || "", id: response.data[i].user_id });
             }
-            items.value.push(...response.data);
+            items.value.push(
+                ...response.data.flatMap<MonthlyHoursItem>((value) => {
+                    return value.hours.map<MonthlyHoursItem>((val) => {
+                        return {
+                            hours: val.hours,
+                            project_id: val.project_id,
+                            name: value.user_name,
+                            user_id: value.user_id,
+                        };
+                    });
+                })
+            );
         });
     }
-});
+}
 
-const items = ref<MonthlyHours[]>([]);
+const items = ref<MonthlyHoursItem[]>([]);
+const modifiedItems = ref<MonthlyHoursItem[]>([]);
 const columnHeaders = ref<MatrixHeader[]>([]);
 const rowHeaders = ref<MatrixHeader[]>([]);
 </script>

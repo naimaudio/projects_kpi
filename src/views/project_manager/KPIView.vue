@@ -25,7 +25,6 @@ import { computed, ref, watch, onMounted } from "vue";
 import { cloneDeep } from "lodash";
 import { type chartType } from "@/typing";
 import { getKPI } from "@/API/kpi_requests";
-import { phases } from "@/stores/nonReactiveStore";
 import { useRoute } from "vue-router";
 import { type Project } from "@/typing/project";
 import { useProjectStore } from "../../stores/projectStore";
