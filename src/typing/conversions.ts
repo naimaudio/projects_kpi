@@ -61,6 +61,10 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             classification: rawProject.classification,
             entity: rawProject.entity,
             complexity: rawProject.complexity,
+            endCapDate: rawProject.end_cap_date === null ? undefined : rawProject.end_cap_date,
+            startCapDate: rawProject.start_cap_date === null ? undefined : rawProject.start_cap_date,
+            startDate: rawProject.start_date === null ? undefined : rawProject.start_date,
+            endDate: rawProject.end_date === null ? undefined : rawProject.end_date,
         };
     });
 }

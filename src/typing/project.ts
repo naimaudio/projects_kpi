@@ -92,6 +92,10 @@ export interface Project {
     name: string;
     entity: string;
     complexity: number;
+    startCapDate?: string;
+    endCapDate?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface RawProject {
@@ -104,6 +108,10 @@ export interface RawProject {
     project_name: string;
     entity: string;
     complexity: number;
+    start_cap_date: string | null;
+    end_cap_date: string | null;
+    start_date: string | null;
+    end_date: string | null;
 }
 
 export interface RawProjectPhase {
@@ -143,6 +151,10 @@ export interface BlankProject {
     entity?: string;
     complexity?: number;
     phases: BlankProjectPhase[];
+    startCapDate?: string;
+    endCapDate?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface SelectableProject extends UserProject {

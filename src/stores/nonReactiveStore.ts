@@ -12,9 +12,12 @@ export const phases: { code: string; name: string }[] = [
     { code: "Dev/EVT", name: "Development 2" },
     { code: "DVT", name: "Pre-production" },
     { code: "PVT", name: "Mass production" },
-    { code: "STOP", name: "Project closure" },
 ];
 
+export const phasesRecord: Record<string, string> = {};
+phases.forEach((ph) => {
+    phasesRecord[ph.code] = ph.name;
+});
 export const routes_by_access = {
     "Business Manager": [
         {
@@ -29,10 +32,6 @@ export const routes_by_access = {
                     label: " History",
                     link: "history",
                 },
-                {
-                    label: " Change",
-                    link: "change",
-                },
             ],
         },
         {
@@ -43,12 +42,12 @@ export const routes_by_access = {
                     link: "KPI",
                 },
                 {
-                    label: "Forecast",
-                    link: "forecast",
-                },
-                {
                     label: "Data",
                     link: "data",
+                },
+                {
+                    label: "Projects",
+                    link: "projects",
                 },
             ],
         },
@@ -63,10 +62,6 @@ export const routes_by_access = {
                     label: "Business KPI",
                     link: "business_kpi",
                 },
-                {
-                    label: "Projects",
-                    link: "projects",
-                },
             ],
         },
     ],
@@ -77,14 +72,11 @@ export const routes_by_access = {
                 {
                     label: "Declare hours",
                     link: "declaration",
+                    secondaryLinks: ["dayDeclaration", "declarationDate"],
                 },
                 {
                     label: " History",
                     link: "history",
-                },
-                {
-                    label: " Change",
-                    link: "change",
                 },
             ],
         },
@@ -94,10 +86,6 @@ export const routes_by_access = {
                 {
                     label: "KPI",
                     link: "KPI",
-                },
-                {
-                    label: "Forecast",
-                    link: "forecast",
                 },
                 {
                     label: "Data",
@@ -117,6 +105,7 @@ export const routes_by_access = {
                 {
                     label: "Declare hours",
                     link: "declaration",
+                    secondaryLinks: ["dayDeclaration", "declarationDate"],
                 },
                 {
                     label: "History",
