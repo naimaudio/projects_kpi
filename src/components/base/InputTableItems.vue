@@ -94,7 +94,6 @@
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
         </div>
-        <span>{{ props.modifiedItems }}</span>
     </div>
 </template>
 

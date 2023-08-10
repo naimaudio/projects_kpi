@@ -22,7 +22,7 @@
                 </div>
                 <div class="table-raw-gap" />
                 <div v-if="props.comment !== undefined && props.comment !== ''" class="table-raw-container-2">
-                    <span>Commentary</span>
+                    <span>Comment</span>
                     <span> {{ props.comment }} </span>
                     <br />
                 </div>

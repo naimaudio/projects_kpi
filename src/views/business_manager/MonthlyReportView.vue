@@ -2,9 +2,17 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 <template>
     <div class="page-container">
         <h1 class="title">Monthly report</h1>
+        <br />
         <VueDatePicker v-model="selectedDate" month-picker style="width: 300px" format="MMMM yyyy"></VueDatePicker>
-        <BaseButton @click="refreshConfirmation = true">Refresh values</BaseButton>
-        <ModalComponent v-if="refreshConfirmation" @close="refreshConfirmation = false">
+
+        <br />
+        <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true">Refresh values</BaseButton>
+        <BaseButton disabled style="margin-left: 15px">Change columns</BaseButton>
+        <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
+            <p>
+                This action will enable data from new declarations to be included in the
+                {{ dayjs((selectedDate.month + 1).toString(), "M").format("MMMM") }} {{ selectedDate.year }} report.
+            </p>
             <p>This will erase your previous modifications, are you sure ?</p>
             <BaseButton accent style="margin-left: auto; display: block" @click="refreshValues">Confirm</BaseButton>
         </ModalComponent>
@@ -53,7 +61,11 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 }
             "
         />
-        <BaseButton style="margin-right: 10px" @click="modifyHours">Modify hours</BaseButton>
+        <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
+            <p>Keep in mind changing hours will have no effect in project managemnt KPIs</p>
+            <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
+        </ModalComponent>
+        <BaseButton style="margin-right: 10px" @click="modifyConfirmation = true">Modify hours</BaseButton>
     </div>
 </template>
 <script setup lang="ts">
@@ -66,6 +78,7 @@ import type { MonthlyHoursItem } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
 import type { MatrixHeader } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
+import dayjs from "dayjs";
 const selectedDate = ref<{ month: number; year: number }>();
 const projectStore = useProjectStore();
 onMounted(() => {
@@ -76,6 +89,8 @@ onMounted(() => {
 });
 
 const refreshConfirmation = ref<boolean>(false);
+const modifyConfirmation = ref<boolean>(false);
+
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -86,6 +101,7 @@ function modifyHours() {
             updateReportMonth(selectedDate.value);
             modifiedItems.value.splice(0);
         });
+        modifyConfirmation.value = false;
     }
 }
 

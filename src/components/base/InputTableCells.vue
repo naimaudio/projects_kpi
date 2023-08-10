@@ -11,7 +11,7 @@
             class="table-raw"
             :style="{
                 'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} 150px`;
+                    return `${str} 100px`;
                 }, '100px '),
             }"
             style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
@@ -27,7 +27,7 @@
             class="table-raw"
             :style="{
                 'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} 150px`;
+                    return `${str} 100px`;
                 }, '100px'),
             }"
         >
@@ -61,7 +61,6 @@
             </div>
         </div>
     </div>
-    {{ props.cells }}
 </template>
 
 <script setup lang="ts">

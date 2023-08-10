@@ -74,7 +74,7 @@
                         </div>
                         <div class="table-raw-gap" />
                         <div class="table-raw-container-2">
-                            <span class="prefix">Commentary (optional)</span>
+                            <span class="prefix">Comment (optional)</span>
                             <fluent-text-area v-model="comment" />
                         </div>
                         <div class="table-raw-gap" />
@@ -161,7 +161,7 @@
                     </div>
                     <div class="table-raw-gap" />
                     <div class="table-raw-container-2">
-                        <span class="prefix">Commentary (optional)</span>
+                        <span class="prefix">Comment (optional)</span>
                         <fluent-text-area v-model="comment" />
                     </div>
                     <div class="table-raw-gap" />
