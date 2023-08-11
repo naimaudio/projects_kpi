@@ -22,7 +22,7 @@
                 />
             </span>
             <div v-if="weeks.length !== 0" class="column-container">
-                <span v-for="week in weeks" :key="week.week">
+                <span v-for="week in weeks" :key="week.week" class="icon-with-text" style="align-items: center">
                     <BaseButton
                         style="width: 90px; display: inline"
                         @click="
@@ -35,25 +35,18 @@
                         "
                         >Week {{ week.week }}
                     </BaseButton>
-                    <span
+                    <div
                         :class="{
-                            'warning-color':
-                                currentWeek.year === week.year
-                                    ? currentWeek.week > week.week
-                                    : currentWeek.year > week.year,
+                            'warning-color': week.label === 'error',
+                            'success-color': week.label === 'success',
                         }"
+                        class="icon-with-text"
                         style="margin-left: 10px"
                     >
-                        <ErrorIcon
-                            v-if="
-                                currentWeek.year === week.year
-                                    ? currentWeek.week > week.week
-                                    : currentWeek.year > week.year
-                            "
-                            style="vertical-align: middle"
-                        />
-                        {{ weekNumberToString(week.week, week.year) }}</span
-                    >
+                        <ErrorIcon v-if="week.label === 'error'" style="vertical-align: middle" />
+                        <CheckmarkIcon v-else-if="week.label === 'success'" style="vertical-align: middle" />
+                        {{ weekNumberToString(week.week, week.year) }}
+                    </div>
                 </span>
             </div>
             <span v-if="weeks.length !== 0 && currentMode === 'LATE'" style="font-size: large">Or</span>
@@ -73,12 +66,13 @@ import dayjs from "dayjs";
 import { range, weekNumberToString } from "@/utilities/main";
 import { useRoute, useRouter } from "vue-router";
 import BaseButton from "@/components/base/BaseButton.vue";
-import type { WeekInYear } from "@/typing/project";
+import type { WeekInYear, WeekInYearLabeled } from "@/typing/project";
 import { useDeclarationStore } from "@/stores/declarationStore";
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 import { ref, watch, computed } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import ArrowPreviousIcon from "@/components/icons/ArrowPreviousIcon.vue";
+import CheckmarkIcon from "@/components/icons/CheckmarkIcon.vue";
 const router = useRouter();
 const route = useRoute();
 const declarationStore = useDeclarationStore();
@@ -93,8 +87,8 @@ function buildDeclarations(
     weeksDeclared: WeekInYear[],
     firstWeekToDeclare: WeekInYear,
     lastWeekToDeclare: WeekInYear
-): WeekInYear[] {
-    const years = range(firstWeekToDeclare.year, lastWeekToDeclare.year + 1);
+): WeekInYearLabeled[] {
+    const years = range(firstWeekToDeclare.year, lastWeekToDeclare.year + 1, "number");
     const sortedWeeksDeclared = weeksDeclared
         .sort((weekInYear, weekInYear2) =>
             weekInYear2.year !== weekInYear.year
@@ -108,7 +102,7 @@ function buildDeclarations(
                 (weekInYear.year < lastWeekToDeclare.year ||
                     (weekInYear.year === lastWeekToDeclare.year && weekInYear.week <= lastWeekToDeclare.week))
         );
-    const declarationsToInput: WeekInYear[] = [];
+    const declarationsToInput: WeekInYearLabeled[] = [];
     let j = 0;
     const lengthOfWeeksDeclared = sortedWeeksDeclared.length;
     years.forEach((year) => {
@@ -120,7 +114,13 @@ function buildDeclarations(
                 sortedWeeksDeclared[j].week === i &&
                 sortedWeeksDeclared[j].year === year
             ) {
-                j += 1;
+                if (currentWeek.year === year ? currentWeek.week > i : currentWeek.year > year) {
+                    j++;
+                } else {
+                    declarationsToInput.push({ week: i, year: year, label: "success" });
+                }
+            } else if (currentWeek.year === year ? currentWeek.week > i : currentWeek.year > year) {
+                declarationsToInput.push({ week: i, year: year, label: "error" });
             } else {
                 declarationsToInput.push({ week: i, year: year });
             }
@@ -163,7 +163,7 @@ function updateWeeks(value: "IN_ADVANCE" | "LATE") {
     }
 }
 
-const weeks = ref<WeekInYear[]>(
+const weeks = ref<WeekInYearLabeled[]>(
     buildDeclarations(
         declarationStore.weeksDeclared,
         {
@@ -193,5 +193,9 @@ const changeWeeks = (mode: "IN_ADVANCE" | "LATE") => {
 
 .warning-color {
     color: #797673;
+}
+
+.success-color {
+    color: #248344;
 }
 </style>

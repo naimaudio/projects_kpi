@@ -169,6 +169,12 @@ export interface WeekInYear {
     year: number;
 }
 
+export interface WeekInYearLabeled {
+    week: number;
+    year: number;
+    label?: "error" | "success";
+}
+
 export interface ForecastItem {
     project_id?: number;
     month: number;

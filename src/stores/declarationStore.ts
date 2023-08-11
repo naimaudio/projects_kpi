@@ -52,7 +52,25 @@ export const useDeclarationStore = defineStore("declaration", () => {
     const getDeclarations = computed(() => {
         return declarations.value;
     });
-
+    async function getDeclaration(year: number, week: number, userId: number): Promise<DeclarationInput[]> {
+        const alreadyRegisteredDeclaration = declarations.value.filter((value) => {
+            return value.week === week && value.year === year;
+        });
+        await addFavorites(
+            alreadyRegisteredDeclaration
+                .filter((d) => {
+                    return !favorites.value.has(d.projectId);
+                })
+                .map((d) => ({
+                    userId: userId,
+                    projectId: d.projectId,
+                }))
+        );
+        return elementaryDeclarationGetter.value.map((elDec) => ({
+            ...elDec,
+            hours: alreadyRegisteredDeclaration.find((dec) => dec.projectId === elDec.projectId)?.hours || 0,
+        }));
+    }
     const getUserProjects = computed<UserProject[]>(() => {
         const sortedDeclarations = cloneDeep(declarations.value).sort((decl1, decl2) =>
             decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
@@ -103,14 +121,17 @@ export const useDeclarationStore = defineStore("declaration", () => {
 
     async function setFavorite(projectId: number, value: boolean, userId: number) {
         if (value) {
-            await postFavorites(userId, projectId);
+            await postFavorites([{ userId: userId, projectId: projectId }]);
             favorites.value.add(projectId);
         } else {
             favorites.value.delete(projectId);
             await deleteFavorites(userId, projectId);
         }
     }
-
+    async function addFavorites(newFavorites: { projectId: number; userId: number }[]) {
+        await postFavorites(newFavorites);
+        newFavorites.forEach((val) => favorites.value.add(val.projectId));
+    }
     return {
         records,
         favorites,
@@ -120,7 +141,9 @@ export const useDeclarationStore = defineStore("declaration", () => {
         weeksDeclared,
         isFavorite,
         setFavorite,
+        addFavorites,
         initFavorites,
         getDeclarations,
+        getDeclaration,
     };
 });

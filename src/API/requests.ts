@@ -75,18 +75,15 @@ export async function getFavorites(userId: number): Promise<SimplifiedResponse<n
     return { status: response.status, data: await response.json() };
 }
 
-export async function postFavorites(userId: number, projectId: number): Promise<SimplifiedResponse<any>> {
+export async function postFavorites(
+    favorites: { userId: number; projectId: number }[]
+): Promise<SimplifiedResponse<any>> {
     const response = await fetcher(`${origin}/favorites`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify([
-            {
-                user_id: userId,
-                project_id: projectId,
-            },
-        ]),
+        body: JSON.stringify(favorites.map((f) => ({ user_id: f.userId, project_id: f.projectId }))),
     });
     return { status: response.status, data: await response.json() };
 }

@@ -85,7 +85,7 @@
                                 :disabled="sumProjectHours != 35 || loading"
                                 @click="confirmationModal = true"
                             >
-                                <span> Validate</span>
+                                <span> {{ isNewDeclaration ? "Validate" : "Change declaration" }}</span>
                             </BaseButton>
                         </div>
                     </div>
@@ -172,16 +172,16 @@
                             :loading="loading"
                             @click="confirmationModal = true"
                         >
-                            <span> Validate</span>
+                            <span> {{ isNewDeclaration ? "Change declaration" : "Validate" }}</span>
                         </BaseButton>
                     </div>
                 </div>
             </template>
             <template v-else>
-                <p>You have already register hours for this week</p>
+                <p>There is a problem with this declaration date.</p>
                 <img
-                    src="@/assets/icons/slightly-smiling-face.png"
-                    alt="Slightly Smiling Face"
+                    src="@/assets/icons/neutral-face.png"
+                    alt="Neutral Face"
                     width="60"
                     height="60"
                     style="margin-left: 130px"
@@ -252,12 +252,18 @@ import { cloneDeep } from "lodash";
 import { rawBuffersToDailyDeclaration } from "@/typing/conversions";
 import ModalHoursView from "@/views/employee/ModalHoursView.vue";
 import { dayValidation } from "../../utilities/main";
+import dayjs from "dayjs";
 
 const addFavoritesModal = ref(false);
 const router: Router = useRouter();
 const route: RouteLocationNormalizedLoaded = useRoute();
 const userStore = useUserStore();
 const declarationStore = useDeclarationStore();
+const isNewDeclaration = computed(() => {
+    return !declarationStore.weeksDeclared.some(
+        (week) => week.week === weekNumber.value && week.year === yearNumber.value
+    );
+});
 const weekNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.week)
         ? undefined
@@ -265,6 +271,7 @@ const weekNumber = computed<number | undefined>(() => {
         ? undefined
         : Number(route.params.week);
 });
+
 const yearNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.year)
         ? undefined
@@ -281,6 +288,17 @@ const userId = userStore.userIdGetter;
 if (userId === undefined) throw Error("no user Logged");
 
 const weeklyDeclaration = ref<DeclarationInput[]>(cloneDeep(declarationStore.elementaryDeclarationGetter));
+
+if (
+    !isNewDeclaration.value &&
+    weekNumber.value !== undefined &&
+    yearNumber.value !== undefined &&
+    userStore.userIdGetter !== undefined
+) {
+    declarationStore
+        .getDeclaration(yearNumber.value, weekNumber.value, userStore.userIdGetter)
+        .then((resp) => (weeklyDeclaration.value = resp));
+}
 const currentDeclaration = computed<DeclarationInput[]>(() => {
     let declaration: DeclarationInput[] = [];
     if (methodSelected.value === "daily") {
@@ -301,6 +319,16 @@ const currentDeclaration = computed<DeclarationInput[]>(() => {
     }
     return declaration;
 });
+const valideRoute = computed(() => {
+    const dayjsDate = dayjs(userStore.user?.firstDeclarationDay, "YYYY-MM-DD");
+    return (
+        (yearNumber.value !== undefined && dayjsDate.get("year") < yearNumber.value) ||
+        (weekNumber.value !== undefined &&
+            dayjsDate.get("year") === yearNumber.value &&
+            dayjsDate.week() <= weekNumber.value)
+    );
+});
+
 const dailyDeclarationHours = ref<DailyDeclaration>([
     cloneDeep(declarationStore.elementaryDeclarationGetter),
     cloneDeep(declarationStore.elementaryDeclarationGetter),
@@ -380,11 +408,6 @@ const favorites = computed<Set<number>>(() => declarationStore.favorites);
 watch(favorites.value, () => {
     refreshbufferValues(weekNumber.value, yearNumber.value, userId);
 });
-
-const valideRoute = computed<boolean>(
-    () =>
-        declarationStore.weeksDeclared.every((week) => week.week !== weekNumber.value || week.year !== yearNumber.value) // BE CAREFULL CAN MAKE THE PAGE TOO LONG TO DISPLAY
-);
 </script>
 
 <style scoped>
