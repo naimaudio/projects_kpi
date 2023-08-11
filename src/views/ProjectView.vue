@@ -120,6 +120,49 @@
                     :enable-time-picker="false"
                 ></VueDatePicker>
             </div>
+            <h3>Project forecast</h3>
+            <span
+                v-if="
+                    editedProject.startDate === undefined ||
+                    editedProject.startDate === null ||
+                    editedProject.endDate === undefined ||
+                    editedProject.endDate === null
+                "
+            >
+                Please provide a start date and an end date if you want to add a forecast</span
+            >
+            <template v-else>
+                <div v-if="!thereIsForecast" class="icon-with-text">
+                    <AddOutlineIcon clickable @click="updateForecast" />
+                    <span class="prefix align-center italic">add forecast</span>
+                </div>
+                <div v-else class="icon-with-text">
+                    <SubtractOutlineIcon clickable @click="editedProject.forecast.splice(0)" />
+                    <span
+                        class="prefix align-center italic"
+                        @click="
+                            () => {
+                                editedProject.forecast.splice(0);
+                            }
+                        "
+                        >remove forecast</span
+                    >
+                </div>
+
+                <div v-if="thereIsForecast">
+                    <div id="forecast-line-chart" ref="forecastLineChart"></div>
+                    <InputTableCells
+                        :cells="cells"
+                        :row-headers="years"
+                        :column-headers="months"
+                        @change="
+                            (rowIndex, columnInded, value) => {
+                                cells[rowIndex][columnInded] = value;
+                            }
+                        "
+                    />
+                </div>
+            </template>
             <h3>Project phases</h3>
             <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
                 <AddOutlineIcon
@@ -164,8 +207,8 @@
                         "
                     />
                     <span v-else></span>
-                    <span>{{ projectPhase.code }}</span>
-                    <span>{{ projectPhase.name }} </span>
+                    <span :class="{ 'disabled-phase': jGetter[i] === undefined }">{{ projectPhase.code }}</span>
+                    <span :class="{ 'disabled-phase': jGetter[i] === undefined }">{{ projectPhase.name }} </span>
                     <VueDatePicker
                         v-if="editedProject.phases[jGetter[i]] !== undefined"
                         :model-value="editedProject.phases[jGetter[i]].startDate"
@@ -210,13 +253,6 @@
                         v-if="editedProject.phases[jGetter[i]] !== undefined"
                         :model-value="editedProject.phases[jGetter[i]].endDate"
                         :min-date="i !== 0 ? editedProject.phases[jGetter[i]].startDate : undefined"
-                        :max-date="
-                            i !== editedProject.phases.length - 1
-                                ? dayjs(editedProject.phases[jGetter[i] + 1].startDate, 'YYYY-MM-DD')
-                                      .subtract(1, 'month')
-                                      .format('YYYY-MM-DD')
-                                : undefined
-                        "
                         ignore-time-validation
                         format="dd/MM/yyyy"
                         month-picker
@@ -234,21 +270,8 @@
                     <span v-else></span>
                 </template>
             </div>
-            <h3>Project forecast</h3>
             <div>
-                <div id="forecast-line-chart" ref="forecastLineChart"></div>
-                <InputTableCells
-                    :cells="cells"
-                    :row-headers="years"
-                    :column-headers="months"
-                    @change="
-                        (rowIndex, columnInded, value) => {
-                            cells[rowIndex][columnInded] = value;
-                        }
-                    "
-                />
-            </div>
-            <div>
+                <br />
                 <BaseButton style="margin-right: 10px" @click="router.push({ name: 'projects', query: route.query })"
                     >Back to projects</BaseButton
                 >
@@ -277,9 +300,10 @@ import {
     type CompleteProject,
     expansionRenewalLabels,
     expansionRenewalArray,
+    type ForecastItem,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { phases, phasesRecord } from "@/stores/nonReactiveStore";
+import { phases } from "@/stores/nonReactiveStore";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
@@ -306,6 +330,10 @@ const user = computed<User>(() => {
     } else {
         return u;
     }
+});
+
+const thereIsForecast = computed<boolean>(() => {
+    return editedProject.value.forecast.length !== 0;
 });
 const newProject = ref<boolean>(false);
 const projectId = computed<number | undefined>(() => {
@@ -343,7 +371,9 @@ if (find === undefined) {
     getProject(find.code).then((response) => {
         project.value = rawProjectToProjectComplete(response.data);
         editedProject.value = rawProjectToProjectComplete(response.data);
-        done.value = true;
+        setTimeout(() => {
+            done.value = true;
+        }, 100);
     });
 }
 const editedProject = ref<BlankProject>({
@@ -353,12 +383,29 @@ const editedProject = ref<BlankProject>({
     complexity: 0,
     phases: [],
     expansionRenewal: "",
+    forecast: [],
 });
 const loading = ref<boolean>(false);
 const codeValidation = ref<string | undefined>();
-
+function updateForecast() {
+    editedProject.value.forecast = cells.value
+        .flatMap<ForecastItem>((cell, i) => {
+            return cell.map<ForecastItem>((item, j) => {
+                return {
+                    month: j + 1,
+                    year: Number(years.value[i]),
+                    hours: item || 0,
+                };
+            });
+        })
+        .slice(
+            dayjs(editedProject.value.startDate).get("month"),
+            -11 + dayjs(editedProject.value.endDate).get("month")
+        );
+}
 const clickHandler = () => {
     loading.value = true;
+    updateForecast();
     if (!newProject.value && "id" in editedProject.value)
         updateProject(editedProject.value as CompleteProject).then((response) => {
             if (response.status === 200) {
@@ -407,37 +454,45 @@ const months: string[] = [
     "November",
     "December",
 ];
-const wholeXAxis = range(2020, 2025).flatMap((year) => {
-    const monthNumbers = range(1, 13).map((i) => (i < 10 ? `0${i}` : `${i}`));
-    return monthNumbers.map<string>((m) => {
-        return `${m}-${year}`;
-    });
-});
-const xAxis = computed(() => {
-    const flatten = cells.value.flatMap((a) => a);
-    return wholeXAxis.slice(
-        flatten.findIndex((val) => val !== 0),
-        flatten.findLastIndex((val) => val !== 0) + 1
+
+const years = computed<string[]>(() => {
+    if (editedProject.value.startDate === undefined || editedProject.value.endDate === undefined) {
+        return [];
+    }
+    return range(
+        dayjs(editedProject.value.startDate).get("year"),
+        dayjs(editedProject.value.endDate).get("year") + 1,
+        "string"
     );
 });
 
+const wholeXAxis = computed(() =>
+    years.value
+        .flatMap((year) => {
+            const monthNumbers = range(1, 13, "number").map((i) => (i < 10 ? `0${i}` : `${i}`));
+            return monthNumbers.map<string>((m) => {
+                return `${m}-${year}`;
+            });
+        })
+        .slice(dayjs(editedProject.value.startDate).get("month"), -11 + dayjs(editedProject.value.endDate).get("month"))
+);
+
 const series = computed<number[]>(() => {
     const flatten = cells.value.flatMap((a) => a);
-    return flatten
-        .reduce<number[]>((acc, curr, index) => {
-            acc.push((acc[index - 1] || 0) + curr);
-            return acc;
-        }, [])
-        .slice(
-            flatten.findIndex((val) => val !== 0),
-            flatten.findLastIndex((val) => val !== 0) + 1
-        );
+    const arr = flatten.slice(
+        flatten.findIndex((val) => val !== undefined),
+        flatten.findLastIndex((val) => val !== undefined) + 1
+    );
+    return arr.reduce<number[]>((acc, curr, index) => {
+        acc.push((acc[index - 1] || 0) + (curr || 0));
+        return acc;
+    }, []);
 });
 const lineChartOption = computed<ECOption>(() => {
     return {
         xAxis: {
             type: "category",
-            data: xAxis.value,
+            data: wholeXAxis.value,
         },
         yAxis: {
             type: "value",
@@ -454,17 +509,73 @@ const lineChartOption = computed<ECOption>(() => {
     };
 });
 
-const years: string[] = ["2020", "2021", "2022", "2023", "2024"];
-
 const forecastLineChart = ref<HTMLElement | null>(null);
 
-const cells = ref<number[][]>(
-    Array(years.length)
+const cells = ref<(number | undefined)[][]>(
+    Array(years.value.length)
         .fill(0)
         .map(() => {
             return Array(months.length).fill(0);
         })
 );
+
+const startDate = computed(() => editedProject.value.startDate);
+const endDate = computed(() => editedProject.value.endDate);
+
+watch([years, startDate, endDate], ([years, newStartDate, newEndDate], [oldYears]) => {
+    if (oldYears.length === 0) {
+        cells.value = Array(years.length)
+            .fill(0)
+            .map(() => {
+                return Array(months.length).fill(0);
+            });
+    } else if (years.length === 0) {
+        cells.value = [];
+    } else {
+        const deleteCountLeft = Number(years[0]) - Number(oldYears[0]);
+        const deleteCountRight = Number(oldYears[oldYears.length - 1]) - Number(years[years.length - 1]);
+
+        if (deleteCountLeft > 0) {
+            cells.value.splice(0, deleteCountLeft);
+        }
+        if (deleteCountRight > 0) {
+            cells.value.splice(cells.value.length - deleteCountRight, deleteCountRight);
+        }
+        if (deleteCountLeft < 0) {
+            for (let i = 0; i < -deleteCountLeft; i++) {
+                cells.value.splice(0, 0, Array(months.length).fill(0));
+            }
+        }
+        if (deleteCountRight < 0) {
+            for (let i = 0; i < -deleteCountRight; i++) {
+                cells.value.push(Array(months.length).fill(0));
+            }
+        }
+    }
+    if (years.length !== 0) {
+        cells.value.forEach((row, i) =>
+            row.forEach((val, j) => {
+                if (val === undefined) {
+                    cells.value[i][j] = 0;
+                }
+            })
+        );
+        const undefinedLeftCount = dayjs(newStartDate, "YYYY-MM-DD").get("month");
+        const undefinedRightCount = 11 - dayjs(newEndDate, "YYYY-MM-DD").get("month");
+        for (let i = 0; i < undefinedLeftCount; i++) {
+            cells.value[0][i] = undefined;
+        }
+        for (let i = 0; i < undefinedRightCount; i++) {
+            cells.value[cells.value.length - 1][11 - i] = undefined;
+        }
+        if (done.value === false) {
+            editedProject.value.forecast.forEach((forecastItem) => {
+                cells.value[forecastItem.year - Number(years[0])][forecastItem.month - 1] = forecastItem.hours;
+            });
+        }
+    }
+});
+
 watch(forecastLineChart, (newValue, oldValue) => {
     if (newValue !== null && oldValue === null) {
         newValue.style.width = "1300px";
@@ -481,9 +592,7 @@ watch(lineChartOption, () => {
         }
     }
 });
-onMounted(() => {
-    console.log(forecastLineChart.value);
-});
+onMounted(() => {});
 </script>
 
 <style>
@@ -547,5 +656,10 @@ onMounted(() => {
     gap: 5px;
     display: flex;
     flex-direction: column;
+}
+
+.disabled-phase {
+    font-style: italic;
+    color: gray;
 }
 </style>

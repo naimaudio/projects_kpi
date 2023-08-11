@@ -21,7 +21,9 @@ export const msalConfig = {
                         console.error(message);
                         return;
                     case LogLevel.Info:
-                        console.info(message);
+                        if (!message.includes("CacheManager:getIdToken - No token found")) {
+                            console.info(message);
+                        }
                         return;
                     case LogLevel.Verbose:
                         console.debug(message);

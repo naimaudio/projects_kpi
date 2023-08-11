@@ -12,7 +12,7 @@ import type {
 import { domains } from "@/typing";
 import type {
     Project,
-    RawProjectAndPhases,
+    RawProjectPhasesAndForecast,
     CompleteProject,
     RawProjectPhase,
     ProjectPhase,
@@ -138,17 +138,22 @@ export function rawPhasesToPhase(phases: RawProjectPhase[]): ProjectPhase[] {
     });
 }
 
-export function rawProjectToProjectComplete(project: RawProjectAndPhases): CompleteProject {
+export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndForecast): CompleteProject {
     return {
-        id: project.project.id,
-        code: project.project.project_code,
-        division: project.project.division,
-        classification: project.project.classification,
-        complexity: project.project.complexity,
-        entity: project.project.entity,
-        expansionRenewal: project.project.type,
-        name: project.project.project_name,
-        subCategory: project.project.sub_category,
-        phases: rawPhasesToPhase(project.phases),
+        id: projectPack.project.id,
+        code: projectPack.project.project_code,
+        division: projectPack.project.division,
+        classification: projectPack.project.classification,
+        complexity: projectPack.project.complexity,
+        entity: projectPack.project.entity,
+        expansionRenewal: projectPack.project.type,
+        name: projectPack.project.project_name,
+        subCategory: projectPack.project.sub_category,
+        phases: rawPhasesToPhase(projectPack.phases),
+        forecast: projectPack.forecasts,
+        startDate: projectPack.project.start_date || undefined,
+        endCapDate: projectPack.project.end_cap_date || undefined,
+        endDate: projectPack.project.end_date || undefined,
+        startCapDate: projectPack.project.start_cap_date || undefined,
     };
 }

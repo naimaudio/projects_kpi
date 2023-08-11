@@ -132,13 +132,15 @@ export interface BlankProjectPhase {
     endDate?: string;
 }
 
-export interface RawProjectAndPhases {
+export interface RawProjectPhasesAndForecast {
     project: RawProject;
     phases: RawProjectPhase[];
+    forecasts: ForecastItem[];
 }
 
 export interface CompleteProject extends Project {
     phases: ProjectPhase[];
+    forecast: ForecastItem[];
 }
 
 export interface BlankProject {
@@ -151,6 +153,7 @@ export interface BlankProject {
     entity?: string;
     complexity?: number;
     phases: BlankProjectPhase[];
+    forecast: ForecastItem[];
     startCapDate?: string;
     endCapDate?: string;
     startDate?: string;
@@ -164,4 +167,13 @@ export interface SelectableProject extends UserProject {
 export interface WeekInYear {
     week: number;
     year: number;
+}
+
+export interface ForecastItem {
+    project_id?: number;
+    month: number;
+
+    year: number;
+
+    hours: number;
 }

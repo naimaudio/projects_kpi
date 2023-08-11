@@ -57,17 +57,27 @@ export const dayNumberToString = (day: dayNb, weekNumber: number, year: number) 
  * @param begining strating of the array
  * @param end end of the array, (excluding last number)
  */
-export function range(begining: number, end: number): number[] {
+export function range(begining: number, end: number, type: "number"): number[];
+export function range(begining: number, end: number, type: "string"): string[];
+export function range(begining: number, end: number, type: "number" | "string" = "number"): number[] | string[] {
     if (begining >= end) {
         return [];
     }
     const range = [];
     let i: number = begining;
-    while (i < end) {
-        range.push(i);
-        i++;
+    if (type === "number") {
+        while (i < end) {
+            range.push(i);
+            i++;
+        }
+        return range;
+    } else {
+        while (i < end) {
+            range.push(i.toString());
+            i++;
+        }
+        return range;
     }
-    return range;
 }
 
 /**

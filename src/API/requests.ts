@@ -7,10 +7,16 @@ import type {
     SimplifiedResponse,
     MonthlyHoursItem,
     dayNb,
+    domain,
 } from "@/typing";
-import type { CompleteProject, RawProject, RawProjectAndPhases, RawProjectPhase } from "@/typing/project";
+import type {
+    CompleteProject,
+    ForecastItem,
+    RawProject,
+    RawProjectPhasesAndForecast,
+    RawProjectPhase,
+} from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
-import type { domain } from "@/typing/index";
 
 export const origin = envVariableWithValidation("VITE_FAST_API_URI");
 export async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
@@ -50,7 +56,7 @@ export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
     return { status: response.status, data: await response.json() };
 }
 
-export async function getProject(projectCode: string): Promise<SimplifiedResponse<RawProjectAndPhases>> {
+export async function getProject(projectCode: string): Promise<SimplifiedResponse<RawProjectPhasesAndForecast>> {
     const response = await fetcher(`${origin}/project?projectcode=${projectCode}`, {
         headers: {
             "Content-Type": "application/json",
@@ -195,7 +201,7 @@ export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
 }
 
 export async function updateProject(project: CompleteProject): Promise<SimplifiedResponse<{ detail: string }>> {
-    interface RequestBody extends RawProjectAndPhases {}
+    interface RequestBody extends RawProjectPhasesAndForecast {}
     const requestBody: RequestBody = {
         project: {
             id: project.id,
@@ -207,10 +213,15 @@ export async function updateProject(project: CompleteProject): Promise<Simplifie
             division: project.division,
             sub_category: project.subCategory,
             type: project.expansionRenewal,
+            end_cap_date: project.endCapDate || null,
+            end_date: project.endDate || null,
+            start_cap_date: project.startCapDate || null,
+            start_date: project.startDate || null,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
         }),
+        forecasts: project.forecast,
     };
     const response = await fetcher(`${origin}/project`, {
         method: "PUT",
@@ -226,6 +237,7 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
     interface RequestBody {
         project: Omit<RawProject, "id">;
         phases: RawProjectPhase[];
+        forecasts: ForecastItem[];
     }
     const requestBody: RequestBody = {
         project: {
@@ -237,10 +249,15 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
             division: project.division,
             sub_category: project.subCategory,
             type: project.expansionRenewal,
+            end_cap_date: project.endCapDate || null,
+            end_date: project.endDate || null,
+            start_cap_date: project.startCapDate || null,
+            start_date: project.startDate || null,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
         }),
+        forecasts: project.forecast,
     };
     const response = await fetcher(`${origin}/project`, {
         method: "POST",

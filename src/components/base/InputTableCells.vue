@@ -37,11 +37,12 @@
             <div v-for="(header, j) in props.columnHeaders" :key="j" class="table-cell">
                 <input
                     ref="inputs"
+                    :disabled="cells[i][j] === undefined"
                     :value="cells[i][j]"
                     type="number"
                     class="input-cell"
                     min="0"
-                    style="background-color: white; padding-left: 8px"
+                    :class="{ 'disabled-cell': cells[i][j] === undefined }"
                     @change="
                         (e) => {
                             emit('change', i, j, Number(e.target?.value));
@@ -70,7 +71,7 @@ const props = withDefaults(
     defineProps<{
         columnHeaders: string[];
         rowHeaders: string[];
-        cells: number[][];
+        cells: (number | undefined)[][];
     }>(),
     {}
 );
@@ -144,5 +145,11 @@ function handleFocus(direction: "left" | "right" | "up" | "down") {
     width: 100%;
     line-height: 30px;
     border: none;
+    padding-left: 8px;
+    background-color: white;
+}
+
+.disabled-cell {
+    background-color: #e2e6eb;
 }
 </style>
