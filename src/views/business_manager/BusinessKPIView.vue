@@ -17,11 +17,15 @@
 </template>
 <script setup lang="ts">
 import * as echarts from "echarts/core";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { cloneDeep } from "lodash";
 import { type chartType } from "@/typing";
 import { getKPI } from "@/API/kpi_requests";
 import type { ECOption } from "@/main";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
 const options = ref<Record<string, ECOption>>({
     lineOption: {
         title: {
@@ -127,12 +131,49 @@ const graphs = ref<
     },
 ]);
 
-// const pieChart = ref<ComponentPublicInstance | null>(null);
+const period = computed<string[] | undefined>(() => {
+    const val = route.query.period;
+    if (Array.isArray(val) && val.length === 2 && val.every((v) => v !== null)) {
+        return val as string[];
+    } else {
+        return undefined;
+    }
+});
+
+const unit = computed<string>(() => {
+    const u = route.query.unit;
+    if (u !== "hours" && u !== "TDE" && u !== "cost") {
+        return "h";
+    } else {
+        return u === "hours" ? "h" : u;
+    }
+});
+
+const cummulated = computed<string>(() => {
+    const u = route.query.cummulated;
+    if (u !== "monthly" && u !== "cummulated") {
+        return "cummulated";
+    } else {
+        return u;
+    }
+});
+
+watch([unit, period, cummulated], ([pId]) => {
+    if (pId !== undefined) {
+        graphUpdate();
+    }
+});
 onMounted(() => {
+    graphUpdate();
+});
+
+function graphUpdate() {
     graphs.value.forEach(async (graphInfo) => {
         const graph = document.getElementById(graphInfo.id);
-        const chartE = echarts.init(graph);
         if (graph !== null) {
+            let chartE: echarts.ECharts;
+            const chartE2 = echarts.getInstanceByDom(graph);
+            chartE = chartE2 === undefined ? echarts.init(graph) : chartE2;
             if (graphInfo.defaultWidth) {
                 graph.style.width = graphInfo.defaultWidth;
             }
@@ -140,14 +181,22 @@ onMounted(() => {
                 graph.style.height = graphInfo.defaultHeight;
             }
             if (graphInfo.fetch_uri) {
-                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, { cumulative: true });
+                const query: Record<string, string | number | undefined | boolean> = {};
+                if (period.value !== undefined) {
+                    query.month1 = Number(period.value[0].split("-")[0]) + 1;
+                    query.year1 = Number(period.value[0].split("-")[1]);
+                    query.month2 = Number(period.value[1].split("-")[0]) + 1;
+                    query.year2 = Number(period.value[1].split("-")[1]);
+                }
+                query.cumulative = cummulated.value === "cummulated";
+                query.unit = unit.value;
+                const updatedOptions = await getKPI(graphInfo.type, graphInfo.fetch_uri, query);
                 options.value[graphInfo.option] = {
                     ...options.value[graphInfo.option],
                     ...updatedOptions,
                 };
             }
-
-            chartE.setOption(options.value[graphInfo.option]);
+            chartE.setOption(options.value[graphInfo.option], true);
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
                 const crt = this;
@@ -167,7 +216,7 @@ onMounted(() => {
             resizeObserver.observe(graph);
         }
     });
-});
+}
 
 const onDropHandler = (event: DragEvent, j: number) => {
     const i = graphs.value.findIndex((graph) => {

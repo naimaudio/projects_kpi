@@ -15,7 +15,13 @@
                 />
             </div>
             <ProjectManagementSelectors
-                v-if="route.name === 'KPI' || route.name === 'forecast' || route.name === 'data'"
+                v-if="route.name === 'KPI' || route.name === 'business_kpi'"
+                :display="{
+                    cummulated: true,
+                    period: true,
+                    project: route.name === 'KPI',
+                    unit: true,
+                }"
             />
             <div>
                 <RouterLink class="avatar-container raw-container" :to="{ name: 'profile', query: route.query }">

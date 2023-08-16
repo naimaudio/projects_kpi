@@ -1,6 +1,6 @@
 <template>
     <div class="selector-container">
-        <div class="field-with-legend">
+        <div v-if="props.display.project" class="field-with-legend">
             <span>Project</span>
             <Combobox
                 :model-value="projectId === undefined ? undefined : projectStore.projectCodes[projectId]"
@@ -48,7 +48,7 @@
                 </ComboboxOptions>
             </Combobox>
         </div>
-        <div class="field-with-legend">
+        <div v-if="props.display.period" class="field-with-legend">
             <span>Period</span>
             <VueDatePicker
                 :model-value="period"
@@ -57,14 +57,14 @@
                 @update:model-value="onDateRangeChange"
             ></VueDatePicker>
         </div>
-        <div class="field-with-legend">
+        <div v-if="props.display.unit" class="field-with-legend">
             <span>Unit</span>
             <fluent-select :value="unit" style="height: 36px" @change="onUnitChange">
                 <fluent-option>hours</fluent-option>
                 <fluent-option>TDE</fluent-option>
             </fluent-select>
         </div>
-        <div class="field-with-legend">
+        <div v-if="props.display.cummulated" class="field-with-legend">
             <span>Accumulated</span>
             <fluent-select :value="cummulated" style="height: 36px" @change="onCummulateChange">
                 <fluent-option>cummulated</fluent-option>
@@ -83,7 +83,24 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 
 const projectStore = useProjectStore();
 const query = ref("");
-
+const props = withDefaults(
+    defineProps<{
+        display?: {
+            cummulated?: boolean;
+            unit?: boolean;
+            period?: boolean;
+            project?: boolean;
+        };
+    }>(),
+    {
+        display: () => ({
+            cummulated: false,
+            unit: false,
+            period: false,
+            project: false,
+        }),
+    }
+);
 const filteredProjects = computed(() =>
     query.value === ""
         ? projectStore.projects.slice(0, 12)
