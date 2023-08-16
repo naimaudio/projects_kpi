@@ -317,7 +317,7 @@ import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 import InputTableCells from "@/components/base/InputTableCells.vue";
 import * as echarts from "echarts/core";
 import type { ECOption } from "@/main";
-import { range } from "../utilities/main";
+import { range, findLastIndex } from "../utilities/main";
 import dayjs from "dayjs";
 const route = useRoute();
 const router = useRouter();
@@ -481,7 +481,7 @@ const series = computed<number[]>(() => {
     const flatten = cells.value.flatMap((a) => a);
     const arr = flatten.slice(
         flatten.findIndex((val) => val !== undefined),
-        flatten.findLastIndex((val) => val !== undefined) + 1
+        findLastIndex(flatten, (val) => val !== undefined) + 1
     );
     return arr.reduce<number[]>((acc, curr, index) => {
         acc.push((acc[index - 1] || 0) + (curr || 0));

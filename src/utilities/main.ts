@@ -103,3 +103,10 @@ export function queryBuilder(query: Record<string, string | boolean | undefined 
     }
     return str;
 }
+
+export function findLastIndex<T>(arr: T[], fn: (value: T, index?: number, array?: T[]) => boolean) {
+    return (arr
+        .map<[number, T]>((val, i) => [i, val])
+        .filter(([i, val]) => fn(val, i, arr))
+        .pop() || [-1])[0];
+}

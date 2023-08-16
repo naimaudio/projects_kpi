@@ -45,7 +45,7 @@
                     :class="{ 'disabled-cell': cells[i][j] === undefined }"
                     @change="
                         (e) => {
-                            emit('change', i, j, Number(e.target?.value));
+                            emit('change', i, j, Number((e.target as HTMLInputElement).value));
                         }
                     "
                     @keydown.up="(e: KeyboardEvent) => {e.preventDefault()}"

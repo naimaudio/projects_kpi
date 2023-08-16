@@ -133,7 +133,7 @@ const cummulated = computed<string>(() => {
 });
 const router = useRouter();
 const route = useRoute();
-const period = computed<string[] | undefined>(() => {
+const period = computed<{ month: number; year: number }[] | undefined>(() => {
     const val = route.query.period;
     if (Array.isArray(val) && val.length === 2 && val.every((v) => v !== null)) {
         return [

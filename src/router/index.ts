@@ -10,7 +10,6 @@ const HoursView = () => import("@/views/employee/HoursView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
 const ProjectView = () => import("@/views/ProjectView.vue");
 const Default = () => import("@/layouts/DefaultLayout.vue");
-const DeclarationChangeView = () => import("@/views/project_manager/DeclarationChangeView.vue");
 const MonthlyReportView = () => import("@/views/business_manager/MonthlyReportView.vue");
 const BusinessKPIView = () => import("@/views/business_manager/BusinessKPIView.vue");
 import { msalInstance } from "@/auth_config/auth";
@@ -91,12 +90,6 @@ const router = createRouter({
                     name: "profile",
                     component: ProfileView,
                     meta: { minimalAccessRole: "Employee" },
-                },
-                {
-                    path: "/declaration_change",
-                    name: "change",
-                    component: DeclarationChangeView,
-                    meta: { minimalAccessRole: "Project Manager" },
                 },
                 {
                     path: "/performance_indicators",

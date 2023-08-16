@@ -44,8 +44,8 @@
                     style="background-color: #f6f6f6; padding-left: 8px"
                     :style="{ 'background-color': modifiedCells[i][j] ? '#f6f6f6' : 'white' }"
                     @change="
-                        (e) => {
-                            if (Number(e.target?.value) === initialCells[i][j]) {
+                        (e:Event) => {
+                            if (Number((e.target as HTMLInputElement).value) === initialCells[i][j]) {
                                 emit('remove', modifiedItemsIndexGetter[`${rowHeader.id}_${header.id}`]);
                             } else {
                                 emit(
@@ -53,7 +53,7 @@
                                     rowHeader.id,
                                     header.id,
                                     modifiedItemsIndexGetter[`${rowHeader.id}_${header.id}`],
-                                    Number(e.target?.value)
+                                    Number((e.target as HTMLInputElement).value)
                                 );
                             }
                         }

@@ -26,6 +26,7 @@ import { computed } from "vue";
 const props = withDefaults(defineProps<Props>(), {
     clickable: false,
     disabled: false,
+    color: undefined,
 });
 
 const fillColor = computed(() => (props.clickable && !props.disabled ? "#0078d4" : "#a19f9d"));
