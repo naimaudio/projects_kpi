@@ -16,6 +16,7 @@
     "@azure/storage-blob": "^12.14.0",
     "@floating-ui/vue": "^1.0.1",
     "@fluentui/web-components": "^2.5.15",
+    "@headlessui/vue": "^1.7.15",
     "@microsoft/fast-element": "^1.12.0",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^10.2.1",
