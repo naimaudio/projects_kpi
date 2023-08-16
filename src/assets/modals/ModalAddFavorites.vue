@@ -13,7 +13,7 @@
 import BaseTable from "@/components/base/BaseTable.vue";
 import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header } from "@/typing";
-import { type SelectableProject } from "@/typing/project";
+import { type SelectableUserProject } from "@/typing/project";
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useUserStore } from "../../stores/userStore";
@@ -51,10 +51,10 @@ const headers: Header[] = [
 const userStore = useUserStore();
 const target = ref(null);
 const projects = declarationStore.getUserProjects;
-const selectionableProjects = ref<SelectableProject[]>(
+const selectionableProjects = ref<SelectableUserProject[]>(
     projects
         .filter((project) => project.favorite === false)
-        .map<SelectableProject>((project) => {
+        .map<SelectableUserProject>((project) => {
             return { ...project, selected: false };
         })
 );

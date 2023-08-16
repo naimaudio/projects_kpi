@@ -7,6 +7,17 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 
         <br />
         <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true">Refresh values</BaseButton>
+        <MonthlyReportRowModal
+            v-if="changeRowsModal"
+            :selected-rows="
+                rowHeaders.map((row) => {
+                    return row.id;
+                })
+            "
+            @close="changeRowsModal = false"
+            @change="changeRows"
+        />
+        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
         <BaseButton disabled style="margin-left: 15px">Change columns</BaseButton>
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
             <p>
@@ -61,7 +72,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 }
             "
         />
-        <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
+        <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
             <p>Keep in mind changing hours will have no effect in project managemnt KPIs</p>
             <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
         </ModalComponent>
@@ -78,6 +89,7 @@ import type { MonthlyHoursItem } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
 import type { MatrixHeader } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
+import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
 const selectedDate = ref<{ month: number; year: number }>();
 const projectStore = useProjectStore();
@@ -88,6 +100,7 @@ onMounted(() => {
     };
 });
 
+const changeRowsModal = ref<boolean>(false);
 const refreshConfirmation = ref<boolean>(false);
 const modifyConfirmation = ref<boolean>(false);
 
@@ -158,4 +171,39 @@ const items = ref<MonthlyHoursItem[]>([]);
 const modifiedItems = ref<MonthlyHoursItem[]>([]);
 const columnHeaders = ref<MatrixHeader[]>([]);
 const rowHeaders = ref<MatrixHeader[]>([]);
+const changeRows = (projectIds: number[]) => {
+    const projectIdSet = new Set<number>(projectIds);
+    const projectIdSetComplete = new Set<number>(projectIds);
+    modifiedItems.value = modifiedItems.value.filter((item) => {
+        return projectIdSet.has(item.project_id);
+    });
+    rowHeaders.value.forEach((p) => {
+        if (!projectIdSet.has(p.id)) {
+            modifiedItems.value.push(
+                ...columnHeaders.value.map<MonthlyHoursItem>((user) => {
+                    console.log(p.id);
+                    return {
+                        hours: 0,
+                        project_id: p.id,
+                        user_id: user.id,
+                        user_name: user.name,
+                    };
+                })
+            );
+            projectIdSetComplete.add(p.id);
+        }
+    });
+    rowHeaders.value.splice(0);
+    projectStore.projects.forEach((p) => {
+        if (projectIdSetComplete.has(p.id)) {
+            rowHeaders.value.push({
+                id: p.id,
+                name: p.name,
+            });
+        }
+    });
+    Array.from(projectIdSet).forEach((projectId) => {
+        return projectId;
+    });
+};
 </script>

@@ -42,7 +42,7 @@
                     class="input-cell"
                     min="0"
                     style="background-color: #f6f6f6; padding-left: 8px"
-                    :style="{ 'background-color': initialCells[i][j] !== cells[i][j] ? '#f6f6f6' : 'white' }"
+                    :style="{ 'background-color': modifiedCells[i][j] ? '#f6f6f6' : 'white' }"
                     @change="
                         (e) => {
                             if (Number(e.target?.value) === initialCells[i][j]) {
@@ -80,17 +80,8 @@
             }"
             style="height: 75px"
         >
-            <span
-                style="
-                    position: sticky;
-                    left: -1px;
-                    padding-left: 10px;
-                    background-color: white;
-                    border-right: 1px #e0e0e0 solid;
-                "
-                >Total</span
-            >
-            <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="table-cell">
+            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell">Total</span>
+            <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
         </div>
@@ -176,6 +167,19 @@ const cells = computed<number[][]>(() => {
     });
     return a;
 });
+
+const modifiedCells = computed<boolean[][]>(() => {
+    const a = Array(props.rowHeaders.length)
+        .fill(false)
+        .map(() => {
+            return Array(props.columnHeaders.length).fill(false);
+        });
+    props.modifiedItems.forEach((val) => {
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = true;
+    });
+    return a;
+});
+
 const initialCells = computed<number[][]>(() => {
     const a = Array(props.rowHeaders.length)
         .fill(0)
@@ -212,6 +216,15 @@ const initialCells = computed<number[][]>(() => {
     height: 44px;
     margin-top: auto;
     margin-bottom: auto;
+    display: flex;
+    overflow-y: auto;
+    border-right: 1px #e0e0e0 solid;
+    border-bottom: 1px #e0e0e0 solid;
+}
+
+.total-table-cell {
+    padding: 8px 8px;
+    height: 50px;
     display: flex;
     overflow-y: auto;
     border-right: 1px #e0e0e0 solid;

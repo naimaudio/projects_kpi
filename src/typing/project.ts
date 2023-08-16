@@ -160,10 +160,13 @@ export interface BlankProject {
     endDate?: string;
 }
 
-export interface SelectableProject extends UserProject {
+export interface SelectableUserProject extends UserProject {
     selected: boolean;
 }
 
+export interface SelectableProject extends Project {
+    selected: boolean;
+}
 export interface WeekInYear {
     week: number;
     year: number;
