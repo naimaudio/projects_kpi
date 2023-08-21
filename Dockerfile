@@ -1,10 +1,12 @@
 FROM node:18-alpine
 
 WORKDIR /frontend
+COPY ./frontend .
+RUN mkdir -p /certificates 
+COPY ./certificates /certificates
 
-COPY . .
 
-RUN npm i
+RUN npm install
 
 RUN npm run build
 
