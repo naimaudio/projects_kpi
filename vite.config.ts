@@ -2,9 +2,8 @@ import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import basicSsl from '@vitejs/plugin-basic-ssl'
-import fs from 'fs'
-import path from 'path'
+import fs from "fs";
+import { envVariableWithValidation } from "./src/utilities/main";
 // https://vitejs.dev/config/
 export default defineConfig({
     base: "/app",
@@ -18,13 +17,13 @@ export default defineConfig({
                 },
             },
         }),
-        basicSsl(),
     ],
     server: {
         https: {
-            key: fs.readFileSync(path.resolve(__dirname, 'ssl', 'key.pem')),
-            cert: fs.readFileSync(path.resolve(__dirname, 'ssl', 'cert.pem')),
-          },
+            key: fs.readFileSync(envVariableWithValidation("VITE_SSL_KEY_PATH")),
+            cert: fs.readFileSync(envVariableWithValidation("VITE_SSL_CERT_PATH")),
+            passphrase: envVariableWithValidation("VITE_SSL_KEY_PASSPHRASE"),
+        },
     },
     resolve: {
         alias: {
