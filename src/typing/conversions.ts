@@ -90,7 +90,7 @@ export function declarationsFromRaw(
             comment: rawDeclaration.record.comment === null ? undefined : rawDeclaration.record.comment,
         });
         i += 1;
-        rawDeclaration.projects.forEach((p, jndex) => {
+        rawDeclaration.record_projects.forEach((p, jndex) => {
             decl.push({
                 week: dayjs(rawDeclaration.record.date_rec).week(),
                 year: dayjs(rawDeclaration.record.date_rec).get("year"),

@@ -143,14 +143,14 @@ const graphs = ref<
         type: "pie",
         fetch_uri: "business_kpi/pie/hours_by_domain",
     },
-    {
-        id: "capSummary",
-        minWidth: "700px",
-        minHeight: "700px",
-        option: "CapSummaryOption",
-        type: "pie",
-        fetch_uri: "business_kpi/pie/cap_summary",
-    },
+    // {
+    //     id: "capSummary",
+    //     minWidth: "700px",
+    //     minHeight: "700px",
+    //     option: "CapSummaryOption",
+    //     type: "pie",
+    //     fetch_uri: "business_kpi/pie/cap_summary",
+    // },
 ]);
 
 const period = computed<string[] | undefined>(() => {
