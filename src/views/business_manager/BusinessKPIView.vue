@@ -10,7 +10,9 @@
                     :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
                     draggable="true"
                     @drop="(event) => onDropHandler(event, index)"
-                ></div>
+                >
+                    <DragIcon style="position: absolute; top: 10px; right: 10px" draggable="true" class="drag" />
+                </div>
             </div>
         </div>
     </div>
@@ -23,6 +25,7 @@ import { type chartType } from "@/typing";
 import { getKPI } from "@/API/kpi_requests";
 import type { ECOption } from "@/main";
 import { useRoute } from "vue-router";
+import DragIcon from "@/components/icons/DragIcon.vue";
 
 const route = useRoute();
 
@@ -35,7 +38,7 @@ const options = ref<Record<string, ECOption>>({
             trigger: "axis",
         },
         legend: {
-            data: ["Spent", "Forecast"],
+            data: ["Spent"],
         },
         grid: {
             right: "4%",
@@ -45,7 +48,18 @@ const options = ref<Record<string, ECOption>>({
         toolbox: {
             feature: {
                 saveAsImage: {},
-                dataView: {},
+                dataView: {
+                    optionToContent: function (opt) {
+                        let axisData = (opt.xAxis as { data: string[] }[])[0].data;
+                        let serie = (opt.series as { data: string[] }[])[0].data;
+                        let rows = [["Month", "Value"]];
+                        rows = rows.concat(axisData.map((item, i) => [item, serie[i]]));
+                        let string = "";
+                        rows.forEach((item) => (string += "<p>" + item[0] + "\t" + item[1] + "</p>"));
+                        string += "<button> Click to export</button>";
+                        return string;
+                    },
+                },
             },
         },
         xAxis: {
@@ -129,6 +143,14 @@ const graphs = ref<
         type: "pie",
         fetch_uri: "business_kpi/pie/hours_by_domain",
     },
+    {
+        id: "capSummary",
+        minWidth: "700px",
+        minHeight: "700px",
+        option: "CapSummaryOption",
+        type: "pie",
+        fetch_uri: "business_kpi/pie/cap_summary",
+    },
 ]);
 
 const period = computed<string[] | undefined>(() => {
@@ -197,6 +219,8 @@ function graphUpdate() {
                 };
             }
             chartE.setOption(options.value[graphInfo.option], true);
+            console.log(chartE.getDataURL({}));
+
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
                 const crt = this;
@@ -238,5 +262,9 @@ const onDropHandler = (event: DragEvent, j: number) => {
     border: 4px darkgray solid;
     resize: both;
     overflow: hidden;
+}
+
+.drag:hover {
+    cursor: grab;
 }
 </style>

@@ -1,9 +1,21 @@
 import VueDatePicker from '@vuepic/vue-datepicker';
 <template>
     <div class="page-container">
-        <h1 class="title">Monthly report</h1>
+        <h1 class="title">
+            Monthly Report
+            <BaseTooltip>
+                <div style="max-width: 300px">Cells with</div>
+            </BaseTooltip>
+        </h1>
+
         <br />
-        <VueDatePicker v-model="selectedDate" month-picker style="width: 300px" format="MMMM yyyy"></VueDatePicker>
+        <VueDatePicker
+            v-model="selectedDate"
+            month-picker
+            style="width: 300px"
+            format="MMMM yyyy"
+            :clearable="false"
+        ></VueDatePicker>
 
         <br />
         <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true">Refresh values</BaseButton>
@@ -91,6 +103,7 @@ import type { MatrixHeader } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
 import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 const selectedDate = ref<{ month: number; year: number }>();
 const projectStore = useProjectStore();
 onMounted(() => {

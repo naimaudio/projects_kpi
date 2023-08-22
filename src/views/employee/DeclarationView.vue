@@ -103,6 +103,7 @@ function buildDeclarations(
                     (weekInYear.year === lastWeekToDeclare.year && weekInYear.week <= lastWeekToDeclare.week))
         );
     const declarationsToInput: WeekInYearLabeled[] = [];
+    // j is the position of index in weeks declared
     let j = 0;
     const lengthOfWeeksDeclared = sortedWeeksDeclared.length;
     years.forEach((year) => {
@@ -118,6 +119,7 @@ function buildDeclarations(
                     j++;
                 } else {
                     declarationsToInput.push({ week: i, year: year, label: "success" });
+                    j++;
                 }
             } else if (currentWeek.year === year ? currentWeek.week > i : currentWeek.year > year) {
                 declarationsToInput.push({ week: i, year: year, label: "error" });

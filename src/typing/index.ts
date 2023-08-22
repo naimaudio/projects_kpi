@@ -61,7 +61,7 @@ export interface RawDeclaration {
         user_id: number;
         comment: string | null;
     };
-    projects: {
+    record_projects: {
         project_id: number;
         declared_hours: number;
     }[];

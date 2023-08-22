@@ -1,6 +1,6 @@
 <template>
     <ModalComponent @close="emits('close')">
-        <span> Select all the </span>
+        <span> Select the rows you want to display </span>
         <BaseTable style="width: 100%" :headers="headers" :items="users" @change="change" />
         <BaseButton
             @click="

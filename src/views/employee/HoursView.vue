@@ -196,10 +196,10 @@
         :declaration="currentDeclaration"
         :year="yearNumber"
         :week-number="weekNumber"
-        :user-id="userId"
         :close-route="route"
         :confirmation="true"
         @close="confirmationModal = false"
+        @confirm="validateDeclaration"
     />
     <ModalHoursView
         v-if="
@@ -239,6 +239,7 @@ import {
     workDays,
     type DailyDeclaration,
     type dayNb,
+    type SimplifiedResponse,
 } from "@/typing";
 import { useUserStore } from "@/stores/userStore";
 import { useDeclarationStore } from "@/stores/declarationStore";
@@ -246,13 +247,15 @@ import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
-import { getBufferTable } from "@/API/requests";
+import { getBufferTable, hoursRegistration, hoursModification } from "@/API/requests";
 import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
 import { cloneDeep } from "lodash";
 import { rawBuffersToDailyDeclaration } from "@/typing/conversions";
 import ModalHoursView from "@/views/employee/ModalHoursView.vue";
 import { dayValidation } from "../../utilities/main";
 import dayjs from "dayjs";
+import { useGlobalStore } from "@/stores/globalStore";
+import { initialization } from "@/utilities/initialization";
 
 const addFavoritesModal = ref(false);
 const router: Router = useRouter();
@@ -408,6 +411,46 @@ const favorites = computed<Set<number>>(() => declarationStore.favorites);
 watch(favorites.value, () => {
     refreshbufferValues(weekNumber.value, yearNumber.value, userId);
 });
+
+const globalStore = useGlobalStore();
+async function validateDeclaration() {
+    if (userId !== undefined && weekNumber.value !== undefined && yearNumber.value !== undefined) {
+        loading.value = true;
+        globalStore.notification.display = false;
+        let response: SimplifiedResponse<any>;
+        if (isNewDeclaration.value === true) {
+            response = await hoursRegistration(
+                currentDeclaration.value,
+                userId,
+                weekNumber.value,
+                yearNumber.value,
+                comment.value
+            );
+        } else {
+            response = await hoursModification(
+                currentDeclaration.value,
+                userId,
+                weekNumber.value,
+                yearNumber.value,
+                comment.value
+            );
+        }
+        if (response.status !== 200) {
+            globalStore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
+            globalStore.notification.type = "FAILURE";
+            globalStore.notification.display = true;
+        } else {
+            globalStore.notification.content = "Declaration has been registered";
+            globalStore.notification.type = "SUCCESS";
+            globalStore.notification.display = true;
+            router.push({ name: "declaration" });
+        }
+        initialization();
+        loading.value = false;
+    } else {
+        console.warn("userId was not provided");
+    }
+}
 </script>
 
 <style scoped>

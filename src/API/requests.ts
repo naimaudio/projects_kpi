@@ -110,7 +110,7 @@ export async function hoursRegistration(
     comment?: string
 ): Promise<SimplifiedResponse<any>> {
     const requestBody: RawDeclaration = {
-        projects: [],
+        record_projects: [],
         record: {
             comment: comment === undefined ? null : comment,
             date_rec: dayNumberToDayDate(2, week, year),
@@ -119,13 +119,45 @@ export async function hoursRegistration(
     };
 
     declarations.forEach((declaration) => {
-        requestBody.projects.push({
+        requestBody.record_projects.push({
             declared_hours: declaration.hours,
             project_id: declaration.projectId,
         });
     });
     const response = await fetcher(`${origin}/records`, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function hoursModification(
+    declarations: DeclarationInput[],
+    userId: number,
+    week: number,
+    year: number,
+    comment?: string
+): Promise<SimplifiedResponse<any>> {
+    const requestBody: RawDeclaration = {
+        record_projects: [],
+        record: {
+            comment: comment === undefined ? null : comment,
+            date_rec: dayNumberToDayDate(2, week, year),
+            user_id: userId,
+        },
+    };
+
+    declarations.forEach((declaration) => {
+        requestBody.record_projects.push({
+            declared_hours: declaration.hours,
+            project_id: declaration.projectId,
+        });
+    });
+    const response = await fetcher(`${origin}/records`, {
+        method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },

@@ -12,9 +12,10 @@
                     :id="graph.id"
                     class="graph-container"
                     :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
-                    draggable="true"
                     @drop="(event) => onDropHandler(event, index)"
-                ></div>
+                >
+                    <DragIcon style="position: absolute; top: 10px; right: 10px" draggable="true" class="drag" />
+                </div>
             </div>
         </div>
     </div>
@@ -29,6 +30,7 @@ import { useRoute } from "vue-router";
 import { type Project } from "@/typing/project";
 import { useProjectStore } from "../../stores/projectStore";
 import type { ECOption } from "@/main";
+import DragIcon from "@/components/icons/DragIcon.vue";
 
 const options = ref<Record<string, ECOption>>({
     barOption: {
@@ -61,9 +63,6 @@ const options = ref<Record<string, ECOption>>({
         },
         tooltip: {
             trigger: "axis",
-        },
-        legend: {
-            data: ["Spent"],
         },
         grid: {
             right: "4%",
@@ -280,5 +279,11 @@ const onDropHandler = (event: DragEvent, j: number) => {
     border: 4px darkgray solid;
     resize: both;
     overflow: hidden;
+}
+
+.drag:hover {
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
 }
 </style>

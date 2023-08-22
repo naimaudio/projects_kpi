@@ -1,5 +1,7 @@
 <template>
-    <InfoOutlineIcon ref="infoIcon" @mouseover="mouseover = true" @mouseleave="mouseover = false" />
+    <div ref="infoIcon" style="display: inline-block">
+        <InfoOutlineIcon @mouseover="mouseover = true" @mouseleave="mouseover = false" />
+    </div>
     <div v-if="mouseover" ref="tooltip" :style="floatingStyles" class="tooltip">
         <slot></slot>
     </div>
@@ -7,13 +9,14 @@
 
 <script setup lang="ts">
 import InfoOutlineIcon from "@/components/icons/InfoOutlineIcon.vue";
-import { useFloating } from "@floating-ui/vue";
+import { flip, offset, shift, useFloating } from "@floating-ui/vue";
 import { ref } from "vue";
 const mouseover = ref<boolean>(false);
 const infoIcon = ref<Element | null>(null);
 const tooltip = ref<HTMLElement | null>(null);
 const { floatingStyles } = useFloating(infoIcon, tooltip, {
     placement: "bottom-end",
+    middleware: [offset(0), flip(), shift()],
 });
 </script>
 

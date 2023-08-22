@@ -29,13 +29,12 @@
             </div>
         </div>
         <div class="table-raw-gap" />
-        <p v-if="confirmation">You will not be able to update this information later.</p>
         <div v-if="confirmation" class="footer-buttons-block">
             <BaseButton
                 :loading="loading"
                 accent
                 :disabled="sumProjectHours != 35 || loading"
-                @click="validateDeclaration"
+                @click="emits('confirm')"
             >
                 <span> Validate</span>
             </BaseButton>
@@ -44,61 +43,29 @@
 </template>
 
 <script setup lang="ts">
-import { hoursRegistration } from "@/API/requests";
 import ModalComponent from "@/components/ModalComponent.vue";
 import type { DeclarationInput } from "@/typing/index";
 import { computed, ref } from "vue";
-import { useGlobalStore } from "../stores/globalStore";
-import { useRouter } from "vue-router";
-import { initialization } from "@/utilities/initialization";
+
 import HoursRecap from "@/components/input_hours/HoursRecap.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 const props = defineProps<{
     declaration: DeclarationInput[];
     comment?: string;
-    userId?: number;
     weekNumber: number;
     year: number;
     confirmation: boolean;
 }>();
-const globalStore = useGlobalStore();
 const sumProjectHours = computed<number>(() => {
     return props.declaration.reduce<number>((sum, decl) => decl.hours + sum, 0);
 });
 
 const emits = defineEmits<{
     (event: "close"): void;
+    (event: "confirm"): void;
 }>();
 
 const loading = ref<boolean>(false);
-const router = useRouter();
-async function validateDeclaration() {
-    if (props.userId !== undefined) {
-        loading.value = true;
-        globalStore.notification.display = false;
-        const response = await hoursRegistration(
-            props.declaration,
-            props.userId,
-            props.weekNumber,
-            props.year,
-            props.comment
-        );
-        if (response.status !== 200) {
-            globalStore.notification.content = "Oh no, an orror occured with the request. Please contact IT team.";
-            globalStore.notification.type = "FAILURE";
-            globalStore.notification.display = true;
-        } else {
-            globalStore.notification.content = "Declaration has been registered";
-            globalStore.notification.type = "SUCCESS";
-            globalStore.notification.display = true;
-            router.push({ name: "declaration" });
-        }
-        initialization();
-        loading.value = false;
-    } else {
-        console.warn("userId was not provided");
-    }
-}
 </script>
 
 <style scoped>
