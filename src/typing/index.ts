@@ -116,7 +116,7 @@ export interface RawBufferRecord {
     daily_hours: number;
 }
 
-export type chartType = "pie" | "line" | "bar";
+export type chartType = "pie" | "line" | "bar" | "nestedPie" | "stackedLine" | "yBar";
 
 export interface MonthlyHours {
     user_id: number;

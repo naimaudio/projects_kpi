@@ -45,17 +45,21 @@
 <script setup lang="ts">
 import ModalComponent from "@/components/ModalComponent.vue";
 import type { DeclarationInput } from "@/typing/index";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 import HoursRecap from "@/components/input_hours/HoursRecap.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
-const props = defineProps<{
-    declaration: DeclarationInput[];
-    comment?: string;
-    weekNumber: number;
-    year: number;
-    confirmation: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        declaration: DeclarationInput[];
+        comment?: string;
+        weekNumber: number;
+        year: number;
+        confirmation: boolean;
+        loading?: boolean;
+    }>(),
+    { loading: false, comment: "" }
+);
 const sumProjectHours = computed<number>(() => {
     return props.declaration.reduce<number>((sum, decl) => decl.hours + sum, 0);
 });
@@ -64,8 +68,6 @@ const emits = defineEmits<{
     (event: "close"): void;
     (event: "confirm"): void;
 }>();
-
-const loading = ref<boolean>(false);
 </script>
 
 <style scoped>

@@ -19,9 +19,13 @@ import type {
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 
 export const origin = envVariableWithValidation("VITE_FAST_API_URI");
-export async function fetcher(input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response> {
+export async function fetcher(
+    input: RequestInfo | URL,
+    init?: RequestInit | undefined,
+    timeout: number = 10000
+): Promise<Response> {
     const objKey = localStorage[`msal.token.keys.${envVariableWithValidation("VITE_CLIENT_ID")}`];
-    const timeout = 10000;
+
     const controller = new AbortController();
     const updatedOptions = { ...init, signal: controller.signal };
     const id = setTimeout(() => {
@@ -341,8 +345,12 @@ export async function postMonthlyHours(date: {
     year: number;
     month: number;
 }): Promise<SimplifiedResponse<MonthlyHours[]>> {
-    const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {
-        method: "POST",
-    });
+    const response = await fetcher(
+        `${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`,
+        {
+            method: "POST",
+        },
+        600000
+    );
     return { status: response.status, data: await response.json() };
 }

@@ -34,10 +34,18 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
             <p>
                 This action will enable data from new declarations to be included in the
-                {{ dayjs((selectedDate.month + 1).toString(), "M").format("MMMM") }} {{ selectedDate.year }} report.
+                {{ dayjs((selectedDate.month + 1).toString(), "M").format("MMMM") }} {{ selectedDate.year }} report. It
+                can take some time.
             </p>
             <p>This will erase your previous modifications, are you sure ?</p>
-            <BaseButton accent style="margin-left: auto; display: block" @click="refreshValues">Confirm</BaseButton>
+            <BaseButton
+                :loading="loading"
+                :disabled="loading"
+                accent
+                style="margin-left: auto; display: block"
+                @click="refreshValues"
+                >Confirm</BaseButton
+            >
         </ModalComponent>
         <InputTableItems
             :items="
@@ -62,7 +70,6 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             :row-headers="rowHeaders"
             @change="
                 (rowId, columnId, index, value) => {
-                    console.log(rowId, columnId, index, value);
                     if (index !== undefined) {
                         modifiedItems[index] = {
                             hours: value,
@@ -112,7 +119,7 @@ onMounted(() => {
         year: new Date().getFullYear(),
     };
 });
-
+const loading = ref<boolean>(false);
 const changeRowsModal = ref<boolean>(false);
 const refreshConfirmation = ref<boolean>(false);
 const modifyConfirmation = ref<boolean>(false);
@@ -132,9 +139,11 @@ function modifyHours() {
 }
 
 function refreshValues() {
+    loading.value = true;
     if (selectedDate.value !== undefined) {
         postMonthlyHours(selectedDate.value).then(() => {
             updateReportMonth(selectedDate.value).then(() => {
+                loading.value = false;
                 refreshConfirmation.value = false;
             });
         });
@@ -194,7 +203,6 @@ const changeRows = (projectIds: number[]) => {
         if (!projectIdSet.has(p.id)) {
             modifiedItems.value.push(
                 ...columnHeaders.value.map<MonthlyHoursItem>((user) => {
-                    console.log(p.id);
                     return {
                         hours: 0,
                         project_id: p.id,

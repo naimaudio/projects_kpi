@@ -79,12 +79,7 @@
                         </div>
                         <div class="table-raw-gap" />
                         <div class="footer-buttons">
-                            <BaseButton
-                                accent
-                                :loading="loading"
-                                :disabled="sumProjectHours != 35 || loading"
-                                @click="confirmationModal = true"
-                            >
+                            <BaseButton accent :disabled="sumProjectHours != 35" @click="confirmationModal = true">
                                 <span> {{ isNewDeclaration ? "Validate" : "Change declaration" }}</span>
                             </BaseButton>
                         </div>
@@ -166,12 +161,7 @@
                     </div>
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
-                        <BaseButton
-                            accent
-                            :disabled="sumProjectHours != 35 || loading"
-                            :loading="loading"
-                            @click="confirmationModal = true"
-                        >
+                        <BaseButton accent :disabled="sumProjectHours != 35" @click="confirmationModal = true">
                             <span> {{ isNewDeclaration ? "Change declaration" : "Validate" }}</span>
                         </BaseButton>
                     </div>
@@ -198,6 +188,7 @@
         :week-number="weekNumber"
         :close-route="route"
         :confirmation="true"
+        :loading="loading"
         @close="confirmationModal = false"
         @confirm="validateDeclaration"
     />

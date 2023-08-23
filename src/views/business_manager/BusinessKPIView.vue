@@ -2,7 +2,7 @@
     <div class="page-container">
         <h1 class="title">Business KPI</h1>
 
-        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 20px">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px">
             <div v-for="(graph, index) in graphs" :key="graph.id">
                 <div
                     :id="graph.id"
@@ -11,7 +11,7 @@
                     draggable="true"
                     @drop="(event) => onDropHandler(event, index)"
                 >
-                    <DragIcon style="position: absolute; top: 10px; right: 10px" draggable="true" class="drag" />
+                    <DragIcon style="position: absolute; bottom: 5px; left: 10px" draggable="true" class="drag" />
                 </div>
             </div>
         </div>
@@ -30,6 +30,61 @@ import DragIcon from "@/components/icons/DragIcon.vue";
 const route = useRoute();
 
 const options = ref<Record<string, ECOption>>({
+    capSummaryOption: {
+        title: {
+            text: "Capitalization summary",
+            left: "center",
+        },
+        tooltip: {
+            trigger: "item",
+            formatter: "{a} <br/>{b}: {c} ({d}%)",
+        },
+    },
+    barCapSummaryOption: {
+        title: {
+            text: "Capitalization Summary",
+        },
+        tooltip: {
+            trigger: "axis",
+            axisPointer: {
+                type: "shadow",
+            },
+        },
+        legend: {},
+        grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+        },
+        xAxis: {
+            type: "value",
+            boundaryGap: [0, 0.01],
+        },
+    },
+    lineNonCapSummaryOption: {
+        title: {
+            text: "Non capitalizable summary",
+            left: "center",
+        },
+        tooltip: {
+            trigger: "axis",
+        },
+        grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+            },
+        },
+        yAxis: {
+            type: "value",
+        },
+    },
     lineOption: {
         title: {
             text: "Total hours spent",
@@ -122,7 +177,12 @@ const graphs = ref<
         minHeight: string;
         defaultWidth?: string;
         defaultHeight?: string;
-        option: "lineOption" | "TDEDomainPieOption";
+        option:
+            | "lineOption"
+            | "TDEDomainPieOption"
+            | "capSummaryOption"
+            | "barCapSummaryOption"
+            | "lineNonCapSummaryOption";
         fetch_uri?: string;
         type: chartType;
     }[]
@@ -130,27 +190,44 @@ const graphs = ref<
     {
         id: "lineChart",
         minWidth: "600px",
-        minHeight: "300px",
+        minHeight: "400px",
         option: "lineOption",
         type: "line",
         fetch_uri: "business_kpi/line/hour_expenditure",
     },
     {
         id: "pieChart",
-        minWidth: "400px",
-        minHeight: "300px",
+        minWidth: "500px",
+        minHeight: "400px",
         option: "TDEDomainPieOption",
         type: "pie",
         fetch_uri: "business_kpi/pie/hours_by_domain",
     },
-    // {
-    //     id: "capSummary",
-    //     minWidth: "700px",
-    //     minHeight: "700px",
-    //     option: "CapSummaryOption",
-    //     type: "pie",
-    //     fetch_uri: "business_kpi/pie/cap_summary",
-    // },
+    {
+        id: "capSummary",
+        minWidth: "1140px",
+        minHeight: "700px",
+        option: "capSummaryOption",
+        type: "nestedPie",
+        fetch_uri: "business_kpi/pie/cap_summary",
+    },
+
+    {
+        id: "barCapSummary",
+        minWidth: "1140px",
+        minHeight: "500px",
+        option: "barCapSummaryOption",
+        type: "yBar",
+        fetch_uri: "business_kpi/bar/cap_summary",
+    },
+    {
+        id: "nonCapSummary",
+        minWidth: "700px",
+        minHeight: "400px",
+        option: "lineNonCapSummaryOption",
+        type: "stackedLine",
+        fetch_uri: "business_kpi/line/noncap_summary",
+    },
 ]);
 
 const period = computed<string[] | undefined>(() => {
@@ -219,7 +296,6 @@ function graphUpdate() {
                 };
             }
             chartE.setOption(options.value[graphInfo.option], true);
-            console.log(chartE.getDataURL({}));
 
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
@@ -257,11 +333,12 @@ const onDropHandler = (event: DragEvent, j: number) => {
 </script>
 <style scoped>
 .graph-container {
-    padding: 30px;
+    padding: 10px;
     border-radius: 15px 15px 0 15px;
-    border: 4px darkgray solid;
+    border: 1px rgb(243, 243, 243) solid;
     resize: both;
     overflow: hidden;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 2px 0px, rgba(0, 0, 0, 0.14) 0px 2px 4px 0px;
 }
 
 .drag:hover {

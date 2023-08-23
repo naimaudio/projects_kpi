@@ -14,7 +14,11 @@
                     :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
                     @drop="(event) => onDropHandler(event, index)"
                 >
-                    <DragIcon style="position: absolute; top: 10px; right: 10px" draggable="true" class="drag" />
+                    <DragIcon
+                        style="position: absolute; bottom: 5px; left: 10px; z-index: 3"
+                        draggable="true"
+                        class="drag"
+                    />
                 </div>
             </div>
         </div>
@@ -274,11 +278,12 @@ const onDropHandler = (event: DragEvent, j: number) => {
 </script>
 <style scoped>
 .graph-container {
-    padding: 30px;
+    padding: 10px;
     border-radius: 15px 15px 0 15px;
-    border: 4px darkgray solid;
+    border: 1px rgb(243, 243, 243) solid;
     resize: both;
     overflow: hidden;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 2px 0px, rgba(0, 0, 0, 0.14) 0px 2px 4px 0px;
 }
 
 .drag:hover {
