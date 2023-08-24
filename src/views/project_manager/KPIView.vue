@@ -5,7 +5,7 @@
             <span>{{ project.name }}</span>
             <span style="font-weight: 400; margin-left: 15px">{{ project.code }}</span>
         </h2>
-        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 20px">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px">
             <div v-for="(graph, index) in graphs" :key="graph.id">
                 <div
                     v-show="projectId !== undefined"
@@ -15,7 +15,7 @@
                     @drop="(event) => onDropHandler(event, index)"
                 >
                     <DragIcon
-                        style="position: absolute; bottom: 5px; left: 10px; z-index: 3"
+                        style="position: absolute; bottom: 5px; left: 10px; z-index: 1"
                         draggable="true"
                         class="drag"
                     />

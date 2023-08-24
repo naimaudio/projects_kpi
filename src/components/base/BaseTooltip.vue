@@ -27,10 +27,13 @@ const { floatingStyles } = useFloating(infoIcon, tooltip, {
     position: absolute;
     top: 0;
     left: 0;
-    background: #222;
-    color: white;
+    background: white;
+    border: 1px;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 2px 0px, rgba(0, 0, 0, 0.14) 0px 2px 4px 0px;
+    color: #222;
     padding: 5px;
     border-radius: var(--button-border-radius);
-    font-size: 90%;
+    font-size: 15px;
+    font-weight: 400;
 }
 </style>

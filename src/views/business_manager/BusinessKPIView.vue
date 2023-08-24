@@ -8,10 +8,13 @@
                     :id="graph.id"
                     class="graph-container"
                     :style="{ minWidth: graph.minWidth, minHeight: graph.minHeight }"
-                    draggable="true"
                     @drop="(event) => onDropHandler(event, index)"
                 >
-                    <DragIcon style="position: absolute; bottom: 5px; left: 10px" draggable="true" class="drag" />
+                    <DragIcon
+                        style="position: absolute; bottom: 5px; left: 10px; z-index: 1"
+                        draggable="true"
+                        class="drag"
+                    />
                 </div>
             </div>
         </div>
@@ -32,17 +35,23 @@ const route = useRoute();
 const options = ref<Record<string, ECOption>>({
     capSummaryOption: {
         title: {
-            text: "Capitalization summary",
+            text: "Capitalization summary by division",
             left: "center",
         },
         tooltip: {
             trigger: "item",
             formatter: "{a} <br/>{b}: {c} ({d}%)",
         },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+                dataView: {},
+            },
+        },
     },
     barCapSummaryOption: {
         title: {
-            text: "Capitalization Summary",
+            text: "Capitalization Summary by Subcategory",
         },
         tooltip: {
             trigger: "axis",

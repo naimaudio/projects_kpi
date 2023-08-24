@@ -1,10 +1,10 @@
 <template>
     <ModalComponent @close="() => emits('close')">
-        <span class="sub-title">Week {{ weekNumber }}</span>
+        <span class="sub-title">Week {{ props.weekNumber }} of {{ props.year }}</span>
         <p v-if="confirmation">
-            Please confirm the declaration for the week {{ props.weekNumber }} of {{ props.year }}.
+            Please confirm the declaration for {{ weekNumberToString(props.weekNumber, props.year) }}.
         </p>
-        <p v-else>Declaration for the week {{ props.weekNumber }} of {{ props.year }}.</p>
+        <p v-else>Declaration for {{ weekNumberToString(props.weekNumber, props.year) }}.</p>
         <div class="table-raw-gap" />
         <div class="declaration-container column-flex">
             <div class="declaration-inputs prefix">
@@ -49,6 +49,7 @@ import { computed } from "vue";
 
 import HoursRecap from "@/components/input_hours/HoursRecap.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
+import { weekNumberToString } from "@/utilities/main";
 const props = withDefaults(
     defineProps<{
         declaration: DeclarationInput[];
