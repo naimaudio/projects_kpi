@@ -1,17 +1,17 @@
 <template>
     <ModalComponent @close="emits('close')">
-        <span> Select all the </span>
+        <span> Select the projects you want to display </span>
         <BaseTable style="width: 100%" :headers="headers" :items="projects" @change="change" />
         <BaseButton
             @click="
                 () => {
-                    emits('change', Array.from(selectedColumnsSet));
+                    emits('change', Array.from(selectedRowsSet));
                     emits('close');
                 }
             "
             >Validate</BaseButton
         >
-        <span>{{ selectedColumnsSet }}</span>
+        <span>{{ selectedRowsSet }}</span>
     </ModalComponent>
 </template>
 
@@ -54,20 +54,20 @@ const headers: Header[] = [
 ];
 const projectStore = useProjectStore();
 
-const selectedColumnsSet = ref<Set<number>>(new Set<number>(props.selectedRows));
+const selectedRowsSet = ref<Set<number>>(new Set<number>(props.selectedRows));
 
 const projects = computed<SelectableProject[]>(() => {
     return projectStore.projects.map<SelectableProject>((project) => {
-        return { ...project, selected: selectedColumnsSet.value.has(project.id) };
+        return { ...project, selected: selectedRowsSet.value.has(project.id) };
     });
 });
 
 const change = (id: number, field: string, value: string | number | boolean | undefined) => {
     if (field === "selected" && typeof value === "boolean") {
         if (value === false) {
-            selectedColumnsSet.value.delete(id);
+            selectedRowsSet.value.delete(id);
         } else if (value === true) {
-            selectedColumnsSet.value.add(id);
+            selectedRowsSet.value.add(id);
         }
     }
 };

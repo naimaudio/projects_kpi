@@ -8,6 +8,7 @@ import type {
     MonthlyHoursItem,
     dayNb,
     domain,
+    Person,
 } from "@/typing";
 import type {
     CompleteProject,
@@ -307,6 +308,11 @@ export async function getMonthlyHours(date: {
     month: number;
 }): Promise<SimplifiedResponse<MonthlyHours[]>> {
     const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {});
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getUsers(): Promise<SimplifiedResponse<Person[]>> {
+    const response = await fetcher(`${origin}/getusers`, {});
     return { status: response.status, data: await response.json() };
 }
 

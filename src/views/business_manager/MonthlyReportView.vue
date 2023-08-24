@@ -4,7 +4,10 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <h1 class="title">
             Monthly Report
             <BaseTooltip>
-                <div style="max-width: 300px">Cells with</div>
+                <div style="max-width: 300px">
+                    The shaded cells are those where the number of hours has been modified. These changes need to be
+                    validated in order to save them, and to ensure an effect on the business KPIs.
+                </div>
             </BaseTooltip>
         </h1>
 
@@ -29,8 +32,19 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             @close="changeRowsModal = false"
             @change="changeRows"
         />
+        <MonthlyReportColumnModal
+            v-if="changeColumnsModal"
+            :selected-columns="
+                columnHeaders.map((column) => {
+                    return column.id;
+                })
+            "
+            :users="users"
+            @close="changeColumnsModal = false"
+            @change="changeColumns"
+        />
         <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
-        <BaseButton disabled style="margin-left: 15px">Change columns</BaseButton>
+        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
             <p>
                 This action will enable data from new declarations to be included in the
@@ -91,11 +105,25 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 }
             "
         />
+        <div v-if="columnHeaders.length === 0 && rowHeaders.length === 0 && !loading">
+            <p class="big" style="display: flex">
+                No declared or modified hours for this month have been saved.
+                <img
+                    src="@/assets/icons/thinking_face_3d.png"
+                    style="margin-left: 15px"
+                    alt="Slightly Smiling Face"
+                    width="60"
+                    height="60"
+                />
+            </p>
+        </div>
         <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
             <p>Keep in mind changing hours will have no effect in project managemnt KPIs</p>
             <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
         </ModalComponent>
-        <BaseButton style="margin-right: 10px" @click="modifyConfirmation = true">Modify hours</BaseButton>
+        <p>
+            <BaseButton style="margin-right: 10px" @click="modifyConfirmation = true">Modify hours</BaseButton>
+        </p>
     </div>
 </template>
 <script setup lang="ts">
@@ -103,14 +131,15 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { ref, watch, onMounted } from "vue";
 import InputTableItems from "@/components/base/InputTableItems.vue";
-import { getMonthlyHours, putMonthlyHours, postMonthlyHours } from "@/API/requests";
-import type { MonthlyHoursItem } from "@/typing";
+import { getMonthlyHours, putMonthlyHours, postMonthlyHours, getUsers } from "@/API/requests";
+import type { MonthlyHoursItem, Person } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
 import type { MatrixHeader } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
 import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import MonthlyReportColumnModal from "@/components/modals/MonthlyReportColumnModal.vue";
 const selectedDate = ref<{ month: number; year: number }>();
 const projectStore = useProjectStore();
 onMounted(() => {
@@ -121,9 +150,13 @@ onMounted(() => {
 });
 const loading = ref<boolean>(false);
 const changeRowsModal = ref<boolean>(false);
+const changeColumnsModal = ref<boolean>(false);
 const refreshConfirmation = ref<boolean>(false);
 const modifyConfirmation = ref<boolean>(false);
-
+const users = ref<Person[]>([]);
+getUsers().then((response) => {
+    users.value = response.data;
+});
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -155,6 +188,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
     columnHeaders.value.splice(0);
     rowHeaders.value.splice(0);
     if (date !== undefined) {
+        loading.value = true;
         await getMonthlyHours(date).then((response) => {
             const projectIds = new Set<number>();
             const l = response.data.length;
@@ -185,6 +219,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                     });
                 })
             );
+            loading.value = false;
         });
     }
 }
@@ -225,6 +260,40 @@ const changeRows = (projectIds: number[]) => {
     });
     Array.from(projectIdSet).forEach((projectId) => {
         return projectId;
+    });
+};
+const changeColumns = (userIds: number[]) => {
+    const userIdSet = new Set<number>(userIds);
+    const userIdSetComplete = new Set<number>(userIds);
+    modifiedItems.value = modifiedItems.value.filter((item) => {
+        return userIdSet.has(item.user_id);
+    });
+    columnHeaders.value.forEach((u) => {
+        if (!userIdSet.has(u.id)) {
+            modifiedItems.value.push(
+                ...rowHeaders.value.map<MonthlyHoursItem>((project) => {
+                    return {
+                        hours: 0,
+                        project_id: project.id,
+                        user_id: u.id,
+                        user_name: u.name,
+                    };
+                })
+            );
+            userIdSetComplete.add(u.id);
+        }
+    });
+    columnHeaders.value.splice(0);
+    users.value.forEach((user) => {
+        if (userIdSetComplete.has(user.id)) {
+            columnHeaders.value.push({
+                id: user.id,
+                name: user.name,
+            });
+        }
+    });
+    Array.from(userIdSet).forEach((userId) => {
+        return userId;
     });
 };
 </script>

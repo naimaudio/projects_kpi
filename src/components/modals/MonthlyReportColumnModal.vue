@@ -1,6 +1,6 @@
 <template>
     <ModalComponent @close="emits('close')">
-        <span> Select the rows you want to display </span>
+        <span> Select the users you want to display </span>
         <BaseTable style="width: 100%" :headers="headers" :items="users" @change="change" />
         <BaseButton
             @click="
@@ -18,14 +18,13 @@
 <script setup lang="ts">
 import ModalComponent from "@/components/ModalComponent.vue";
 import BaseTable from "@/components/base/BaseTable.vue";
-import type { SelectableProject } from "../../typing/project";
 import { computed, ref } from "vue";
-import { useProjectStore } from "../../stores/projectStore";
 import BaseButton from "@/components/base/BaseButton.vue";
-import type { Header } from "@/typing";
+import type { Header, Person } from "@/typing";
 
 const props = defineProps<{
     selectedColumns: number[];
+    users: Person[];
 }>();
 
 const emits = defineEmits<{
@@ -40,24 +39,22 @@ const headers: Header[] = [
         width: "60px",
     },
     {
-        id: "code",
-        name: "Project code",
+        id: "name",
+        name: "Name",
         filterable: false,
         width: "1fr",
     },
     {
-        id: "name",
-        name: "Name",
+        id: "email",
+        name: "Email",
         filterable: false,
-        width: "2fr",
+        width: "1fr",
     },
 ];
-const projectStore = useProjectStore();
 
 const selectedColumnsSet = ref<Set<number>>(new Set<number>(props.selectedColumns));
-
-const users = computed<SelectableProject[]>(() => {
-    return projectStore.projects.map<SelectableProject>((project) => {
+const users = computed<Person[]>(() => {
+    return props.users.map((project) => {
         return { ...project, selected: selectedColumnsSet.value.has(project.id) };
     });
 });

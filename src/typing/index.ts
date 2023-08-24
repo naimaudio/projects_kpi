@@ -136,3 +136,9 @@ export interface InputItem {
     row_id: number;
     value: number;
 }
+
+export interface Person {
+    name: string;
+    email: string;
+    id: number;
+}
