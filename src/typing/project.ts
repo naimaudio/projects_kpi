@@ -6,7 +6,7 @@ export interface UserProject {
     favorite: boolean;
 }
 
-export const divisions = ["ALL", "HOME", "PRO", "MOTORITIES", "RESEARCH"] as const;
+export const divisions = ["ALL", "HOME", "PRO", "HEADPHONE", "MOTORITIES", "RESEARCH"] as const;
 export type Division = (typeof divisions)[number];
 export type SubCategory =
     | "H_CI"
@@ -44,7 +44,7 @@ export const divisionOptions: { [key in Division]: { id: key; label: string; sub
     HOME: {
         id: "HOME",
         label: "Home",
-        subDivisions: ["H_CI", "H_LSP", "H_HP", "H_AMP", ""],
+        subDivisions: ["H_CI", "H_LSP", "H_AMP", ""],
     },
     MOTORITIES: {
         id: "MOTORITIES",
@@ -54,7 +54,12 @@ export const divisionOptions: { [key in Division]: { id: key; label: string; sub
     PRO: {
         id: "PRO",
         label: "Pro",
-        subDivisions: ["P_LSP", "P_HP", ""],
+        subDivisions: ["P_LSP", ""],
+    },
+    HEADPHONE: {
+        id: "HEADPHONE",
+        label: "Headphone",
+        subDivisions: ["H_HP", "P_HP", ""],
     },
     RESEARCH: {
         id: "RESEARCH",
