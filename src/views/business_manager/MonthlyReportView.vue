@@ -1,19 +1,8 @@
 import VueDatePicker from '@vuepic/vue-datepicker';
 <template>
-    <Teleport to=".global">
-        <BaseButton
-            v-if="modifiedItems.length >= 1"
-            accent
-            style="position: absolute; right: 50px; bottom: 50px; z-index: 13"
-            @click="modifyConfirmation = true"
-        >
-            <div class="icon-with-text" style="align-items: center">
-                <CheckmarkLineIcon />
-                <span> Validate modified hours</span>
-            </div>
-        </BaseButton>
-    </Teleport>
     <div class="page-container">
+        <!-- HEADER -->
+
         <h1 class="title">
             Monthly Report
             <BaseTooltip>
@@ -23,6 +12,8 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 </div>
             </BaseTooltip>
         </h1>
+
+        <!-- BUTTONS -->
 
         <br />
         <VueDatePicker
@@ -34,7 +25,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         ></VueDatePicker>
 
         <br />
-        <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true">Refresh values</BaseButton>
+        <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true"
+            >Refresh/reset values</BaseButton
+        >
         <MonthlyReportRowModal
             v-if="changeRowsModal"
             :selected-rows="
@@ -59,6 +52,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
         <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
         <BaseButton style="margin-left: 15px" disabled>Exports</BaseButton>
+
+        <!-- MODALS -->
+
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
             <p>
                 This action will enable data from new declarations to be included in the
@@ -75,6 +71,14 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 >Confirm</BaseButton
             >
         </ModalComponent>
+        <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
+            <p>Are you sure of your modifications ?</p>
+            <p>Keep in mind changing hours will have no effect in project management KPIs</p>
+            <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
+        </ModalComponent>
+
+        <!-- TABLE -->
+
         <InputTableItems
             :items="
                 items.map((i) => {
@@ -131,12 +135,23 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 />
             </p>
         </div>
-        <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
-            <p>Are you sure of your modifications ?</p>
-            <p>Keep in mind changing hours will have no effect in project management KPIs</p>
-            <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
-        </ModalComponent>
     </div>
+
+    <!-- CONFIRMATION BUTTON -->
+
+    <Teleport to=".global">
+        <BaseButton
+            v-if="modifiedItems.length >= 1"
+            accent
+            style="position: absolute; right: 50px; bottom: 50px; z-index: 13"
+            @click="modifyConfirmation = true"
+        >
+            <div class="icon-with-text" style="align-items: center">
+                <CheckmarkLineIcon />
+                <span> Validate modified hours</span>
+            </div>
+        </BaseButton>
+    </Teleport>
 </template>
 <script setup lang="ts">
 import VueDatePicker from "@vuepic/vue-datepicker";
@@ -153,32 +168,49 @@ import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue
 import dayjs from "dayjs";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import MonthlyReportColumnModal from "@/components/modals/MonthlyReportColumnModal.vue";
+import { useGlobalStore } from "@/stores/globalStore";
+
 const selectedDate = ref<{ month: number; year: number }>();
-const projectStore = useProjectStore();
-onMounted(() => {
-    selectedDate.value = {
-        month: new Date().getMonth(),
-        year: new Date().getFullYear(),
-    };
-});
 const loading = ref<boolean>(false);
 const changeRowsModal = ref<boolean>(false);
 const changeColumnsModal = ref<boolean>(false);
 const refreshConfirmation = ref<boolean>(false);
 const modifyConfirmation = ref<boolean>(false);
 const users = ref<Person[]>([]);
-getUsers().then((response) => {
-    users.value = response.data;
-});
+const items = ref<MonthlyHoursItem[]>([]);
+const modifiedItems = ref<MonthlyHoursItem[]>([]);
+const columnHeaders = ref<MatrixHeader[]>([]);
+const rowHeaders = ref<MatrixHeader[]>([]);
+
+const projectStore = useProjectStore();
+const globalStore = useGlobalStore();
+
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
 
+/**
+ * Methods
+ */
+
 function modifyHours() {
     if (selectedDate.value !== undefined) {
-        putMonthlyHours(selectedDate.value, modifiedItems.value).then(() => {
-            updateReportMonth(selectedDate.value);
-            modifiedItems.value.splice(0);
+        putMonthlyHours(selectedDate.value, modifiedItems.value).then((response) => {
+            if (response.status === 200) {
+                updateReportMonth(selectedDate.value);
+                modifiedItems.value.splice(0);
+                globalStore.notification = {
+                    content: "Hours succesfully modified",
+                    display: true,
+                    type: "SUCCESS",
+                };
+            } else {
+                globalStore.notification = {
+                    content: "Server Error",
+                    display: true,
+                    type: "FAILURE",
+                };
+            }
         });
         modifyConfirmation.value = false;
     }
@@ -237,10 +269,6 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
     }
 }
 
-const items = ref<MonthlyHoursItem[]>([]);
-const modifiedItems = ref<MonthlyHoursItem[]>([]);
-const columnHeaders = ref<MatrixHeader[]>([]);
-const rowHeaders = ref<MatrixHeader[]>([]);
 const changeRows = (projectIds: number[]) => {
     const projectIdSet = new Set<number>(projectIds);
     const projectIdSetComplete = new Set<number>(projectIds);
@@ -275,6 +303,7 @@ const changeRows = (projectIds: number[]) => {
         return projectId;
     });
 };
+
 const changeColumns = (userIds: number[]) => {
     const userIdSet = new Set<number>(userIds);
     const userIdSetComplete = new Set<number>(userIds);
@@ -309,4 +338,18 @@ const changeColumns = (userIds: number[]) => {
         return userId;
     });
 };
+
+/**
+ * Initialization
+ */
+onMounted(() => {
+    selectedDate.value = {
+        month: new Date().getMonth(),
+        year: new Date().getFullYear(),
+    };
+});
+
+getUsers().then((response) => {
+    users.value = response.data;
+});
 </script>
