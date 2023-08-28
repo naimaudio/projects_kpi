@@ -50,15 +50,6 @@ import PreviousIcon from "./icons/PreviousIcon.vue";
 import CarretLeftSolidIcon from "./icons/CarretLeftSolidIcon.vue";
 import CarretRightSolidIcon from "./icons/CarretRightSolidIcon.vue";
 import { computed } from "vue";
-const PagesHiddenLeftCount = computed<number>(() => {
-    return Math.min(Math.max(0, props.currentPage - 3), Math.max(props.pageCount, 5) - 5);
-});
-const buttonCount = computed<number>(() => {
-    return Math.min(5, props.pageCount);
-});
-const emit = defineEmits<{
-    (event: "pageChange", pageNumber: number): void;
-}>();
 
 const props = defineProps<{
     currentPage: number;
@@ -66,6 +57,18 @@ const props = defineProps<{
     itemsCount: number;
     itemsPerPageCount: number;
 }>();
+
+const emit = defineEmits<{
+    (event: "pageChange", pageNumber: number): void;
+}>();
+
+const PagesHiddenLeftCount = computed<number>(() => {
+    return Math.min(Math.max(0, props.currentPage - 3), Math.max(props.pageCount, 5) - 5);
+});
+
+const buttonCount = computed<number>(() => {
+    return Math.min(5, props.pageCount);
+});
 </script>
 
 <style scoped>

@@ -3,7 +3,7 @@
         <h1 class="title">Business KPI</h1>
 
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px">
-            <div v-for="(graph, index) in graphs" :key="graph.id">
+            <div v-for="(graph, index) in graphsInfo" :key="graph.id">
                 <div
                     :id="graph.id"
                     class="graph-container"
@@ -20,6 +20,7 @@
         </div>
     </div>
 </template>
+
 <script setup lang="ts">
 import * as echarts from "echarts/core";
 import { onMounted, ref, computed, watch } from "vue";
@@ -179,7 +180,7 @@ const options = ref<Record<string, ECOption>>({
     },
 });
 
-const graphs = ref<
+const graphsInfo = ref<
     {
         id: string;
         minWidth: string;
@@ -276,7 +277,7 @@ onMounted(() => {
 });
 
 function graphUpdate() {
-    graphs.value.forEach(async (graphInfo) => {
+    graphsInfo.value.forEach(async (graphInfo) => {
         const graph = document.getElementById(graphInfo.id);
         if (graph !== null) {
             let chartE: echarts.ECharts;
@@ -309,7 +310,6 @@ function graphUpdate() {
             graph.addEventListener("dragstart", function (event) {
                 event.dataTransfer?.setData("text/plain", this.id);
                 const crt = this;
-                // crt.style.opacity = "0.5";
                 event.dataTransfer?.setDragImage(crt, 0, 0);
             });
             graph.addEventListener("dragenter", (event) => {
@@ -317,7 +317,6 @@ function graphUpdate() {
             });
             graph.addEventListener("dragover", function (event) {
                 event.preventDefault();
-                // this.style.opacity = "1";
             });
             const resizeObserver = new ResizeObserver(() => {
                 chartE?.resize();
@@ -328,13 +327,13 @@ function graphUpdate() {
 }
 
 const onDropHandler = (event: DragEvent, j: number) => {
-    const i = graphs.value.findIndex((graph) => {
+    const i = graphsInfo.value.findIndex((graph) => {
         return graph.id === event.dataTransfer?.getData("text/plain");
     });
-    if (!isNaN(i) && i < graphs.value.length) {
-        const cloneObj = cloneDeep(graphs.value[i]);
-        graphs.value[i] = graphs.value[j];
-        graphs.value[j] = cloneObj;
+    if (!isNaN(i) && i < graphsInfo.value.length) {
+        const cloneObj = cloneDeep(graphsInfo.value[i]);
+        graphsInfo.value[i] = graphsInfo.value[j];
+        graphsInfo.value[j] = cloneObj;
     }
 };
 

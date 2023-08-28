@@ -14,17 +14,18 @@ import { useRouter, type RouteLocationRaw } from "vue-router";
 import { onClickOutside } from "@vueuse/core";
 import { ref } from "vue";
 import DismissIcon from "@/components/icons/DismissIcon.vue";
+
 const router = useRouter();
+
 const props = defineProps<{
     closeRoute?: RouteLocationRaw;
 }>();
+
 const emits = defineEmits<{
     (event: "close"): void;
 }>();
+
 const target = ref(null);
-onClickOutside(target, () => {
-    close();
-});
 
 const close = () => {
     emits("close");
@@ -32,6 +33,10 @@ const close = () => {
         router.push(props.closeRoute);
     }
 };
+
+onClickOutside(target, () => {
+    close();
+});
 </script>
 <style>
 .close-modal-icon {

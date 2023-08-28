@@ -39,10 +39,16 @@ import { BarChart, LineChart, PieChart } from "echarts/charts";
 import type { BarSeriesOption, LineSeriesOption, PieSeriesOption } from "echarts/charts";
 import { SVGRenderer } from "echarts/renderers";
 
+/**
+ * Dayjs initialization
+ */
 extend(weekOfYear);
 extend(isoWeekInYear);
 extend(isLeapYear);
 
+/**
+ * ECharts initialization
+ */
 export type ECOption = ComposeOption<
     | BarSeriesOption
     | LineSeriesOption
@@ -66,11 +72,16 @@ echarts.use([
     PieChart,
 ]);
 
+/**
+ * App initialization
+ */
+
 const app = createApp(App);
 // registration of the store
 app.use(createPinia());
+// registration of the router
 app.use(router);
-
+// app starts
 app.mount("#app");
 
 // Registration of fluent components. Across the whole application,

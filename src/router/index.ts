@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+
+// Lazy Loading Routes => https://router.vuejs.org/guide/advanced/lazy-loading.html
 const DeclarationView = () => import("@/views/employee/DeclarationView.vue");
 const KPIView = () => import("@/views/project_manager/KPIView.vue");
 const ForecastView = () => import("@/views/project_manager/ForecastView.vue");
@@ -25,6 +27,10 @@ declare module "vue-router" {
     }
 }
 
+/**
+ * Routes declared.
+ *
+ */
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     scrollBehavior() {

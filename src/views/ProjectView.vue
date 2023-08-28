@@ -1,6 +1,8 @@
 <!-- eslint-disable vue/no-deprecated-slot-attribute -->
 <template>
     <div v-if="done" class="page-container">
+        <!-- HEADER SECTION -->
+
         <button
             class="breadcrumb-item button-style-reset clickable"
             @click="router.push({ name: 'projects', query: route.query })"
@@ -12,8 +14,10 @@
             project === undefined || newProject === true ? "New project" : project.name
         }}</span>
         <h2>{{ newProject ? "New project" : project?.name }}</h2>
-        <h3>Project properties</h3>
 
+        <!-- PROJECT PROPERTIES SECTION -->
+
+        <h3>Project properties</h3>
         <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent">
             <span>* Name</span>
             <fluent-text-field v-model="editedProject.name" required></fluent-text-field>
@@ -23,9 +27,12 @@
             </fluent-select>
             <span>* Code</span>
             <div class="field-with-validation">
-                <fluent-text-field v-model="editedProject.code" @input="codeValidation = undefined"></fluent-text-field>
-                <span v-if="codeValidation !== undefined" class="icon-with-text" style="color: #f04e85"
-                    ><ErrorIcon /> {{ codeValidation }}</span
+                <fluent-text-field
+                    v-model="editedProject.code"
+                    @input="projectCodeValidation = undefined"
+                ></fluent-text-field>
+                <span v-if="projectCodeValidation !== undefined" class="icon-with-text" style="color: #f04e85"
+                    ><ErrorIcon /> {{ projectCodeValidation }}</span
                 >
             </div>
             <span>* Category</span>
@@ -84,7 +91,10 @@
             <span>Organization</span>
             <span>{{ editedProject?.entity }}</span>
         </div>
+
         <template v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
+            <!-- DATES SECTION -->
+
             <h3>Project dates</h3>
             <div class="parent">
                 <span>Start date</span>
@@ -120,6 +130,9 @@
                     :enable-time-picker="false"
                 ></VueDatePicker>
             </div>
+
+            <!-- FORECAST SECTION -->
+
             <h3>Project forecast</h3>
             <span
                 v-if="
@@ -163,6 +176,9 @@
                     />
                 </div>
             </template>
+
+            <!-- PHASES SECTION -->
+
             <h3>Project phases</h3>
             <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
                 <AddOutlineIcon
@@ -270,6 +286,9 @@
                     <span v-else></span>
                 </template>
             </div>
+
+            <!-- FOOTER SECTION -->
+
             <div>
                 <br />
                 <BaseButton style="margin-right: 10px" @click="router.push({ name: 'projects', query: route.query })"
@@ -287,7 +306,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
 import {
     type BlankProject,
@@ -319,10 +338,79 @@ import * as echarts from "echarts/core";
 import type { ECOption } from "@/main";
 import { range, findLastIndex } from "../utilities/main";
 import dayjs from "dayjs";
+
 const route = useRoute();
 const router = useRouter();
+const globalStore = useGlobalStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
+
+const complexities = ["", "★", "★★", "★★★", "★★★★", "★★★★★"];
+const months: string[] = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
+
+/**
+ * Ref properties
+ */
+
+// A key in order to hard reload a select component.
+const selectKey = ref(1294821749);
+
+const loadingInitialRequest = ref<boolean>(false);
+const project = ref<CompleteProject | undefined>();
+const find = projectStore.projects.find((p) => p.id === projectId.value);
+const done = ref<boolean>(false);
+
+const newProject = ref<boolean>(false);
+const editedProject = ref<BlankProject>({
+    entity: organizationNames[0],
+    division: "ALL",
+    classification: "NC",
+    complexity: 0,
+    phases: [],
+    expansionRenewal: "",
+    forecast: [],
+});
+
+const loading = ref<boolean>(false);
+const projectCodeValidation = ref<string | undefined>();
+
+const forecastLineChart = ref<HTMLElement | null>(null);
+
+const years = computed<string[]>(() => {
+    if (editedProject.value.startDate === undefined || editedProject.value.endDate === undefined) {
+        return [];
+    }
+    return range(
+        dayjs(editedProject.value.startDate).get("year"),
+        dayjs(editedProject.value.endDate).get("year") + 1,
+        "string"
+    );
+});
+const cells = ref<(number | undefined)[][]>(
+    Array(years.value.length)
+        .fill(0)
+        .map(() => {
+            return Array(months.length).fill(0);
+        })
+);
+
+/**
+ * Computed properties
+ */
+
 const user = computed<User>(() => {
     const u = userStore.user;
     if (u === undefined) {
@@ -331,28 +419,18 @@ const user = computed<User>(() => {
         return u;
     }
 });
-
 const thereIsForecast = computed<boolean>(() => {
     return editedProject.value.forecast.length !== 0;
 });
-const newProject = ref<boolean>(false);
 const projectId = computed<number | undefined>(() => {
     const pId: number = Number(route.params["projectId"]);
     return isNaN(pId) ? undefined : pId;
 });
-
 const subDivisions = computed<SubCategory[]>(() => {
     const division = editedProject.value.division;
     return division !== undefined ? divisionOptions[division].subDivisions : [];
 });
 
-const complexities = ["", "★", "★★", "★★★", "★★★★", "★★★★★"];
-const globalStore = useGlobalStore();
-const selectKey = ref(1294821749);
-const loadingInitialRequest = ref<boolean>(false);
-const project = ref<CompleteProject | undefined>();
-const find = projectStore.projects.find((p) => p.id === projectId.value);
-const done = ref<boolean>(false);
 const jGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = [];
     editedProject.value.phases.forEach((val, index) => {
@@ -362,6 +440,9 @@ const jGetter = computed<Record<number, number>>(() => {
     });
     return rec;
 });
+
+const startDate = computed(() => editedProject.value.startDate);
+const endDate = computed(() => editedProject.value.endDate);
 
 if (find === undefined) {
     newProject.value = true;
@@ -376,17 +457,63 @@ if (find === undefined) {
         }, 100);
     });
 }
-const editedProject = ref<BlankProject>({
-    entity: organizationNames[0],
-    division: "ALL",
-    classification: "NC",
-    complexity: 0,
-    phases: [],
-    expansionRenewal: "",
-    forecast: [],
+
+const series = computed<number[]>(() => {
+    const flatten = cells.value.flatMap((a) => a);
+    const arr = flatten.slice(
+        flatten.findIndex((val) => val !== undefined),
+        findLastIndex(flatten, (val) => val !== undefined) + 1
+    );
+    return arr.reduce<number[]>((acc, curr, index) => {
+        acc.push((acc[index - 1] || 0) + (curr || 0));
+        return acc;
+    }, []);
 });
-const loading = ref<boolean>(false);
-const codeValidation = ref<string | undefined>();
+
+const lineChartOption = computed<ECOption>(() => {
+    return {
+        xAxis: {
+            type: "category",
+            data: wholeXAxis.value,
+        },
+        yAxis: {
+            type: "value",
+            name: "Time (hours)",
+            nameLocation: "end",
+        },
+        title: {
+            text: "Forecast",
+            left: "center",
+        },
+
+        series: [
+            {
+                type: "line",
+                data: series.value,
+                name: "Forecast",
+            },
+        ],
+        tooltip: {
+            trigger: "axis",
+        },
+    };
+});
+
+const wholeXAxis = computed(() =>
+    years.value
+        .flatMap((year) => {
+            const monthNumbers = range(1, 13, "number").map((i) => (i < 10 ? `0${i}` : `${i}`));
+            return monthNumbers.map<string>((m) => {
+                return `${m}-${year}`;
+            });
+        })
+        .slice(dayjs(editedProject.value.startDate).get("month"), -11 + dayjs(editedProject.value.endDate).get("month"))
+);
+
+/**
+ * Methods
+ */
+
 function updateForecast() {
     editedProject.value.forecast = cells.value
         .flatMap<ForecastItem>((cell, i) => {
@@ -403,6 +530,7 @@ function updateForecast() {
             -11 + dayjs(editedProject.value.endDate).get("month")
         );
 }
+
 const clickHandler = () => {
     loading.value = true;
     updateForecast();
@@ -413,7 +541,7 @@ const clickHandler = () => {
                 globalStore.notification.display = true;
                 globalStore.notification.type = "SUCCESS";
             } else if (response.status === 400 && response.data.detail === "Project code already exists") {
-                codeValidation.value = "Project code already exists";
+                projectCodeValidation.value = "Project code already exists";
             } else {
                 globalStore.notification.content = "Oh no, there was an error";
                 globalStore.notification.display = true;
@@ -428,7 +556,7 @@ const clickHandler = () => {
                 globalStore.notification.display = true;
                 globalStore.notification.type = "SUCCESS";
             } else if (response.status === 400 && response.data.detail === "Project code already exists") {
-                codeValidation.value = "Project code already exists";
+                projectCodeValidation.value = "Project code already exists";
             } else {
                 globalStore.notification.content = "Oh no, there was an error";
                 globalStore.notification.display = true;
@@ -440,87 +568,9 @@ const clickHandler = () => {
     loading.value = false;
 };
 
-const months: string[] = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-];
-
-const years = computed<string[]>(() => {
-    if (editedProject.value.startDate === undefined || editedProject.value.endDate === undefined) {
-        return [];
-    }
-    return range(
-        dayjs(editedProject.value.startDate).get("year"),
-        dayjs(editedProject.value.endDate).get("year") + 1,
-        "string"
-    );
-});
-
-const wholeXAxis = computed(() =>
-    years.value
-        .flatMap((year) => {
-            const monthNumbers = range(1, 13, "number").map((i) => (i < 10 ? `0${i}` : `${i}`));
-            return monthNumbers.map<string>((m) => {
-                return `${m}-${year}`;
-            });
-        })
-        .slice(dayjs(editedProject.value.startDate).get("month"), -11 + dayjs(editedProject.value.endDate).get("month"))
-);
-
-const series = computed<number[]>(() => {
-    const flatten = cells.value.flatMap((a) => a);
-    const arr = flatten.slice(
-        flatten.findIndex((val) => val !== undefined),
-        findLastIndex(flatten, (val) => val !== undefined) + 1
-    );
-    return arr.reduce<number[]>((acc, curr, index) => {
-        acc.push((acc[index - 1] || 0) + (curr || 0));
-        return acc;
-    }, []);
-});
-const lineChartOption = computed<ECOption>(() => {
-    return {
-        xAxis: {
-            type: "category",
-            data: wholeXAxis.value,
-        },
-        yAxis: {
-            type: "value",
-        },
-        series: [
-            {
-                type: "line",
-                data: series.value,
-            },
-        ],
-        tooltip: {
-            trigger: "axis",
-        },
-    };
-});
-
-const forecastLineChart = ref<HTMLElement | null>(null);
-
-const cells = ref<(number | undefined)[][]>(
-    Array(years.value.length)
-        .fill(0)
-        .map(() => {
-            return Array(months.length).fill(0);
-        })
-);
-
-const startDate = computed(() => editedProject.value.startDate);
-const endDate = computed(() => editedProject.value.endDate);
+/**
+ * Watchers
+ */
 
 watch([years, startDate, endDate], ([years, newStartDate, newEndDate], [oldYears]) => {
     if (oldYears.length === 0) {
@@ -592,7 +642,6 @@ watch(lineChartOption, () => {
         }
     }
 });
-onMounted(() => {});
 </script>
 
 <style>

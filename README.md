@@ -1,8 +1,31 @@
 # Time Management Interface for projects
 
-This frontend application give to employees an interface to input hours worked on each of their projects. 
+This frontend application provides employees with an interface to enter the hours they have worked on each of their projects.
+This project is a part of a larger project. If the project kpi api is setup, you can build a developpement environment
 
-## Install application
+## Dev setup
+
+In order to setup a developpement server, you need npm v18 installed, an FastAPI backend and setup environment variables.
+
+### Environnment variables
+
+
+VITE_AUTHORITY: The Azure Authority URI 
+VITE_REDIRECT_URI: The redirect URI of the application
+VITE_CLIENT_ID: The azure Client Id of the application
+VITE_FAST_API_URI: The fast api endpoint URI
+VITE_ORGANIZATIONS: Names of the organisations working together separated with a space
+SSL_KEY_PATH: SSL Key path for https
+SSL_CERT_PATH: SSL Certificate path for https
+SSL_KEY_PASSPHRASE: If your SSL key is encrypted and need a passphrase, provide it.
+
+Those environnement variables can be placed in a .env, or .env.local at the root of the frontend application
+
+### Certificates
+
+
+
+### Install application
 
 ```bash
 npm install
@@ -18,7 +41,17 @@ Build project for production
 npm run build
 ```
 
-## Choices made
+Type verifications
+```bash
+npm run type-check
+```
+
+Linting check
+```bash
+npm run lint
+```
+
+### Choices made
 
 This frontend has been made the most accurate according to the fluent 2 design system. The first users of this application will be Focal employees, which are fluent with the Microsoft ecosystem.
 
@@ -77,3 +110,27 @@ You can find the sourcecode of frontend in src. The architecture of the applicat
 - utilities : Here you can find a set of usefull functions used by components. Be carefull to do not insert vue router, direct utilization of a store, because a store utilisation must be declared in components, it is not recommended to "hide" those
 - directives : A more advanced vue future. It only contains a function that helps doing modal components. (clickoutside the modal, to close it)
 - assets : The static content used in the application. global.css contains css usable in the whole app.
+
+
+## Change port frontend
+Change port on package.json
+Check if environnement variables have to change (espacially (VITE_REDIRECT_URI)) 
+Change in the azure app declaration
+
+## Vue compotent writting guidelines
+The frontend app has quite a few guidelines :
+
+### Vue compotent order
+Whenever possible, if you work on this project please write foolowing this order :
+It helps to keep the code a bit readabble :
+
+- Imports
+- Route, router initialization (useRoute, useRouter)
+- Stores initialization (use[...]Store)
+- Props
+- Emits
+- Constants
+- Refs (if ref initialization need a computed, computed can be just ahead)
+- Computed
+- Methods
+- Component initialization (onMounted, or plain code, etc...)

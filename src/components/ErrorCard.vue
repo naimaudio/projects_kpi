@@ -8,8 +8,12 @@
 
 <script setup lang="ts">
 import DismissIcon from "@/components/icons/DismissIcon.vue";
-
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
+
+/**
+ * This card is displayed whend the application failed to initalize
+ */
+
 const emits = defineEmits<{ (event: "close"): void }>();
 const props = withDefaults(defineProps<{ closable?: boolean }>(), { closable: true });
 </script>

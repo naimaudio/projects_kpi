@@ -8,6 +8,10 @@ import { declarationsFromRaw, projectsFromRaw, userFromRaw } from "@/typing/conv
 import { useDeclarationStore } from "@/stores/declarationStore";
 import { msalInstance } from "@/auth_config/auth";
 
+/**
+ * This function fetches all usefull data at the start of the application and set this information into the stores.
+ * This function can be use at the start of the app or when the data needs to be reloaded after records upload for example.
+ */
 export async function initialization() {
     const projectStore = useProjectStore();
     const userStore = useUserStore();

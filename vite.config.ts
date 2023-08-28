@@ -8,7 +8,6 @@ import fs from "fs";
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), "");
     return {
-        base: "/app",
         plugins: [
             vue({
                 template: {

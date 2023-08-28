@@ -35,25 +35,27 @@
 
 <script setup lang="ts">
 import EmailIcon from "@/components/icons/EmailIcon.vue";
+import CalendarEmpty from "@/components/icons/CalendarEmpty.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useRouter } from "vue-router";
-import { ref } from "vue";
 import type { domain } from "@/typing";
 import { domains } from "@/typing";
-
-import BaseButton from "@/components/base/BaseButton.vue";
+import { ref } from "vue";
 import { getDomain, putDomain } from "@/API/requests";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
 import dayjs from "dayjs";
-import CalendarEmpty from "@/components/icons/CalendarEmpty.vue";
 import { msalInstance } from "@/auth_config/auth";
 
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
 const router = useRouter();
+
+const userId = userStore.userIdGetter;
+
 const loading = ref<boolean>(true);
 const userDomain = ref<domain | "">("");
-const userId = userStore.userIdGetter;
+
 if (userId !== undefined) {
     getDomain(userId).then((domain) => {
         userDomain.value = domain.data;

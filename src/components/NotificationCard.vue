@@ -9,10 +9,9 @@
 
 <script setup lang="ts">
 import DismissIcon from "@/components/icons/DismissIcon.vue";
-
 import ErrorIcon from "@/components/icons/ErrorIcon.vue";
 import CheckmarkIcon from "./icons/CheckmarkIcon.vue";
-const emits = defineEmits<{ (event: "close"): void }>();
+
 const props = withDefaults(
     defineProps<{
         /**
@@ -28,6 +27,8 @@ const props = withDefaults(
         lifetime: 0,
     }
 );
+
+const emits = defineEmits<{ (event: "close"): void }>();
 
 if (props.lifetime > 0) {
     setTimeout(() => emits("close"), props.lifetime * 1000);

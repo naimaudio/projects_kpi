@@ -35,9 +35,12 @@ import NotificationCard from "@/components/NotificationCard.vue";
 import { msalInstance } from "@/auth_config/auth";
 import { useUserStore } from "@/stores/userStore";
 import { cloneDeep } from "lodash";
-const globalStore = useGlobalStore();
+
 const router = useRouter();
+
+const globalStore = useGlobalStore();
 const userStore = useUserStore();
+
 async function signIn() {
     await msalInstance
         .loginPopup({ scopes: ["User.Read"] })

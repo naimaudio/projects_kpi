@@ -5,8 +5,15 @@
             <span>{{ project.name }}</span>
             <span style="font-weight: 400; margin-left: 15px">{{ project.code }}</span>
         </h2>
+        <div v-else style="display: flex; align-items: center; gap: 13px">
+            <span
+                >To display performance indicators for the project of your choice, please select it at the top of the
+                window.</span
+            >
+            <img src="@/assets/icons/slightly-smiling-face.png" alt="Slightly Smiling Face" width="60" height="60" />
+        </div>
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px">
-            <div v-for="(graph, index) in graphs" :key="graph.id">
+            <div v-for="(graph, index) in graphsInfo" :key="graph.id">
                 <div
                     v-show="projectId !== undefined"
                     :id="graph.id"
@@ -35,6 +42,9 @@ import { type Project } from "@/typing/project";
 import { useProjectStore } from "../../stores/projectStore";
 import type { ECOption } from "@/main";
 import DragIcon from "@/components/icons/DragIcon.vue";
+
+const route = useRoute();
+const projectStore = useProjectStore();
 
 const options = ref<Record<string, ECOption>>({
     barOption: {
@@ -127,7 +137,7 @@ const options = ref<Record<string, ECOption>>({
     },
 });
 
-const graphs = ref<
+const graphsInfo = ref<
     {
         id: string;
         minWidth: string;
@@ -165,12 +175,15 @@ const graphs = ref<
         fetch_uri: "kpi/stackedbar/hour_expenditure_by_project",
     },
 ]);
-const route = useRoute();
-const projectStore = useProjectStore();
+
 const projectId = computed<number | undefined>(() => {
     const pId = Number(route.query.projectId);
     return isNaN(pId) ? undefined : pId;
 });
+
+/**
+ * route query parsing computed properties
+ */
 
 const period = computed<string[] | undefined>(() => {
     const val = route.query.period;
@@ -207,14 +220,9 @@ watch([projectId, unit, period, cummulated], ([pId]) => {
         graphUpdate();
     }
 });
-onMounted(() => {
-    if (projectId.value !== undefined) {
-        graphUpdate();
-    }
-});
 
 function graphUpdate() {
-    graphs.value.forEach(async (graphInfo) => {
+    graphsInfo.value.forEach(async (graphInfo) => {
         const graph = document.getElementById(graphInfo.id);
         if (graph !== null) {
             let chartE: echarts.ECharts;
@@ -265,16 +273,22 @@ function graphUpdate() {
     });
 }
 
-const onDropHandler = (event: DragEvent, j: number) => {
-    const i = graphs.value.findIndex((graph) => {
+function onDropHandler(event: DragEvent, j: number) {
+    const i = graphsInfo.value.findIndex((graph) => {
         return graph.id === event.dataTransfer?.getData("text/plain");
     });
-    if (!isNaN(i) && i < graphs.value.length) {
-        const cloneObj = cloneDeep(graphs.value[i]);
-        graphs.value[i] = graphs.value[j];
-        graphs.value[j] = cloneObj;
+    if (!isNaN(i) && i < graphsInfo.value.length) {
+        const cloneObj = cloneDeep(graphsInfo.value[i]);
+        graphsInfo.value[i] = graphsInfo.value[j];
+        graphsInfo.value[j] = cloneObj;
     }
-};
+}
+
+onMounted(() => {
+    if (projectId.value !== undefined) {
+        graphUpdate();
+    }
+});
 </script>
 <style scoped>
 .graph-container {
