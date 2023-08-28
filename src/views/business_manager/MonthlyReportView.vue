@@ -1,5 +1,18 @@
 import VueDatePicker from '@vuepic/vue-datepicker';
 <template>
+    <Teleport to=".global">
+        <BaseButton
+            v-if="modifiedItems.length >= 1"
+            accent
+            style="position: absolute; right: 50px; bottom: 50px; z-index: 13"
+            @click="modifyConfirmation = true"
+        >
+            <div class="icon-with-text" style="align-items: center">
+                <CheckmarkLineIcon />
+                <span> Validate modified hours</span>
+            </div>
+        </BaseButton>
+    </Teleport>
     <div class="page-container">
         <h1 class="title">
             Monthly Report
@@ -45,6 +58,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         />
         <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
         <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
+        <BaseButton style="margin-left: 15px" disabled>Exports</BaseButton>
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
             <p>
                 This action will enable data from new declarations to be included in the
@@ -118,17 +132,16 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             </p>
         </div>
         <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
-            <p>Keep in mind changing hours will have no effect in project managemnt KPIs</p>
+            <p>Are you sure of your modifications ?</p>
+            <p>Keep in mind changing hours will have no effect in project management KPIs</p>
             <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
         </ModalComponent>
-        <p>
-            <BaseButton style="margin-right: 10px" @click="modifyConfirmation = true">Modify hours</BaseButton>
-        </p>
     </div>
 </template>
 <script setup lang="ts">
 import VueDatePicker from "@vuepic/vue-datepicker";
 import BaseButton from "@/components/base/BaseButton.vue";
+import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
 import { ref, watch, onMounted } from "vue";
 import InputTableItems from "@/components/base/InputTableItems.vue";
 import { getMonthlyHours, putMonthlyHours, postMonthlyHours, getUsers } from "@/API/requests";
