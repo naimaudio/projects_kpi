@@ -42,7 +42,15 @@
                         <HoursForm
                             deletable
                             :model-value="weeklyDeclaration"
-                            @update:model-value="(index, value) => (weeklyDeclaration[index].hours = value)"
+                            @update:model-value="
+                                (key, index, value) => {
+                                    if (key === 'domain') {
+                                        weeklyDeclaration[index].domain = stringToDomain(value.toString());
+                                    } else if (key === 'hours') {
+                                        weeklyDeclaration[index].hours = Number(value);
+                                    }
+                                }
+                            "
                             @remove="
                                 (projectId, _) => {
                                     const userId = userStore.userIdGetter;
@@ -207,7 +215,7 @@
         :day-declaration="dailyDeclarationHours[dayNumber]"
         @close="
             () => {
-                refreshbufferValues(weekNumber, yearNumber, userId);
+                refreshBufferValues(weekNumber, yearNumber, userId);
                 router.push({ name: 'declarationDate', query: route.query });
             }
         "
@@ -239,25 +247,29 @@ import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import ModalAddFavorites from "@/assets/modals/ModalAddFavorites.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { getBufferTable, hoursRegistration, hoursModification } from "@/API/requests";
-import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
+import DeclConfirmationModal from "@/components/modals/DeclConfirmationModal.vue";
 import { cloneDeep } from "lodash";
-import { rawBuffersToDailyDeclaration } from "@/typing/conversions";
+import { rawBuffersToDailyDeclaration, stringToDomain } from "@/typing/conversions";
 import ModalHoursView from "@/views/employee/ModalHoursView.vue";
 import { dayValidation } from "../../utilities/main";
 import dayjs from "dayjs";
 import { useGlobalStore } from "@/stores/globalStore";
 import { initialization } from "@/utilities/initialization";
 
-const addFavoritesModal = ref(false);
 const router: Router = useRouter();
 const route: RouteLocationNormalizedLoaded = useRoute();
-const userStore = useUserStore();
+
+const globalStore = useGlobalStore();
 const declarationStore = useDeclarationStore();
+
+const addFavoritesModal = ref(false);
+const userStore = useUserStore();
 const isNewDeclaration = computed(() => {
     return !declarationStore.weeksDeclared.some(
         (week) => week.week === weekNumber.value && week.year === yearNumber.value
     );
 });
+
 const weekNumber = computed<number | undefined>(() => {
     return Array.isArray(route.params.week)
         ? undefined
@@ -276,12 +288,13 @@ const yearNumber = computed<number | undefined>(() => {
 const dayNumber = computed<dayNb | undefined>(() => {
     return dayValidation(route.params.day);
 });
+
 const confirmationModal = ref<boolean>(false);
 const comment = ref<string | undefined>();
+const weeklyDeclaration = ref<DeclarationInput[]>(cloneDeep(declarationStore.elementaryDeclarationGetter));
+
 const userId = userStore.userIdGetter;
 if (userId === undefined) throw Error("no user Logged");
-
-const weeklyDeclaration = ref<DeclarationInput[]>(cloneDeep(declarationStore.elementaryDeclarationGetter));
 
 if (
     !isNewDeclaration.value &&
@@ -306,6 +319,8 @@ const currentDeclaration = computed<DeclarationInput[]>(() => {
                     dailyDeclarationHours.value[4][index].hours,
                 name: decl.name,
                 projectId: decl.projectId,
+                projectCode: decl.projectCode,
+                domain: decl.domain,
             })
         );
     } else if (methodSelected.value === "weekly") {
@@ -339,7 +354,7 @@ const defaultDeclarationHours = computed<DailyDeclaration>(() => [
 ]);
 const defaultDeclaration = computed<DeclarationInput[]>(() => cloneDeep(declarationStore.elementaryDeclarationGetter));
 const loading = ref<boolean>(false);
-function refreshbufferValues(week: number | undefined, year: number | undefined, userID: number) {
+function refreshBufferValues(week: number | undefined, year: number | undefined, userID: number) {
     if (week !== undefined && year !== undefined) {
         getBufferTable(userID, week, year).then((value) => {
             dailyDeclarationHours.value = rawBuffersToDailyDeclaration(
@@ -351,7 +366,7 @@ function refreshbufferValues(week: number | undefined, year: number | undefined,
         });
     }
 }
-refreshbufferValues(weekNumber.value, yearNumber.value, userId);
+refreshBufferValues(weekNumber.value, yearNumber.value, userId);
 watch(defaultDeclaration, (value) => {
     const newDeclaration = value;
     newDeclaration.forEach((val) => {
@@ -400,10 +415,9 @@ const sumProjectHours = computed<number>(() => {
 
 const favorites = computed<Set<number>>(() => declarationStore.favorites);
 watch(favorites.value, () => {
-    refreshbufferValues(weekNumber.value, yearNumber.value, userId);
+    refreshBufferValues(weekNumber.value, yearNumber.value, userId);
 });
 
-const globalStore = useGlobalStore();
 async function validateDeclaration() {
     if (userId !== undefined && weekNumber.value !== undefined && yearNumber.value !== undefined) {
         loading.value = true;

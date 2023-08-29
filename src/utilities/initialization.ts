@@ -23,7 +23,9 @@ export async function initialization() {
                 if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
-                    userStore.setUser(userFromRaw(response.data));
+                    const newUser = userFromRaw(response.data);
+                    userStore.setUser(newUser);
+                    declarationStore.userDomain = newUser.domain;
                 }
             });
         }

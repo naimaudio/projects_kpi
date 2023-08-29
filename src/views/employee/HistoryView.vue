@@ -33,7 +33,7 @@ import { useDeclarationStore } from "@/stores/declarationStore";
 import type { Header, DeclRecord, DeclarationInput } from "@/typing";
 import { computed, ref } from "vue";
 import BaseTable from "@/components/base/BaseTable.vue";
-import DeclConfirmationModal from "@/components/DeclConfirmationModal.vue";
+import DeclConfirmationModal from "@/components/modals/DeclConfirmationModal.vue";
 import { useUserStore } from "../../stores/userStore";
 import { useProjectStore } from "../../stores/projectStore";
 
@@ -67,6 +67,7 @@ const commentHeaders: Header[] = [
 const projectStore = useProjectStore();
 const declarationStore = useDeclarationStore();
 const userStore = useUserStore();
+
 const currentDeclaration = ref<undefined | DeclRecord>();
 const currentDeclarationData = computed<DeclarationInput[]>(() => {
     return declarationStore.getDeclarations
@@ -85,6 +86,7 @@ const currentDeclarationData = computed<DeclarationInput[]>(() => {
                 projectId: decl.projectId,
                 projectCode: decl.projectCode,
                 name: name,
+                domain: decl.domain,
             };
         });
 });

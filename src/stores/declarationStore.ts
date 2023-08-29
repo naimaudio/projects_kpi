@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Declaration, DeclarationInput } from "@/typing/index";
+import type { Declaration, DeclarationInput, domain } from "@/typing/index";
 import { computed, ref } from "vue";
 import { useProjectStore } from "./projectStore";
 import { cloneDeep } from "lodash";
@@ -10,7 +10,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
     const projectStore = useProjectStore();
 
     const favorites = ref<Set<number>>(new Set([]));
-
+    const userDomain = ref<domain>("General");
     const declarations = ref<Declaration[]>([]);
 
     const records = ref<DeclRecord[]>([]);
@@ -43,6 +43,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
                     hours: 0,
                     projectId: project.id,
                     projectCode: project.code,
+                    domain: userDomain.value,
                 });
             }
             return declarations;
@@ -134,6 +135,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
     }
     return {
         records,
+        userDomain,
         favorites,
         getUserProjects,
         elementaryDeclarationGetter,

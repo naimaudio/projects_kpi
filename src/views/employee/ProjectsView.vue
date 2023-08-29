@@ -45,21 +45,24 @@ import BaseButton from "@/components/base/BaseButton.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 
 const router = useRouter();
+const route = useRoute();
+
+const declarationStore = useDeclarationStore();
+const userStore = useUserStore();
+
 const headers: Header[] = [
     { name: "Code", id: "code", filterable: false, width: "80px" },
     { name: "Name", id: "name", filterable: false, clickable: true },
     { name: "Personal time (h)", id: "time_spent", filterable: false },
     { name: "Fav", id: "favorite", filterable: false, width: "80px" },
 ];
-const declarationStore = useDeclarationStore();
-const userStore = useUserStore();
+
 function change<K extends keyof UserProject>(id: number, field: K, value: UserProject[K]) {
     const userId = userStore.userIdGetter;
     if (field === "favorite" && typeof value === "boolean" && userId !== undefined) {
         declarationStore.setFavorite(id, value, userId);
     }
 }
-const route = useRoute();
 function rowClickHandler(id: number) {
     router.push({ name: "project", params: { projectId: id }, query: route.query });
 }

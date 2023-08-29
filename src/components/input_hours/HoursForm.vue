@@ -8,6 +8,7 @@
             <span>Project Code</span>
             <span>Project Name</span>
             <span>Hours</span>
+            <span>Domain</span>
         </div>
         <br />
         <div
@@ -30,9 +31,10 @@
                     :min="0"
                     :max="35"
                     style="width: 100%"
-                    @change="(event: ChangeEvent) => emits('update:modelValue', index, Number(event.target.value))"
+                    @change="(event: ChangeEvent) => emits('update:modelValue','hours', index, Number(event.target.value))"
                 />
             </div>
+            <span>{{ declaration.domain }}</span>
         </div>
     </div>
 </template>
@@ -40,7 +42,6 @@
 <script setup lang="ts">
 import type { ChangeEvent, DeclarationInput } from "@/typing";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
-
 const props = withDefaults(
     defineProps<{
         modelValue: DeclarationInput[];
@@ -52,7 +53,7 @@ const props = withDefaults(
 );
 
 const emits = defineEmits<{
-    (e: "update:modelValue", index: number, value: number): void;
+    (e: "update:modelValue", key: "domain" | "hours", index: number, value: number | string): void;
     (e: "remove", projectId: number, index: number): void;
 }>();
 </script>
@@ -60,13 +61,13 @@ const emits = defineEmits<{
 <style scoped>
 .table-raw-container-delete {
     display: grid;
-    grid-template-columns: 20px 1fr 2fr 3fr;
+    grid-template-columns: 20px 1fr 2fr 3fr 1fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }
 .table-raw-container {
     display: grid;
-    grid-template-columns: 1fr 2fr 3fr;
+    grid-template-columns: 1fr 2fr 3fr 1fr;
     grid-template-rows: 1fr;
     grid-column-gap: 31px;
 }

@@ -13,7 +13,15 @@
         </p>
         <HoursForm
             :model-value="props.dayDeclaration"
-            @update:model-value="(index, value) => (onGoingDayDeclaration[index].hours = value)"
+            @update:model-value="
+                (key, index, value) => {
+                    if (key === 'domain') {
+                        onGoingDayDeclaration[index].domain = stringToDomain(value.toString());
+                    } else if (key === 'hours') {
+                        onGoingDayDeclaration[index].hours = Number(value);
+                    }
+                }
+            "
         />
         <div class="footer-buttons-block">
             <BaseButton :loading="loading" accent :disabled="loading" @click="validation">
@@ -37,11 +45,11 @@ import { useGlobalStore } from "../../stores/globalStore";
 import { cloneDeep } from "lodash";
 import BaseButton from "@/components/base/BaseButton.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
-const route = useRoute();
-const modal = ref(null);
-const close = () => emits("close");
+import { stringToDomain } from "@/typing/conversions";
 
-onClickOutside(modal, () => close());
+const route = useRoute();
+
+const globalStore = useGlobalStore();
 
 const props = defineProps<{
     dayDeclaration: DeclarationInput[];
@@ -51,14 +59,15 @@ const props = defineProps<{
     day: dayNb;
 }>();
 
-const onGoingDayDeclaration = ref<DeclarationInput[]>(cloneDeep(props.dayDeclaration));
-const loading = ref<boolean>(false);
 const emits = defineEmits<{
     (event: "change", day: dayNb, declarationIndex: number, value: number): void;
     (event: "close"): void;
 }>();
 
-const globalStore = useGlobalStore();
+const onGoingDayDeclaration = ref<DeclarationInput[]>(cloneDeep(props.dayDeclaration));
+const loading = ref<boolean>(false);
+const modal = ref(null);
+
 const validation = async () => {
     loading.value = true;
     postBufferTable(props.userId, onGoingDayDeclaration.value, props.day, props.week, props.year).then((response) => {
@@ -75,4 +84,7 @@ const validation = async () => {
         loading.value = false;
     });
 };
+const close = () => emits("close");
+
+onClickOutside(modal, () => close());
 </script>

@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import "@/assets/global.css";
-import App from "@/App.vue";
+import App from "./App.vue";
 import router from "@/router";
 import {
     provideFluentDesignSystem,
@@ -24,6 +24,7 @@ import { extend } from "dayjs";
 import isoWeekInYear from "dayjs/plugin/isoWeeksInYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 import weekOfYear from "dayjs/plugin/weekOfYear";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import "@vuepic/vue-datepicker/dist/main.css";
 import * as echarts from "echarts/core";
 
@@ -45,6 +46,7 @@ import { SVGRenderer } from "echarts/renderers";
 extend(weekOfYear);
 extend(isoWeekInYear);
 extend(isLeapYear);
+extend(customParseFormat);
 
 /**
  * ECharts initialization

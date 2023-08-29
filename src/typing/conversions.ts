@@ -98,6 +98,7 @@ export function declarationsFromRaw(
                 hours: p.declared_hours,
                 id: index * lengthProjects + jndex,
                 projectCode: projectCodeMapping[p.project_id],
+                domain: p.domain,
             });
             rec[i].projectCodes.push(projectCodeMapping[p.project_id]);
         });

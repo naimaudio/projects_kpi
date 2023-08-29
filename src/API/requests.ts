@@ -9,6 +9,7 @@ import type {
     dayNb,
     domain,
     Person,
+    RawDeclarationMinified,
 } from "@/typing";
 import type {
     CompleteProject,
@@ -127,6 +128,7 @@ export async function hoursRegistration(
         requestBody.record_projects.push({
             declared_hours: declaration.hours,
             project_id: declaration.projectId,
+            domain: declaration.domain,
         });
     });
     const response = await fetcher(`${origin}/records`, {
@@ -159,6 +161,7 @@ export async function hoursModification(
         requestBody.record_projects.push({
             declared_hours: declaration.hours,
             project_id: declaration.projectId,
+            domain: declaration.domain,
         });
     });
     const response = await fetcher(`${origin}/records`, {
@@ -358,5 +361,16 @@ export async function postMonthlyHours(date: {
         },
         600000
     );
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getDeclarationData(projectIds: number[]): Promise<SimplifiedResponse<RawDeclarationMinified[]>> {
+    const response = await fetcher(`${origin}/data?`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projectIds),
+    });
     return { status: response.status, data: await response.json() };
 }

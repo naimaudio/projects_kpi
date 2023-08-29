@@ -16,9 +16,15 @@
             }"
             style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
         >
-            <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="table-cell"></div>
-            <div v-for="header in props.columnHeaders" :key="header.id" class="table-cell header-cell">
-                <span style="margin-left: 8px">{{ header.name }}</span>
+            <div
+                style="position: sticky; top: 0px; left: -1px; background-color: white"
+                class="header-cell table-cell"
+            ></div>
+            <div v-for="header in props.columnHeaders" :key="header.id" class="header-cell table-cell">
+                <span>
+                    <span style="margin-left: 8px">{{ header.name }}<br /></span>
+                    <span style="margin-left: 8px; white-space: pre-line; font-style: italic"> {{ header.desc }}</span>
+                </span>
             </div>
         </div>
         <div
@@ -89,13 +95,13 @@
 </template>
 
 <script setup lang="ts">
-import type { InputItem, MatrixHeader } from "@/typing";
+import type { InputItem, MatrixHeader, MatrixHeaderExtended } from "@/typing";
 import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
 
 const props = withDefaults(
     defineProps<{
-        columnHeaders: MatrixHeader[];
+        columnHeaders: MatrixHeaderExtended[];
         rowHeaders: MatrixHeader[];
         items: InputItem[];
         modifiedItems?: InputItem[];
@@ -209,6 +215,7 @@ const initialCells = computed<number[][]>(() => {
 .header-cell {
     align-items: center;
     gap: 4px;
+    height: 66px !important;
 }
 
 .table-cell {

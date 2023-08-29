@@ -9,6 +9,11 @@ export interface MatrixHeader {
     name: string;
     id: number;
 }
+export interface MatrixHeaderExtended {
+    name: string;
+    desc: string;
+    id: number;
+}
 export interface Preferences {
     preferedMethod: InputMethod;
 }
@@ -26,9 +31,19 @@ export interface DeclarationInput {
     name: string;
     hours: number;
     projectCode?: string;
+    domain: domain;
 }
 
-export const domains = ["Acoustics", "Tests", "Hardware", "Software", "Mechanics", "Project Management"] as const;
+export const domains = [
+    "General",
+    "Acoustics",
+    "Tests",
+    "Hardware",
+    "Software",
+    "Mechanics",
+    "Project Management",
+    "Shop floor",
+] as const;
 
 export type domain = (typeof domains)[number];
 
@@ -63,6 +78,7 @@ export interface RawDeclaration {
     };
     record_projects: {
         project_id: number;
+        domain: domain;
         declared_hours: number;
     }[];
 }
@@ -74,6 +90,16 @@ export interface Declaration {
     projectId: number;
     projectCode: string;
     id: number;
+    domain: domain;
+}
+
+export interface DeclRecord {
+    id: number;
+    userId: number;
+    comment?: string;
+    week: number;
+    year: number;
+    projectCodes: string[];
 }
 
 export interface RawUser {
@@ -95,15 +121,6 @@ export interface User {
     role: role;
 }
 
-export interface DeclRecord {
-    id: number;
-    userId: number;
-    comment?: string;
-    week: number;
-    year: number;
-    projectCodes: string[];
-}
-
 export interface SimplifiedResponse<T> {
     status: number;
     data: T;
@@ -121,6 +138,7 @@ export type chartType = "pie" | "line" | "bar" | "nestedPie" | "stackedLine" | "
 export interface MonthlyHours {
     user_id: number;
     user_name?: string;
+    domain: domain;
     hours: { project_id: number; hours: number }[];
 }
 
@@ -140,5 +158,15 @@ export interface InputItem {
 export interface Person {
     name: string;
     email: string;
+    id: number;
+}
+
+export interface RawDeclarationMinified {
+    email: string;
+    hours: number;
+    name: string;
+    project_code: string;
+    week: number;
+    year: number;
     id: number;
 }

@@ -162,7 +162,7 @@ import InputTableItems from "@/components/base/InputTableItems.vue";
 import { getMonthlyHours, putMonthlyHours, postMonthlyHours, getUsers } from "@/API/requests";
 import type { MonthlyHoursItem, Person } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
-import type { MatrixHeader } from "@/typing";
+import type { MatrixHeader, MatrixHeaderExtended } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
 import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
@@ -179,7 +179,7 @@ const modifyConfirmation = ref<boolean>(false);
 const users = ref<Person[]>([]);
 const items = ref<MonthlyHoursItem[]>([]);
 const modifiedItems = ref<MonthlyHoursItem[]>([]);
-const columnHeaders = ref<MatrixHeader[]>([]);
+const columnHeaders = ref<MatrixHeaderExtended[]>([]);
 const rowHeaders = ref<MatrixHeader[]>([]);
 
 const projectStore = useProjectStore();
@@ -250,7 +250,11 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
 
             const userCount = response.data.length;
             for (let i = 0; i < userCount; i++) {
-                columnHeaders.value.push({ name: response.data[i].user_name || "", id: response.data[i].user_id });
+                columnHeaders.value.push({
+                    name: response.data[i].user_name || "",
+                    desc: response.data[i].domain || "",
+                    id: response.data[i].user_id,
+                });
             }
             items.value.push(
                 ...response.data.flatMap<MonthlyHoursItem>((value) => {
@@ -330,6 +334,7 @@ const changeColumns = (userIds: number[]) => {
         if (userIdSetComplete.has(user.id)) {
             columnHeaders.value.push({
                 id: user.id,
+                desc: "",
                 name: user.name,
             });
         }

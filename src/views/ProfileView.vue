@@ -15,8 +15,9 @@
             <br />
             <div class="divider"></div>
             <br />
+            <p>You can only change the domain you are working on before the first declaration of each month</p>
             <span>Domain</span>
-            <fluent-select v-model="userDomain">
+            <fluent-select v-model="userDomain" :disabled="disableSelect">
                 <fluent-option value=""><span style="font-style: italic">None</span></fluent-option>
                 <fluent-option v-for="d in domains" :key="d" :value="d">{{ d }}</fluent-option>
             </fluent-select>
@@ -40,21 +41,32 @@ import BaseButton from "@/components/base/BaseButton.vue";
 import { useRouter } from "vue-router";
 import type { domain } from "@/typing";
 import { domains } from "@/typing";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { getDomain, putDomain } from "@/API/requests";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
 import dayjs from "dayjs";
 import { msalInstance } from "@/auth_config/auth";
+import { useDeclarationStore } from "@/stores/declarationStore";
 
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
+const declarationStore = useDeclarationStore();
 const router = useRouter();
 
 const userId = userStore.userIdGetter;
 
 const loading = ref<boolean>(true);
 const userDomain = ref<domain | "">("");
+
+const disableSelect = computed<boolean>(() => {
+    const wednesdayOfWeek = dayjs().startOf("week").add(4, "day");
+    return (
+        declarationStore.weeksDeclared.some((weekInYear) => {
+            return weekInYear.week === wednesdayOfWeek.week() && weekInYear.year === wednesdayOfWeek.get("year");
+        }) || wednesdayOfWeek.get("month") === wednesdayOfWeek.subtract(7, "day").get("month")
+    );
+});
 
 if (userId !== undefined) {
     getDomain(userId).then((domain) => {
@@ -73,6 +85,7 @@ async function setDomain(domain: domain | "") {
             if (response.status === 200) {
                 userDomain.value = domain;
                 loading.value = false;
+                declarationStore.userDomain = domain;
                 globalStore.notification = { content: "Domain changed successfully", display: true, type: "SUCCESS" };
             } else {
                 loading.value = false;
