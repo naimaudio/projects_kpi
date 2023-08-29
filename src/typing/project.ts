@@ -19,6 +19,7 @@ export type SubCategory =
     | "P_HP"
     | "ETC"
     | "H_AMP"
+    | "ABS"
     | "";
 
 export const subCategoryLabels: Record<SubCategory, string> = {
@@ -32,6 +33,7 @@ export const subCategoryLabels: Record<SubCategory, string> = {
     P_HP: "Pro Headphone",
     ETC: "Others",
     H_AMP: "Home Amplifier",
+    ABS: "Day off",
     "": "",
 } as const;
 
@@ -39,7 +41,7 @@ export const divisionOptions: { [key in Division]: { id: key; label: string; sub
     ALL: {
         id: "ALL",
         label: "All",
-        subDivisions: ["ETC", ""],
+        subDivisions: ["ETC", "ABS", ""],
     },
     HOME: {
         id: "HOME",
@@ -63,7 +65,6 @@ export const divisionOptions: { [key in Division]: { id: key; label: string; sub
     },
     RESEARCH: {
         id: "RESEARCH",
-
         label: "Research",
         subDivisions: [""],
     },
