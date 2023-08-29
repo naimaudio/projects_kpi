@@ -329,7 +329,7 @@ const currentDeclaration = computed<DeclarationInput[]>(() => {
     return declaration;
 });
 const valideRoute = computed(() => {
-    const dayjsDate = dayjs(userStore.user?.firstDeclarationDay, "YYYY-MM-DD");
+    const dayjsDate = dayjs(userStore.user?.firstDeclarationDay);
     return (
         (yearNumber.value !== undefined && dayjsDate.get("year") < yearNumber.value) ||
         (weekNumber.value !== undefined &&

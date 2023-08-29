@@ -8,7 +8,7 @@
         <div class="table-raw-gap" />
         <div class="declaration-container column-flex">
             <div class="declaration-inputs prefix">
-                <HoursRecap deletable :model-value="props.declaration" />
+                <HoursRecap :model-value="props.declaration" />
                 <div class="table-raw-gap" />
                 <div class="divider" />
                 <div class="table-raw-gap" />
