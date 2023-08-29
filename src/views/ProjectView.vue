@@ -14,7 +14,7 @@
             project === undefined || newProject === true ? "New project" : project.name
         }}</span>
         <h2>{{ newProject ? "New project" : project?.name }}</h2>
-
+        <p v-if="editedProject?.subCategory === 'ABS'">This project will not be included in KPIs.</p>
         <!-- PROJECT PROPERTIES SECTION -->
 
         <h3>Project properties</h3>
@@ -92,7 +92,12 @@
             <span>{{ editedProject?.entity }}</span>
         </div>
 
-        <template v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
+        <template
+            v-if="
+                editedProject?.subCategory !== 'ABS' &&
+                (user.role === 'Project Manager' || user.role === 'Business Manager')
+            "
+        >
             <!-- DATES SECTION -->
 
             <h3>Project dates</h3>
@@ -286,9 +291,11 @@
                     <span v-else></span>
                 </template>
             </div>
+        </template>
 
-            <!-- FOOTER SECTION -->
+        <!-- FOOTER SECTION -->
 
+        <template v-if="user.role === 'Project Manager' || user.role === 'Business Manager'">
             <div>
                 <br />
                 <BaseButton style="margin-right: 10px" @click="router.push({ name: 'projects', query: route.query })"
@@ -370,7 +377,6 @@ const selectKey = ref(1294821749);
 
 const loadingInitialRequest = ref<boolean>(false);
 const project = ref<CompleteProject | undefined>();
-const find = projectStore.projects.find((p) => p.id === projectId.value);
 const done = ref<boolean>(false);
 
 const newProject = ref<boolean>(false);
@@ -443,20 +449,6 @@ const jGetter = computed<Record<number, number>>(() => {
 
 const startDate = computed(() => editedProject.value.startDate);
 const endDate = computed(() => editedProject.value.endDate);
-
-if (find === undefined) {
-    newProject.value = true;
-    done.value = true;
-} else {
-    loadingInitialRequest.value = true;
-    getProject(find.code).then((response) => {
-        project.value = rawProjectToProjectComplete(response.data);
-        editedProject.value = rawProjectToProjectComplete(response.data);
-        setTimeout(() => {
-            done.value = true;
-        }, 100);
-    });
-}
 
 const series = computed<number[]>(() => {
     const flatten = cells.value.flatMap((a) => a);
@@ -634,6 +626,7 @@ watch(forecastLineChart, (newValue, oldValue) => {
         eChart.setOption(lineChartOption.value);
     }
 });
+
 watch(lineChartOption, () => {
     if (forecastLineChart.value !== null) {
         const eChart = echarts.getInstanceByDom(forecastLineChart.value);
@@ -642,6 +635,26 @@ watch(lineChartOption, () => {
         }
     }
 });
+
+/**
+ * Initialization
+ */
+
+const find = projectStore.projects.find((p) => p.id === projectId.value);
+
+if (find === undefined) {
+    newProject.value = true;
+    done.value = true;
+} else {
+    loadingInitialRequest.value = true;
+    getProject(find.code).then((response) => {
+        project.value = rawProjectToProjectComplete(response.data);
+        editedProject.value = rawProjectToProjectComplete(response.data);
+        setTimeout(() => {
+            done.value = true;
+        }, 100);
+    });
+}
 </script>
 
 <style>
