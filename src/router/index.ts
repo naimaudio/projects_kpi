@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from "vue-router";
 // Lazy Loading Routes => https://router.vuejs.org/guide/advanced/lazy-loading.html
 const DeclarationView = () => import("@/views/employee/DeclarationView.vue");
 const KPIView = () => import("@/views/project_manager/KPIView.vue");
-const ForecastView = () => import("@/views/project_manager/ForecastView.vue");
 const DataView = () => import("@/views/project_manager/DataView.vue");
 const ProjectsView = () => import("@/views/employee/ProjectsView.vue");
 const ProfileView = () => import("@/views/ProfileView.vue");
@@ -101,12 +100,6 @@ const router = createRouter({
                     path: "/performance_indicators",
                     name: "KPI",
                     component: KPIView,
-                    meta: { minimalAccessRole: "Project Manager" },
-                },
-                {
-                    path: "/forecast",
-                    name: "forecast",
-                    component: ForecastView,
                     meta: { minimalAccessRole: "Project Manager" },
                 },
                 {
