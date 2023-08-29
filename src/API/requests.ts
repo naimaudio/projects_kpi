@@ -326,7 +326,12 @@ export async function putMonthlyHours(
     },
     monthlyHoursItems: MonthlyHoursItem[]
 ): Promise<SimplifiedResponse<MonthlyHours[]>> {
-    const monthlyHours: MonthlyHours[] = [];
+    interface RequestBody {
+        user_id: number;
+        user_name?: string;
+        hours: { project_id: number; hours: number }[];
+    }
+    const monthlyHours: RequestBody[] = [];
     monthlyHoursItems.forEach((mhItem) => {
         const index = monthlyHours.findIndex((val) => {
             val.user_id === mhItem.user_id;
