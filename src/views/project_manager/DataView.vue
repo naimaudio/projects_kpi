@@ -48,7 +48,7 @@ const headers: Header[] = [
 ];
 
 const items = ref<RawDeclarationMinified[]>([]);
-getDeclarationData([247]).then((response) => {
+getDeclarationData([]).then((response) => {
     items.value = response.data;
 });
 const importModal = ref<boolean>(false);
