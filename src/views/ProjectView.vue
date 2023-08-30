@@ -15,6 +15,7 @@
         }}</span>
         <h2>{{ newProject ? "New project" : project?.name }}</h2>
         <p v-if="editedProject?.subCategory === 'ABS'">This project will not be included in KPIs.</p>
+
         <!-- PROJECT PROPERTIES SECTION -->
 
         <h3>Project properties</h3>

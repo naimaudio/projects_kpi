@@ -56,11 +56,12 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <!-- MODALS -->
 
         <ModalComponent v-if="exportsModal" @close="exportsModal = false">
-            <p>Which exports ?</p>
+            <h2>Which exports ?</h2>
             <div style="display: flex; gap: 20px">
-                <BaseButton @click="exportMonthly">Time spend by project with capitalization</BaseButton>
-                <BaseButton>Time spend by sub category with capitalization</BaseButton>
-                <BaseButton>Non capitalized projects</BaseButton>
+                <BaseButton :loading="loadingExportMonthly" @click="exportMonthly">All records</BaseButton>
+                <BaseButton :loading="loadingExportMonthlyReview" @click="exportMonthlyReview"
+                    >Overall review of the month</BaseButton
+                >
             </div>
         </ModalComponent>
         <ModalComponent v-if="refreshConfirmation && selectedDate !== undefined" @close="refreshConfirmation = false">
@@ -167,7 +168,14 @@ import BaseButton from "@/components/base/BaseButton.vue";
 import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
 import { ref, watch, onMounted } from "vue";
 import InputTableItems from "@/components/base/InputTableItems.vue";
-import { getMonthlyHours, putMonthlyHours, postMonthlyHours, getUsers, getExportMonthlyHours } from "@/API/requests";
+import {
+    getMonthlyHours,
+    putMonthlyHours,
+    postMonthlyHours,
+    getUsers,
+    getExportMonthlyHours,
+    getExportMonthlyOverallReview,
+} from "@/API/requests";
 import type { MonthlyHoursItem, Person } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
 import type { MatrixHeader, MatrixHeaderExtended } from "@/typing";
@@ -190,7 +198,8 @@ const items = ref<MonthlyHoursItem[]>([]);
 const modifiedItems = ref<MonthlyHoursItem[]>([]);
 const columnHeaders = ref<MatrixHeaderExtended[]>([]);
 const rowHeaders = ref<MatrixHeader[]>([]);
-
+const loadingExportMonthlyReview = ref<boolean>(false);
+const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
 
@@ -204,11 +213,27 @@ watch(selectedDate, (date) => {
 
 async function exportMonthly() {
     if (selectedDate.value !== undefined) {
+        loadingExportMonthly.value = true;
+
         getExportMonthlyHours(selectedDate.value).then((response) => {
             const link = document.createElement("a");
             link.href = URL.createObjectURL(response.data);
             link.download = "declaration export";
             link.click();
+            loadingExportMonthly.value = false;
+        });
+    }
+}
+
+async function exportMonthlyReview() {
+    if (selectedDate.value !== undefined) {
+        loadingExportMonthlyReview.value = true;
+        getExportMonthlyOverallReview(selectedDate.value).then((response) => {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(response.data);
+            link.download = "declaration export";
+            link.click();
+            loadingExportMonthlyReview.value = false;
         });
     }
 }

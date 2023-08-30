@@ -11,7 +11,6 @@
             "
             >Validate</BaseButton
         >
-        <span>{{ selectedRowsSet }}</span>
     </ModalComponent>
 </template>
 

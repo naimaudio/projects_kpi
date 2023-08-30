@@ -10,18 +10,25 @@ In order to setup a developpement server, you need npm v18 installed, an FastAPI
 ### Environnment variables
 
 
-VITE_AUTHORITY: The Azure Authority URI 
-VITE_REDIRECT_URI: The redirect URI of the application
-VITE_CLIENT_ID: The azure Client Id of the application
-VITE_FAST_API_URI: The fast api endpoint URI
-VITE_ORGANIZATIONS: Names of the organisations working together separated with a space
-SSL_KEY_PATH: SSL Key path for https
-SSL_CERT_PATH: SSL Certificate path for https
-SSL_KEY_PASSPHRASE: If your SSL key is encrypted and need a passphrase, provide it.
+VITE_AUTHORITY=```https://login.microsoftonline.com```/```tenant ID ``` : The Azure Authority URI
+
+The Directory (tenant) ID can be found on the application overview in azure app registrations.
+
+- ```VITE_REDIRECT_URI```: The redirect URI of the application
+- ```VITE_CLIENT_ID```: The azure Client Id of the application
+- ```VITE_FAST_API_URI```: The fast api endpoint URI
+- ```VITE_ORGANIZATIONS='FOCAL NAIM'``` Names of the organisations working together separated with a space.
+Names of the organisations working together separated with a space.
+- ```SSL_KEY_PATH='/certificates/project-kpi.verventaudio.com.key'```: SSL Key path for https
+- ```SSL_CERT_PATH='/certificates/project-kpi.verventaudio.com.cer'```: SSL Certificate path for https
+- ```SSL_KEY_PASSPHRASE```: If your SSL key is encrypted and need a passphrase, provide it.
 
 Those environnement variables can be placed in a .env, or .env.local at the root of the frontend application
 
 ### Certificates
+Pour un server frontend de développement, il est nécessaire d'inclure des certificats et clefs SSL. Ils doivent être placés dans ./certificates
+- certificat: ```./certificates/project-kpi.verventaudio.com.cer```
+- key: ```./certificates/project-kpi.verventaudio.com.key```
 
 ### Install application
 
