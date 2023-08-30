@@ -48,8 +48,65 @@
                 </ComboboxOptions>
             </Combobox>
         </div>
+        <!-- <div v-if="props.display.projects" class="field-with-legend">
+            <span>Projects</span>
+            <Combobox
+                :model-value="projectIds.map((pId) => projectStore.projectCodes[pId])"
+                multiple
+                @update:model-value="(pId) => onProjectsChange(pId)"
+            >
+                <div class="combobox-input-multiple">
+                    <span v-for="pId in projectIds" :key="pId" class="combobox-mulpiple-value">
+                        {{ projectStore.projectCodes[pId] }}
+                    </span>
+                    <input class="reset input style" style="width: max-content; border: none" />
+                </div>
+                <ComboboxInput class="combobox-input" />
+                <ComboboxOptions class="combobox-options">
+                    <ComboboxOption
+                        v-for="project in projectStore.projects"
+                        :key="project.id"
+                        v-slot="{ active, selected }"
+                        class="combobox-option"
+                        :value="project.code"
+                    >
+                        <div style="position: relative; width: 0; height: 0">
+                            <div
+                                v-if="selected"
+                                style="
+                                    display: flex;
+                                    position: absolute;
+                                    height: 16px;
+                                    width: 0;
+                                    top: 6px;
+                                    left: 4px;
+                                    border: #036ac4 solid 2px;
+                                    margin-right: 3px;
+                                    z-index: 1000;
+                                "
+                            ></div>
+                        </div>
+                        <button
+                            class="button-style-reset combobox-button"
+                            :class="{ active: active, selected: selected }"
+                        >
+                            <span style="font-weight: 300">{{ project.name }}</span>
+                            <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px">{{ project.code }}</span>
+                        </button>
+                    </ComboboxOption>
+                </ComboboxOptions>
+            </Combobox>
+        </div> -->
         <div v-if="props.display.period" class="field-with-legend">
-            <span>Period</span>
+            <span
+                ><span>Period</span
+                ><BaseTooltip icon-style="margin-left: 10px; margin-up: 5px"
+                    ><p>
+                        You can select a single month by <br />
+                        clicking twice on the same month.
+                    </p></BaseTooltip
+                ></span
+            >
             <VueDatePicker
                 :model-value="period"
                 range
@@ -80,6 +137,8 @@ import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from "@headl
 import { computed, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
+import BaseTooltip from "./base/BaseTooltip.vue";
+// import { isArray } from "lodash";
 
 const projectStore = useProjectStore();
 const query = ref("");
@@ -90,6 +149,7 @@ const props = withDefaults(
             unit?: boolean;
             period?: boolean;
             project?: boolean;
+            projects?: boolean;
         };
     }>(),
     {
@@ -98,6 +158,7 @@ const props = withDefaults(
             unit: false,
             period: false,
             project: false,
+            projects: false,
         }),
     }
 );
@@ -144,14 +205,33 @@ const period = computed<{ month: number; year: number }[] | undefined>(() => {
         return undefined;
     }
 });
+
 const projectId = computed<undefined | number>(() => {
     const nb = Number(route.query.projectId);
     return isNaN(nb) ? undefined : nb;
 });
 
+// const projectIds = computed<number[]>(() => {
+//     const nbs = route.query.projectIds;
+//     return isArray(nbs)
+//         ? nbs.every((nb) => !isNaN(Number(nb)))
+//             ? nbs.map((n) => Number(n))
+//             : []
+//         : isNaN(Number(nbs))
+//         ? []
+//         : [Number(nbs)];
+// });
+
 function onProjectChange(pCode: string) {
     router.push({ ...route, query: { ...route.query, projectId: projectStore.projectCodeIds[pCode] } });
 }
+
+// function onProjectsChange(pCodes: string[]) {
+//     router.push({
+//         ...route,
+//         query: { ...route.query, projectIds: pCodes.map((pCode) => projectStore.projectCodeIds[pCode]) },
+//     });
+// }
 function onDateRangeChange(period: { month: number; year: number }[] | null) {
     if (period !== null) {
         router.push({
@@ -190,6 +270,7 @@ function onCummulateChange(event: any) {
     justify-content: space-between;
     display: flex;
     gap: 15px;
+    height: fit-content;
 }
 .field-with-legend {
     display: flex;
@@ -248,5 +329,28 @@ function onCummulateChange(event: any) {
 
 .selected {
     background-color: #f5f5f5;
+}
+
+.combobox-mulpiple-value {
+    border: #242424 solid 1px;
+    border-radius: 5px;
+    padding: 3px 5px;
+    background-color: #f5f5f5;
+    margin: auto 0;
+    line-height: 20px;
+}
+
+.combobox-input-multiple {
+    height: 36px;
+    width: 291px;
+    padding: 0px 10px;
+    font-size: 16px;
+    font-family: inherit;
+    border: 1px solid #efefef;
+    border-bottom: 1px solid #929292;
+    border-radius: 3px;
+    outline: none;
+    display: flex;
+    gap: 3px;
 }
 </style>

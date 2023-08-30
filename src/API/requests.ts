@@ -379,3 +379,10 @@ export async function getDeclarationData(projectIds: number[]): Promise<Simplifi
     });
     return { status: response.status, data: await response.json() };
 }
+
+export async function getExportMonthlyHours(date: { year: number; month: number }): Promise<SimplifiedResponse<Blob>> {
+    const response = await fetcher(`${origin}/export_monthly?year=${date.year}&month=${date.month + 1}`, {
+        method: "GET",
+    });
+    return { status: response.status, data: await response.json() };
+}

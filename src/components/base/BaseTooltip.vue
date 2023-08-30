@@ -1,5 +1,5 @@
 <template>
-    <div ref="infoIcon" style="display: inline-block">
+    <div ref="infoIcon" style="display: inline-block" :style="props.iconStyle">
         <InfoOutlineIcon @mouseover="mouseover = true" @mouseleave="mouseover = false" />
     </div>
     <div v-if="mouseover" ref="tooltip" :style="floatingStyles" class="tooltip">
@@ -18,6 +18,7 @@ const { floatingStyles } = useFloating(infoIcon, tooltip, {
     placement: "bottom-end",
     middleware: [offset(0), flip(), shift()],
 });
+const props = defineProps<{ iconStyle?: string }>();
 </script>
 
 <style scoped>

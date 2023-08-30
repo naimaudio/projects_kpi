@@ -118,7 +118,7 @@
                     :auto-apply="true"
                     :enable-time-picker="false"
                 ></VueDatePicker>
-                <span>Capitalization starts</span>
+                <span>Capitalization start</span>
                 <VueDatePicker
                     v-model="editedProject.startCapDate"
                     format="dd/MM/yyyy"
@@ -126,7 +126,7 @@
                     :auto-apply="true"
                     :enable-time-picker="false"
                 ></VueDatePicker>
-                <span>Capitalization ends</span>
+                <span>Capitalization end</span>
                 <VueDatePicker
                     v-model="editedProject.endCapDate"
                     format="dd/MM/yyyy"
@@ -166,9 +166,15 @@
                         >remove forecast</span
                     >
                 </div>
-
                 <div v-if="thereIsForecast">
                     <div id="forecast-line-chart" ref="forecastLineChart"></div>
+                    <h4>
+                        Input forecast (hours)
+                        <BaseTooltip
+                            >You can enter the expected time (in hours) for the project in the table below. The graph
+                            above provides a real-time overview of this data.</BaseTooltip
+                        >
+                    </h4>
                     <InputTableCells
                         :cells="cells"
                         :row-headers="years"
@@ -345,6 +351,7 @@ import * as echarts from "echarts/core";
 import type { ECOption } from "@/main";
 import { range, findLastIndex } from "../utilities/main";
 import dayjs from "dayjs";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -475,6 +482,7 @@ const lineChartOption = computed<ECOption>(() => {
         },
         title: {
             text: "Forecast",
+            subtext: "Time spend, cumulated",
             left: "center",
         },
 
@@ -621,7 +629,7 @@ watch([years, startDate, endDate], ([years, newStartDate, newEndDate], [oldYears
 watch(forecastLineChart, (newValue, oldValue) => {
     if (newValue !== null && oldValue === null) {
         newValue.style.width = "1300px";
-        newValue.style.height = "600px";
+        newValue.style.height = "430px";
         const eChart = echarts.init(forecastLineChart.value);
         eChart.setOption(lineChartOption.value);
     }

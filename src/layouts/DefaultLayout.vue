@@ -15,12 +15,13 @@
                 />
             </div>
             <ProjectManagementSelectors
-                v-if="route.name === 'KPI' || route.name === 'business_kpi'"
+                v-if="route.name === 'KPI' || route.name === 'business_kpi' || route.name === 'data'"
                 :display="{
-                    cummulated: true,
-                    period: true,
+                    cummulated: route.name === 'KPI' || route.name === 'business_kpi',
+                    period: route.name === 'KPI' || route.name === 'business_kpi',
                     project: route.name === 'KPI',
-                    unit: true,
+                    unit: route.name === 'KPI' || route.name === 'business_kpi',
+                    projects: route.name === 'data',
                 }"
             />
             <div>

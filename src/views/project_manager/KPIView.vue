@@ -2,8 +2,13 @@
     <div class="page-container">
         <h1 class="title">KPI</h1>
         <h2 v-if="project !== undefined">
-            <span>{{ project.name }}</span>
-            <span style="font-weight: 400; margin-left: 15px">{{ project.code }}</span>
+            <RouterLink
+                class="project-link"
+                :to="{ name: 'project', query: route.query, params: { projectId: projectId } }"
+            >
+                <span>{{ project.name }}</span>
+                <span style="font-weight: 400; margin-left: 15px">{{ project.code }}</span>
+            </RouterLink>
         </h2>
         <div v-else style="display: flex; align-items: center; gap: 13px">
             <span
@@ -12,6 +17,7 @@
             >
             <img src="@/assets/icons/slightly-smiling-face.png" alt="Slightly Smiling Face" width="60" height="60" />
         </div>
+        <br />
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px">
             <div v-for="(graph, index) in graphsInfo" :key="graph.id">
                 <div
@@ -304,5 +310,13 @@ onMounted(() => {
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
+}
+
+.project-link {
+    text-decoration: none;
+}
+
+.project-link:hover {
+    color: #0078d4;
 }
 </style>

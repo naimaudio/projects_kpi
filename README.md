@@ -23,8 +23,6 @@ Those environnement variables can be placed in a .env, or .env.local at the root
 
 ### Certificates
 
-
-
 ### Install application
 
 ```bash
@@ -134,3 +132,12 @@ It helps to keep the code a bit readabble :
 - Computed
 - Methods
 - Component initialization (onMounted, or plain code, etc...)
+
+### Project data setup
+
+Once the application has been installed, the project database needs to be completed.
+In order to obtain reliable and useful KPIs, it is essential to fill in the projects correctly in the associated project page.
+- Properties: Define the right properties for each project
+- Capitalization: If a project is capitalizable during a given period, it is necessary to define at least the capitalization starts field, but also the capitalization ends field, when the project is no longer capitalizable.
+- Project phase: Enter the dates of project phases.
+- Forecast: Define a project start and end date, so that a complete forecast can be made each month.
