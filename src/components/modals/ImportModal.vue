@@ -1,38 +1,127 @@
 <template>
     <ModalComponent @close="emits('close')">
-        <div id="file-upload-form" class="uploader">
-            <input id="file-upload" type="file" accept="text/csv" @change="onUpload" />
-            <label for="file-upload"
-                ><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>
-                <div id="start">
-                    <i class="fa fa-download" aria-hidden="true"></i>
-                    <div>Select a file or drag here</div>
-                    <div id="notimage" class="hidden">Please select an image</div>
-                    <span id="file-upload-btn" class="btn btn-primary">Select a file</span>
-                </div>
-            </label>
-            <button class="box__button" type="submit">Upload</button>
+        <div class="container">
+            <h2>Declarations Import</h2>
+            <p>Import employee records with the same format as export.</p>
+            <form id="file-upload-form" ref="form" class="uploader">
+                <input id="file-upload" type="file" name="fileUpload" accept="text/csv" @change="fileSelectHandler" />
+
+                <label
+                    id="file-drag"
+                    for="file-upload"
+                    :class="{
+                        hover: fileDraggedOver,
+                    }"
+                    @dragover="fileDragHover"
+                    @dragleave="fileDragHover"
+                    @drop="fileSelectHandler"
+                >
+                    <div v-show="file === undefined" id="start">
+                        <UploadIcon />
+                        <div>Select a file or drag here</div>
+                        <div class="pointer" style="height: fit-content; width: fit-content; margin: 0 auto">
+                            <BaseButton type="button" partly-disabled accent big>Select a file</BaseButton>
+                        </div>
+                    </div>
+                    <div v-show="!greatFile && file !== undefined" id="response">
+                        <div>{{ messages }}</div>
+                        <strong>{{ strongMessages }}</strong>
+                        <BaseButton
+                            style="margin: 45px auto 0 auto; min-width: 100px"
+                            type="button"
+                            :disabled="file === undefined || importLoading"
+                            :loading="importLoading"
+                            accent
+                            big
+                            @click="uploadFile"
+                            >Upload</BaseButton
+                        >
+                    </div>
+                </label>
+            </form>
         </div>
-        <!-- <div v-if="uploading" class="box__uploading">Uploading…</div>
-        <div v-if="success" class="box__success">Done!</div>
-        <div v-if="error" class="box__error">Error! <span></span>.</div> -->
     </ModalComponent>
 </template>
 
 <script setup lang="ts">
 import ModalComponent from "@/components/ModalComponent.vue";
 import { ref } from "vue";
-
-const file = ref<File | undefined>(undefined);
+import UploadIcon from "@/components/icons/UploadIcon.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import { postImportCsv } from "@/API/requests";
+import { useGlobalStore } from "@/stores/globalStore";
+import { initialization } from "@/utilities/initialization";
 const emits = defineEmits<{
     (event: "close"): void;
 }>();
 
-const onUpload = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    file.value = target.files === null ? undefined : target.files[0];
-};
+const globalStore = useGlobalStore();
+
+const fileDraggedOver = ref<boolean>(false);
+const greatFile = ref<boolean>(true);
+const importLoading = ref<boolean>(false);
+const strongMessages = ref<string>("");
+const messages = ref<string>("");
+// File Upload
+//
+
+const form = ref<HTMLFormElement>();
+const file = ref<File | undefined>();
+function fileDragHover(e: Event) {
+    e.stopPropagation();
+    e.preventDefault();
+    fileDraggedOver.value = e.type === "dragover";
+}
+function fileSelectHandler(e: DragEvent) {
+    // Fetch FileList object
+    file.value = ((e.target as HTMLInputElement)?.files || [undefined])[0] || (e.dataTransfer?.files || [undefined])[0];
+
+    // Cancel event and hover styling
+    fileDragHover(e);
+    if (file.value !== undefined) {
+        parseFile(file.value);
+    }
+}
+
+function parseFile(file: File) {
+    strongMessages.value = file.name;
+    let imageName = file.name;
+    let isGood = /\.(?=csv)/gi.test(imageName);
+    if (!isGood) {
+        greatFile.value = true;
+        globalStore.notification.content = "Please provide a csv file";
+        globalStore.notification.type = "FAILURE";
+        globalStore.notification.display = true;
+    } else {
+        greatFile.value = false;
+    }
+}
+
+function uploadFile() {
+    importLoading.value = true;
+    if (file.value !== undefined) {
+        postImportCsv(file.value)
+            .then((response) => {
+                if (response.status === 200) {
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "SUCCESS";
+                    globalStore.notification.content = "Declarations successfully imported";
+                } else {
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "FAILURE";
+                    globalStore.notification.content =
+                        "An error occurred during import, please check that each week declared by the user has a sum of hours equal to 35 hours.";
+                }
+                importLoading.value = false;
+            })
+            .then(() => {
+                initialization();
+                emits("close");
+            });
+    }
+}
 </script>
+
 <style scoped>
 .uploader {
     display: block;
@@ -41,7 +130,10 @@ const onUpload = (event: Event) => {
     width: 100%;
     max-width: 600px;
 }
-#file-upload {
+.container {
+    height: 250px;
+}
+label {
     float: left;
     clear: both;
     width: 100%;
@@ -54,10 +146,10 @@ const onUpload = (event: Event) => {
     user-select: none;
 
     &:hover {
-        border-color: #454cad;
+        border-color: var(--theme);
     }
     &.hover {
-        border: 3px solid #454cad;
+        border: 3px solid var(--theme);
         box-shadow: inset 0 0 0 6px #eee;
 
         #start {
@@ -67,5 +159,76 @@ const onUpload = (event: Event) => {
             }
         }
     }
+}
+
+#start {
+    float: left;
+    clear: both;
+    width: 100%;
+    i.fa {
+        font-size: 50px;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease-in-out;
+    }
+}
+#response {
+    display: flex;
+    flex-direction: column;
+    float: left;
+    clear: both;
+    width: 100%;
+    #messages {
+        margin-bottom: 0.5rem;
+    }
+}
+
+#file-image {
+    display: inline;
+    margin: 0 auto 0.5rem auto;
+    width: auto;
+    height: auto;
+    max-width: 180px;
+}
+
+#notimage {
+    display: block;
+    float: left;
+    clear: both;
+    width: 100%;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+div {
+    margin: 0 0 0.5rem 0;
+    color: #5f6982;
+}
+.btn {
+    display: inline-block;
+    margin: 0.5rem 0.5rem 1rem 0.5rem;
+    clear: both;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    text-transform: initial;
+    border: none;
+    border-radius: 0.2rem;
+    outline: none;
+    padding: 0 1rem;
+    height: 36px;
+    line-height: 36px;
+    color: #fff;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+    background: var(--theme);
+    border-color: var(--theme);
+    cursor: pointer;
+}
+
+.pointer {
+    cursor: pointer;
 }
 </style>

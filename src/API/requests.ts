@@ -21,6 +21,7 @@ import type {
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 
 export const origin = envVariableWithValidation("VITE_FAST_API_URI");
+
 export async function fetcher(
     input: RequestInfo | URL,
     init?: RequestInit | undefined,
@@ -233,7 +234,7 @@ export async function getBufferTable(
 }
 
 export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
-    const response = await fetcher(`${origin}/export-records-csv`);
+    const response = await fetcher(`${origin}/export-records-csv`, { method: "POST" });
     return { status: response.status, data: await response.blob() };
 }
 
@@ -398,4 +399,15 @@ export async function getExportMonthlyOverallReview(date: {
         }
     );
     return { status: response.status, data: await response.blob() };
+}
+
+export async function postImportCsv(file: File): Promise<SimplifiedResponse<Blob>> {
+    const data = new FormData();
+    data.append("file", file);
+
+    const response = await fetcher(`${origin}/import-csv`, {
+        method: "POST",
+        body: data,
+    });
+    return { status: response.status, data: await response.json() };
 }

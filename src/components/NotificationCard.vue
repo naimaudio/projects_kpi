@@ -37,7 +37,7 @@ if (props.lifetime > 0) {
 
 <style scoped>
 .notification-container {
-    z-index: 10;
+    z-index: 100;
     display: flex;
     background-color: #f6f6f6;
     padding: 24px;

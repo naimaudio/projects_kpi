@@ -1,8 +1,14 @@
 <template>
     <button
         class="button"
-        :disabled="props.disabled"
-        :class="{ 'white-button': !props.accent, 'blue-button': props.accent, disabled: props.disabled, big: big }"
+        :disabled="props.disabled || props.partlyDisabled"
+        :class="{
+            'white-button': !props.accent,
+            'blue-button': props.accent,
+            disabled: props.disabled,
+            partlyDisabled: props.partlyDisabled,
+            big: big,
+        }"
     >
         <div class="button-inside">
             <slot name="start">
@@ -20,12 +26,14 @@ const props = withDefaults(
         accent?: boolean;
         loading?: boolean;
         big?: boolean;
+        partlyDisabled?: boolean;
     }>(),
     {
         accent: false,
         disabled: false,
         loading: false,
         big: false,
+        partlyDisabled: false,
     }
 );
 </script>
@@ -77,6 +85,9 @@ const props = withDefaults(
     cursor: not-allowed;
 } */
 
+.partlyDisabled {
+    pointer-events: none;
+}
 .big {
     font-size: 23px;
     line-height: normal;

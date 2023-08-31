@@ -2,7 +2,7 @@
     <div class="page-container">
         <h1 class="title">Data</h1>
         <BaseButton @click="exportCSV">Export Data</BaseButton>
-        <BaseButton disabled @click="importModal = true">Import Data</BaseButton>
+        <BaseButton @click="importModal = true">Import Data</BaseButton>
         <br /><br />
         <BaseTable :headers="headers" :items="items" />
         <ImportModal v-if="importModal" @close="importModal = false"></ImportModal>
