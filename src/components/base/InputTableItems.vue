@@ -71,7 +71,7 @@
                     @keydown.enter="handleFocus('down')"
                     @click="
                         () => {
-                            focused = i * columnHeaders.length + j;
+                            focused = i * props.columnHeaders.length + j;
                         }
                     "
                 />

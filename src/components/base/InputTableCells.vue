@@ -89,23 +89,39 @@ watch(focused, (cellFocused) => {
 
 const inputs = ref<HTMLElement[]>([]);
 function handleFocus(direction: "left" | "right" | "up" | "down") {
+    const currentCell = [
+        Math.floor(focused.value / props.columnHeaders.length),
+        focused.value % props.columnHeaders.length,
+    ];
     if (direction === "left") {
-        if (focused.value % props.columnHeaders.length !== 0) {
+        if (
+            focused.value % props.columnHeaders.length !== 0 &&
+            props.cells[currentCell[0]][currentCell[1] - 1] !== undefined
+        ) {
             focused.value = focused.value - 1;
         }
     }
     if (direction === "right") {
-        if (focused.value % props.columnHeaders.length !== props.columnHeaders.length - 1) {
+        if (
+            focused.value % props.columnHeaders.length !== props.columnHeaders.length - 1 &&
+            props.cells[currentCell[0]][currentCell[1] + 1] !== undefined
+        ) {
             focused.value = focused.value + 1;
         }
     }
     if (direction === "down") {
-        if (focused.value + props.columnHeaders.length < props.rowHeaders.length * props.columnHeaders.length) {
+        if (
+            focused.value + props.columnHeaders.length < props.rowHeaders.length * props.columnHeaders.length &&
+            props.cells[currentCell[0] + 1][currentCell[1]] !== undefined
+        ) {
             focused.value = focused.value + props.columnHeaders.length;
         }
     }
     if (direction === "up") {
-        if (focused.value - props.columnHeaders.length >= 0) {
+        if (
+            focused.value - props.columnHeaders.length >= 0 &&
+            props.cells[currentCell[0] - 1][currentCell[1]] !== undefined
+        ) {
             focused.value = focused.value - props.columnHeaders.length;
         }
     }

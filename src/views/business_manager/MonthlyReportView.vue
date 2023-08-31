@@ -89,6 +89,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <!-- TABLE -->
 
         <InputTableItems
+            :key="inputTableKey"
             :items="
                 items.map((i) => {
                     return {
@@ -202,7 +203,7 @@ const loadingExportMonthlyReview = ref<boolean>(false);
 const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
-
+const inputTableKey = ref(9942154);
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -351,6 +352,7 @@ const changeRows = (projectIds: number[]) => {
     Array.from(projectIdSet).forEach((projectId) => {
         return projectId;
     });
+    inputTableKey.value += 1;
 };
 
 const changeColumns = (userIds: number[]) => {
@@ -387,6 +389,8 @@ const changeColumns = (userIds: number[]) => {
     Array.from(userIdSet).forEach((userId) => {
         return userId;
     });
+
+    inputTableKey.value += 1;
 };
 
 /**
