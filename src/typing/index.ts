@@ -147,6 +147,7 @@ export interface MonthlyHoursItem {
     user_name?: string;
     project_id: number;
     hours: number;
+    domain: domain;
 }
 
 export interface InputItem {
@@ -159,6 +160,7 @@ export interface Person {
     name: string;
     email: string;
     id: number;
+    domain: domain;
 }
 
 export interface RawDeclarationMinified {

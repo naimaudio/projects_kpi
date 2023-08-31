@@ -117,12 +117,20 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                             hours: value,
                             project_id: rowId,
                             user_id: columnId,
+                            domain:
+                                items.find((item) => item.user_id === columnId)?.domain ||
+                                users.find((user) => user.id === columnId)?.domain ||
+                                'General',
                         };
                     } else {
                         modifiedItems.push({
                             hours: value,
                             project_id: rowId,
                             user_id: columnId,
+                            domain:
+                                items.find((item) => item.user_id === columnId)?.domain ||
+                                users.find((user) => user.id === columnId)?.domain ||
+                                'General',
                         });
                     }
                 }
@@ -310,11 +318,16 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                             project_id: val.project_id,
                             name: value.user_name,
                             user_id: value.user_id,
+                            domain: value.domain,
+                            user_name: value.user_name,
                         };
                     });
                 })
             );
             loading.value = false;
+        });
+        getUsers().then((response) => {
+            users.value = response.data;
         });
     }
 }
@@ -334,6 +347,10 @@ const changeRows = (projectIds: number[]) => {
                         project_id: p.id,
                         user_id: user.id,
                         user_name: user.name,
+                        domain:
+                            items.value.find((item) => item.user_id === user.id)?.domain ||
+                            users.value.find((u) => u.id === user.id)?.domain ||
+                            "General",
                     };
                 })
             );
@@ -370,6 +387,10 @@ const changeColumns = (userIds: number[]) => {
                         project_id: project.id,
                         user_id: u.id,
                         user_name: u.name,
+                        domain:
+                            items.value.find((item) => item.user_id === u.id)?.domain ||
+                            users.value.find((user) => user.id === u.id)?.domain ||
+                            "General",
                     };
                 })
             );
@@ -381,7 +402,7 @@ const changeColumns = (userIds: number[]) => {
         if (userIdSetComplete.has(user.id)) {
             columnHeaders.value.push({
                 id: user.id,
-                desc: "",
+                desc: user.domain,
                 name: user.name,
             });
         }

@@ -67,6 +67,12 @@ const options = ref<Record<string, ECOption>>({
             bottom: "3%",
             containLabel: true,
         },
+        toolbox: {
+            feature: {
+                saveAsImage: {},
+                dataView: {},
+            },
+        },
         xAxis: {
             type: "value",
             boundaryGap: [0, 0.01],
@@ -89,6 +95,7 @@ const options = ref<Record<string, ECOption>>({
         toolbox: {
             feature: {
                 saveAsImage: {},
+                dataView: {},
             },
         },
         yAxis: {
@@ -113,18 +120,7 @@ const options = ref<Record<string, ECOption>>({
         toolbox: {
             feature: {
                 saveAsImage: {},
-                dataView: {
-                    optionToContent: function (opt) {
-                        let axisData = (opt.xAxis as { data: string[] }[])[0].data;
-                        let serie = (opt.series as { data: string[] }[])[0].data;
-                        let rows = [["Month", "Value"]];
-                        rows = rows.concat(axisData.map((item, i) => [item, serie[i]]));
-                        let string = "";
-                        rows.forEach((item) => (string += "<p>" + item[0] + "\t" + item[1] + "</p>"));
-                        string += "<button> Click to export</button>";
-                        return string;
-                    },
-                },
+                dataView: {},
             },
         },
         xAxis: {

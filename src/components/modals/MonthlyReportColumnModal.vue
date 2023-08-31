@@ -49,6 +49,12 @@ const headers: Header[] = [
         filterable: false,
         width: "1fr",
     },
+    {
+        id: "domain",
+        name: "Domain",
+        filterable: false,
+        width: "1fr",
+    },
 ];
 
 const selectedColumnsSet = ref<Set<number>>(new Set<number>(props.selectedColumns));

@@ -330,6 +330,7 @@ export async function putMonthlyHours(
     interface RequestBody {
         user_id: number;
         user_name?: string;
+        domain: string;
         hours: { project_id: number; hours: number }[];
     }
     const monthlyHours: RequestBody[] = [];
@@ -343,6 +344,8 @@ export async function putMonthlyHours(
             monthlyHours.push({
                 hours: [{ project_id: mhItem.project_id, hours: mhItem.hours }],
                 user_id: mhItem.user_id,
+                domain: mhItem.domain,
+                user_name: mhItem.user_name,
             });
         }
     });
