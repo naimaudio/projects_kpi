@@ -62,8 +62,6 @@ const greatFile = ref<boolean>(true);
 const importLoading = ref<boolean>(false);
 const strongMessages = ref<string>("");
 const messages = ref<string>("");
-// File Upload
-//
 
 const form = ref<HTMLFormElement>();
 const file = ref<File | undefined>();
@@ -72,9 +70,9 @@ function fileDragHover(e: Event) {
     e.preventDefault();
     fileDraggedOver.value = e.type === "dragover";
 }
-function fileSelectHandler(e: DragEvent) {
-    // Fetch FileList object
-    file.value = ((e.target as HTMLInputElement)?.files || [undefined])[0] || (e.dataTransfer?.files || [undefined])[0];
+function fileSelectHandler(e: Event) {
+    // Fetch File object
+    file.value = ((e.target as HTMLInputElement)?.files || (e as DragEvent).dataTransfer?.files || [undefined])[0];
 
     // Cancel event and hover styling
     fileDragHover(e);
