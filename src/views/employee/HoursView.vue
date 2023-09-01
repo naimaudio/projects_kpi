@@ -170,7 +170,7 @@
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
                         <BaseButton accent :disabled="sumProjectHours != 35" @click="confirmationModal = true">
-                            <span> {{ isNewDeclaration ? "Change declaration" : "Validate" }}</span>
+                            <span> {{ isNewDeclaration ? "Validate" : "Change declaration" }}</span>
                         </BaseButton>
                     </div>
                 </div>
