@@ -80,7 +80,6 @@ export async function getKPI(
     } else if (type === "stackedLine") {
         return {
             series: data.series.map((s) => {
-                console.log(s);
                 return {
                     name: s.name,
                     type: "line",
