@@ -58,7 +58,7 @@ npm run lint
 
 ### Choices made
 
-This frontend has been made the most accurate according to the fluent 2 design system. The first users of this application will be Focal employees, which are fluent with the Microsoft ecosystem.
+This frontend has been made the most accurate according to the fluent 2 design system. The first users of this application will be verventudio employees, which are fluent with the Microsoft ecosystem.
 
 ## Vue concepts
 

@@ -18,6 +18,10 @@ export const phasesRecord: Record<string, string> = {};
 phases.forEach((ph) => {
     phasesRecord[ph.code] = ph.name;
 });
+
+/**
+ * This variable defines the routes accessible in the left pannel of the application depending on the access rôle of the user
+ */
 export const routes_by_access = {
     "Business Manager": [
         {
@@ -48,6 +52,7 @@ export const routes_by_access = {
                 {
                     label: "Projects",
                     link: "projects",
+                    secondaryLinks: ["project"],
                 },
             ],
         },
@@ -94,6 +99,7 @@ export const routes_by_access = {
                 {
                     label: "Projects",
                     link: "projects",
+                    secondaryLinks: ["project"],
                 },
             ],
         },
