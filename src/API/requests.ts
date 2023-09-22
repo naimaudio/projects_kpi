@@ -41,7 +41,7 @@ export async function fetcher(
         const tokenObj = localStorage.getItem(JSON.parse(objKey)["accessToken"]);
         const token = tokenObj === null ? null : JSON.parse(tokenObj).secret;
         if (token === null || token === undefined) {
-            throw Error("Token not found, be sure that the user is authenticated");
+            throw new TypeError("token validation failed");
         }
         if (init !== undefined) {
             updatedOptions.headers = { ...init.headers, Authorization: `Bearer ${token}` };

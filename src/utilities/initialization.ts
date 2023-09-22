@@ -20,7 +20,9 @@ export async function initialization() {
     if (accounts.length === 1) {
         if (userStore.user?.email !== accounts[0].username) {
             await getUser().then((response) => {
-                if (response.status !== 200) {
+                if (response.status === 401) {
+                    throw new TypeError("token verification failed");
+                } else if (response.status !== 200) {
                     throw Error("Initialization failed");
                 } else {
                     const newUser = userFromRaw(response.data);

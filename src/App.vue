@@ -13,15 +13,19 @@
 import { ref } from "vue";
 import ErrorCard from "./components/ErrorCard.vue";
 import { initialization } from "@/utilities/initialization";
+import { useRouter } from "vue-router";
 
 const done = ref(false);
 const noError = ref(true);
-
 initialization()
     .then(() => (done.value = true))
     .catch((error) => {
-        noError.value = false;
-        console.error(error);
+        if (error instanceof TypeError && error.message === "token validation failed") {
+            localStorage.clear();
+            done.value = true;
+        } else {
+            noError.value = false;
+        }
     });
 </script>
 

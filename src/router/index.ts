@@ -136,14 +136,22 @@ router.beforeEach(async (to) => {
         const accounts = msalInstance.getAllAccounts();
         if (accounts.length > 0) {
             if (userStore.user === undefined) {
-                await getUser().then((response) => {
-                    if (response.status === 200) {
-                        userStore.user = userFromRaw(response.data);
-                    } else if (response.status === 401) {
-                        userStore.lastRoute = to;
+                try {
+                    await getUser().then((response) => {
+                        if (response.status === 200) {
+                            userStore.user = userFromRaw(response.data);
+                        } else if (response.status === 401) {
+                            userStore.lastRoute = to;
+                            return router.push({ name: "login" });
+                        }
+                    });
+                } catch (error) {
+                    if (error instanceof TypeError && error.message === "token validation failed") {
+                        localStorage.clear();
                         return router.push({ name: "login" });
                     }
-                });
+                    console.error(error);
+                }
             }
             const role = userStore.userRoleGetter;
 
