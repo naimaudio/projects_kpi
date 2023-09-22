@@ -139,6 +139,9 @@ router.beforeEach(async (to) => {
                 await getUser().then((response) => {
                     if (response.status === 200) {
                         userStore.user = userFromRaw(response.data);
+                    } else if (response.status === 401) {
+                        userStore.lastRoute = to;
+                        return router.push({ name: "login" });
                     }
                 });
             }
