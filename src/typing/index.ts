@@ -11,7 +11,7 @@ export interface MatrixHeader {
 }
 export interface MatrixHeaderExtended {
     name: string;
-    desc: string;
+    desc?: string;
     id: number;
 }
 export interface Preferences {
@@ -138,8 +138,7 @@ export type chartType = "pie" | "line" | "bar" | "nestedPie" | "stackedLine" | "
 export interface MonthlyHours {
     user_id: number;
     user_name?: string;
-    domain: domain;
-    hours: { project_id: number; hours: number }[];
+    hours: { project_id: number; hours: number; domain: domain }[];
 }
 
 export interface MonthlyHoursItem {

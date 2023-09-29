@@ -330,8 +330,7 @@ export async function putMonthlyHours(
     interface RequestBody {
         user_id: number;
         user_name?: string;
-        domain: string;
-        hours: { project_id: number; hours: number }[];
+        hours: { project_id: number; hours: number; domain: string }[];
     }
     const monthlyHours: RequestBody[] = [];
     monthlyHoursItems.forEach((mhItem) => {
@@ -339,12 +338,15 @@ export async function putMonthlyHours(
             val.user_id === mhItem.user_id;
         });
         if (index !== -1) {
-            monthlyHours[index].hours.push({ project_id: mhItem.project_id, hours: mhItem.hours });
+            monthlyHours[index].hours.push({
+                project_id: mhItem.project_id,
+                hours: mhItem.hours,
+                domain: mhItem.domain,
+            });
         } else {
             monthlyHours.push({
-                hours: [{ project_id: mhItem.project_id, hours: mhItem.hours }],
+                hours: [{ project_id: mhItem.project_id, hours: mhItem.hours, domain: mhItem.domain }],
                 user_id: mhItem.user_id,
-                domain: mhItem.domain,
                 user_name: mhItem.user_name,
             });
         }

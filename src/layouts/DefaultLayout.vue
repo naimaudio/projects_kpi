@@ -36,7 +36,7 @@
             <!-- SIDEBAR -->
             <Transition name="sidebar">
                 <div v-if="showSideBar" id="sidebar">
-                    <div class="base-menu" style="padding-top: 28px">
+                    <div class="base-menu" style="padding-top: 28px; overflow-y: auto">
                         <div v-for="routes in routeLinks" :key="routes.label" class="sub-menu">
                             <span class="group-link">{{ routes.label }}</span>
                             <RouterLink
@@ -177,12 +177,12 @@ const showSideBar = ref<boolean>(true);
     flex-direction: column;
     padding-left: 32px;
     padding-right: 28px;
-    gap: 10px;
+    gap: 6px;
 }
 .sub-menu {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 .copyright {

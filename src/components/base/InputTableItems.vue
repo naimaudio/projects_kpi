@@ -11,8 +11,8 @@
             class="table-raw"
             :style="{
                 'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} 150px`;
-                }, '250px '),
+                    return `${str} ${columnHeights}`;
+                }, firstColumnHeight),
             }"
             style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
         >
@@ -21,10 +21,9 @@
                 class="header-cell table-cell"
             ></div>
             <div v-for="header in props.columnHeaders" :key="header.id" class="header-cell table-cell">
-                <span>
-                    <span style="margin-left: 8px">{{ header.name }}<br /></span>
-                    <span style="margin-left: 8px; white-space: pre-line; font-style: italic"> {{ header.desc }}</span>
-                </span>
+                <span style="margin-left: 5px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis">{{
+                    header.name
+                }}</span>
             </div>
         </div>
         <div
@@ -33,8 +32,8 @@
             class="table-raw"
             :style="{
                 'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} 150px`;
-                }, '250px'),
+                    return `${str} ${columnHeights}`;
+                }, firstColumnHeight),
             }"
         >
             <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
@@ -81,8 +80,8 @@
             class="table-raw"
             :style="{
                 'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} 150px`;
-                }, '250px'),
+                    return `${str} ${columnHeights}`;
+                }, firstColumnHeight),
             }"
             style="height: 75px"
         >
@@ -98,6 +97,9 @@
 import type { InputItem, MatrixHeader, MatrixHeaderExtended } from "@/typing";
 import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
+
+const firstColumnHeight: string = "200px";
+const columnHeights: string = "90px";
 
 const props = withDefaults(
     defineProps<{
@@ -215,16 +217,23 @@ const initialCells = computed<number[][]>(() => {
 .header-cell {
     align-items: center;
     gap: 4px;
+    text-align: center;
     height: 66px !important;
+    overflow: hidden;
+    background-color: white;
 }
 
+.header-cell:hover {
+    width: fit-content;
+    overflow: visible;
+    z-index: 1;
+}
 .table-cell {
     padding: 0px 0px;
     height: 44px;
     margin-top: auto;
     margin-bottom: auto;
     display: flex;
-    overflow-y: auto;
     border-right: 1px #e0e0e0 solid;
     border-bottom: 1px #e0e0e0 solid;
 }

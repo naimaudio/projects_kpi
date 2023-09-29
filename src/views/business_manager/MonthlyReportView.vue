@@ -26,7 +26,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 
         <br />
         <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true"
-            >Refresh/reset values</BaseButton
+            >Refresh/reset to declared data</BaseButton
         >
         <MonthlyReportRowModal
             v-if="changeRowsModal"
@@ -306,7 +306,6 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
             for (let i = 0; i < userCount; i++) {
                 columnHeaders.value.push({
                     name: response.data[i].user_name || "",
-                    desc: response.data[i].domain || "",
                     id: response.data[i].user_id,
                 });
             }
@@ -318,7 +317,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                             project_id: val.project_id,
                             name: value.user_name,
                             user_id: value.user_id,
-                            domain: value.domain,
+                            domain: val.domain,
                             user_name: value.user_name,
                         };
                     });
@@ -402,7 +401,6 @@ const changeColumns = (userIds: number[]) => {
         if (userIdSetComplete.has(user.id)) {
             columnHeaders.value.push({
                 id: user.id,
-                desc: user.domain,
                 name: user.name,
             });
         }
