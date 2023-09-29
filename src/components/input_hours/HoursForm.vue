@@ -36,7 +36,7 @@
             </div>
             <fluent-select
                 :value="declaration.domain"
-                @change="(event: ChangeEvent) => emits('update:modelValue','domain', index, Number(event.target.value))"
+                @change="(event: ChangeEvent) => emits('update:modelValue','domain', index, String(event.target.value))"
             >
                 <fluent-option v-for="domain in domains" :key="domain" :value="domain">
                     {{ domain }}

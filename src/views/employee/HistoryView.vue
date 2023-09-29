@@ -19,7 +19,6 @@
     <DeclConfirmationModal
         v-if="currentDeclaration !== undefined"
         :comment="currentDeclaration.comment"
-        :user-id="userStore.userIdGetter"
         :declaration="currentDeclarationData"
         :week-number="currentDeclaration.week"
         :year="currentDeclaration.year"
