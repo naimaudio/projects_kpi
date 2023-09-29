@@ -516,11 +516,6 @@ async function validateDeclaration() {
     font-weight: 600;
 }
 
-.italic {
-    font-size: small;
-    font-style: italic;
-    font-weight: 400;
-}
 fluent-select {
     min-width: 100px;
 }

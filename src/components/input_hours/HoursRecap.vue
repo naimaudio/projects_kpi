@@ -55,10 +55,4 @@ const filteredDeclarations = computed<DeclarationInput[]>(() => props.modelValue
     height: min-content;
     align-self: center;
 }
-
-.italic {
-    font-size: small;
-    font-style: italic;
-    font-weight: 400;
-}
 </style>

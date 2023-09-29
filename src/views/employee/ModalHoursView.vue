@@ -72,7 +72,7 @@ const validation = async () => {
     loading.value = true;
     postBufferTable(props.userId, onGoingDayDeclaration.value, props.day, props.week, props.year).then((response) => {
         if (response.status !== 200) {
-            globalStore.notification.content = "Your daily declaration can't be registered, please contact IT";
+            globalStore.notification.content = "Your Daily Declaration can't be registered, please contact IT";
             globalStore.notification.display = true;
             globalStore.notification.type = "FAILURE";
         } else {

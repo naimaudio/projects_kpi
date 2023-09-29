@@ -34,13 +34,20 @@
                     @change="(event: ChangeEvent) => emits('update:modelValue','hours', index, Number(event.target.value))"
                 />
             </div>
-            <span>{{ declaration.domain }}</span>
+            <fluent-select
+                :value="declaration.domain"
+                @change="(event: ChangeEvent) => emits('update:modelValue','domain', index, Number(event.target.value))"
+            >
+                <fluent-option v-for="domain in domains" :key="domain" :value="domain">
+                    {{ domain }}
+                </fluent-option>
+            </fluent-select>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import type { ChangeEvent, DeclarationInput } from "@/typing";
+import { domains, type ChangeEvent, type DeclarationInput } from "@/typing";
 import DeleteOutlineIcon from "@/components/icons/DeleteOutlineIcon.vue";
 const props = withDefaults(
     defineProps<{
@@ -80,11 +87,5 @@ const emits = defineEmits<{
     flex-direction: column;
     gap: 6px;
     width: 100%;
-}
-
-.italic {
-    font-size: small;
-    font-style: italic;
-    font-weight: 400;
 }
 </style>

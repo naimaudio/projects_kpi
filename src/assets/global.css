@@ -68,7 +68,11 @@
     width: max-content;
 }
 
-
+.italic {
+  font-size: small;
+  font-style: italic;
+  font-weight: 400;
+}
 
 .svg-container {
   display: flex;

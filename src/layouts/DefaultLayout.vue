@@ -1,5 +1,6 @@
 <template>
     <div style="position: absolute; top: 0; bottom: 0; right: 0; left: 0">
+        <!-- HEADER -->
         <div id="headerbar">
             <div style="display: flex; align-items: center; width: var(--sidebar-width)">
                 <PanelExpendIcon v-if="!showSideBar" style="margin-left: 25px" clickable @click="showSideBar = true" />
@@ -32,9 +33,10 @@
             </div>
         </div>
         <div style="display: flex; height: calc(100% - var(--header-height))">
+            <!-- SIDEBAR -->
             <Transition name="sidebar">
                 <div v-if="showSideBar" id="sidebar">
-                    <div class="base-menu">
+                    <div class="base-menu" style="padding-top: 28px">
                         <div v-for="routes in routeLinks" :key="routes.label" class="sub-menu">
                             <span class="group-link">{{ routes.label }}</span>
                             <RouterLink
@@ -51,13 +53,26 @@
                                 {{ label }}
                             </RouterLink>
                         </div>
-                        <br />
+                    </div>
+                    <div>
+                        <div class="divider-soft"></div>
+                        <div class="base-menu" style="padding-top: 12px">
+                            <div class="sub-menu">
+                                <a :href="envVariableWithValidation('VITE_SUPPORT_LINK')" class="base-link-with-icon">
+                                    <PersonFeedbackIcon />
+                                    Need help?
+                                </a>
+                            </div>
+                            <span class="sub-menu copyright">© 2024 VerVent Audio Group </span>
+                        </div>
                     </div>
                 </div>
             </Transition>
+            <!-- MAIN -->
             <div id="main-section">
                 <RouterView />
             </div>
+            <!-- NOTIFICATION -->
             <Transition name="fade">
                 <NotificationCard
                     v-if="globalStore.notification.display"
@@ -83,6 +98,8 @@ import PanelExpendIcon from "@/components/icons/PanelExpendIcon.vue";
 import PanelContractIcon from "@/components/icons/PanelContractIcon.vue";
 import { routes_by_access } from "@/stores/nonReactiveStore";
 import ProjectManagementSelectors from "@/components/ProjectManagementSelectors.vue";
+import { envVariableWithValidation } from "@/utilities/main";
+import PersonFeedbackIcon from "@/components/icons/PersonFeedbackIcon.vue";
 const userStore = useUserStore();
 const globalStore = useGlobalStore();
 const initials = computed<string | undefined>(() =>
@@ -116,6 +133,11 @@ const showSideBar = ref<boolean>(true);
     background-color: white;
     border-right: 1px solid #e6e6e6;
     overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 90px;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
 }
 
 #headerbar {
@@ -151,21 +173,37 @@ const showSideBar = ref<boolean>(true);
     flex-direction: column;
     padding-left: 32px;
     padding-right: 28px;
-    padding-top: 28px;
     gap: 10px;
 }
 .sub-menu {
     display: flex;
     flex-direction: column;
-
     gap: 10px;
 }
+
+.copyright {
+    font-weight: 300;
+    font-size: 12px;
+    color: rgb(110, 119, 129);
+}
+
 .base-links {
     text-decoration: none;
     display: block;
     color: black;
     padding: 6px 20px 6px 20px;
     border-radius: 5px;
+}
+
+.base-link-with-icon {
+    text-decoration: none;
+    display: block;
+    color: black;
+    padding: 6px 10px 6px 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
 }
 
 .group-link {
@@ -176,6 +214,7 @@ const showSideBar = ref<boolean>(true);
 }
 
 .base-links:hover,
+.base-link-with-icon:hover,
 .avatar-container:hover {
     background-color: rgba(138, 153, 168, 0.2);
 }
