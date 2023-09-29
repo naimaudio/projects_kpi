@@ -195,7 +195,8 @@ const initialCells = computed<number[][]>(() => {
             return Array(props.columnHeaders.length).fill(0);
         });
     props.items.forEach((val) => {
-        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = val.value;
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] =
+            val.value + (a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] | 0);
     });
     return a;
 });
