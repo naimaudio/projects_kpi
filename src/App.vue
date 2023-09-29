@@ -3,8 +3,8 @@
         <RouterView v-if="done && noError" />
         <div v-else-if="noError" class="centered"><fluent-progress-ring /></div>
         <ErrorCard v-else-if="!noError" :closable="false" @close="noError = true"
-            >Oh no, there was an error at the initialization, please try to reload page, or contact IT
-            support</ErrorCard
+            >Oh no, there was an error at the initialization, please try to reload page, or
+            <a :href="envVariableWithValidation('VITE_SUPPORT_LINK')" target="_blank"> contact IT support</a></ErrorCard
         >
     </div>
 </template>
@@ -13,7 +13,7 @@
 import { ref } from "vue";
 import ErrorCard from "./components/ErrorCard.vue";
 import { initialization } from "@/utilities/initialization";
-import { useRouter } from "vue-router";
+import { envVariableWithValidation } from "@/utilities/main";
 
 const done = ref(false);
 const noError = ref(true);
