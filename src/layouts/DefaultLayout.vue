@@ -58,7 +58,11 @@
                         <div class="divider-soft"></div>
                         <div class="base-menu" style="padding-top: 12px">
                             <div class="sub-menu">
-                                <a :href="envVariableWithValidation('VITE_SUPPORT_LINK')" class="base-link-with-icon">
+                                <a
+                                    :href="envVariableWithValidation('VITE_SUPPORT_LINK')"
+                                    class="base-link-with-icon"
+                                    target="_blank"
+                                >
                                     <PersonFeedbackIcon />
                                     Need help?
                                 </a>
