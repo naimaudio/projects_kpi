@@ -338,8 +338,8 @@
         <h2>Change project state</h2>
         <p v-if="editedProject.status === 'Active'">
             Employees won't be able to input hours in a frozen or an archived project. An archived project is concidered
-            as closed, and is not intended to be opened again. A frozen project is on an inactive state, and can be
-            reopened later.
+            as closed, and is not intended to be opened again. A frozen project is inactive and can be reopened at a
+            later date.
         </p>
         <p v-if="editedProject.status === 'Active'">Do you want to freeze, or archive the project ?</p>
         <p v-if="editedProject.status === 'Frozen'">Do you want to unfreeze the project?</p>
