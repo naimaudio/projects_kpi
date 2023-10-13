@@ -13,6 +13,13 @@
     padding: 10px 62px;
 }
 
+
+.white-button {
+  background-color: white;
+  color: #242424;
+  border: 1px solid #d1d1d1;
+}
+
 .title {
     font-size: 40px;
     font-weight: 600;
@@ -58,7 +65,15 @@
 .divider-soft {
     border-bottom: 1px #e6e6e6 solid;
     width: 100%;
+}
 
+.frozen-color {
+  background-color: #d6ebe7 ;
+}
+
+
+.archived-color {
+  background-color: #cee8f3 ;
 }
 
 .icon-with-text {

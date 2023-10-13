@@ -33,7 +33,6 @@ import type { Header, DeclRecord, DeclarationInput } from "@/typing";
 import { computed, ref } from "vue";
 import BaseTable from "@/components/base/BaseTable.vue";
 import DeclConfirmationModal from "@/components/modals/DeclConfirmationModal.vue";
-import { useUserStore } from "../../stores/userStore";
 import { useProjectStore } from "../../stores/projectStore";
 
 const commentHeaders: Header[] = [
@@ -41,12 +40,14 @@ const commentHeaders: Header[] = [
         id: "week",
         name: "Week",
         filterable: false,
+        clickable: true,
         width: "1fr",
     },
     {
         id: "year",
         name: "Year",
         filterable: false,
+        clickable: true,
         width: "1fr",
     },
     {
@@ -60,12 +61,12 @@ const commentHeaders: Header[] = [
         id: "comment",
         name: "Comment",
         filterable: false,
+        clickable: true,
         width: "3fr",
     },
 ];
 const projectStore = useProjectStore();
 const declarationStore = useDeclarationStore();
-const userStore = useUserStore();
 
 const currentDeclaration = ref<undefined | DeclRecord>();
 const currentDeclarationData = computed<DeclarationInput[]>(() => {

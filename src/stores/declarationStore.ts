@@ -91,6 +91,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
                 name: project.name,
                 code: project.code,
                 time_spent: 0,
+                status: project.status,
             };
             return displayableProject;
         });

@@ -15,9 +15,21 @@
             <h2>{{ newProject ? "New project" : project?.name }}</h2>
             <BaseButton v-if="!newProject" style="margin-right: 26.8px" @click="changeProjectStatusModal = true">
                 <template #start>
-                    <LockIcon />
+                    <MultipleLockIcon v-if="editedProject.status === 'Active'" />
+                    <SunIcon v-else-if="editedProject.status === 'Frozen'" />
+                    <UnarchiveIcon v-else-if="editedProject.status === 'Closed'" />
                 </template>
-                <template #default> <span>Lock/archive the project</span></template></BaseButton
+                <template #default>
+                    <span>{{
+                        editedProject.status === "Active"
+                            ? "Lock/archive the project"
+                            : editedProject.status === "Closed"
+                            ? "Unarchive project"
+                            : editedProject.status === "Frozen"
+                            ? "Unfreeze project"
+                            : "ERROR : Unknow project status"
+                    }}</span></template
+                ></BaseButton
             >
         </div>
         <p v-if="editedProject?.subCategory === 'ABS'">This project will not be included in KPIs.</p>
@@ -323,7 +335,48 @@
     </div>
     <div v-else class="centered"><fluent-progress-ring /></div>
     <ModalComponent v-if="changeProjectStatusModal" @close="changeProjectStatusModal = false">
-        <span>Do you want to Lock project for modifications, or archive project ?</span>
+        <h2>Change project state</h2>
+        <p v-if="editedProject.status === 'Active'">
+            Employees won't be able to input hours in a locked or an archived project. An archived project is concidered
+            as closed, and is not intended to be opened again. A frozen project is on an inactive state, and can be
+            reopened later.
+        </p>
+        <p v-if="editedProject.status === 'Active'">Do you want to freeze, or archive the project ?</p>
+        <p v-if="editedProject.status === 'Frozen'">Do you want to unfreeze the project?</p>
+        <p v-if="editedProject.status === 'Closed'">Do you want to unarchive the project?</p>
+        <BaseButton
+            v-if="editedProject.status === 'Active'"
+            class="frozen-color"
+            style="margin-right: 26.8px"
+            @click="changeState('Frozen')"
+        >
+            <template #start>
+                <SnowIcon />
+            </template>
+            <template #default> <span>Freeze project</span></template>
+        </BaseButton>
+        <BaseButton
+            v-if="editedProject.status === 'Active'"
+            class="archived-color"
+            style="margin-right: 26.8px"
+            @click="changeState('Active')"
+        >
+            <template #start>
+                <ArchiveIcon />
+            </template>
+            <template #default> <span>Archive project</span></template>
+        </BaseButton>
+        <BaseButton
+            v-if="editedProject.status !== 'Active'"
+            style="margin-right: 26.8px"
+            @click="changeState('Active')"
+        >
+            <template #start>
+                <SunIcon v-if="editedProject.status === 'Frozen'" />
+                <UnarchiveIcon v-if="editedProject.status === 'Closed'" />
+            </template>
+            <template #default> <span>Confirm</span></template>
+        </BaseButton>
     </ModalComponent>
 </template>
 
@@ -343,6 +396,7 @@ import {
     expansionRenewalLabels,
     expansionRenewalArray,
     type ProjectMonthlyInformationItem,
+    type ProjectStatus,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { phases } from "@/stores/nonReactiveStore";
@@ -351,7 +405,7 @@ import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
 import type { User } from "@/typing/index";
 import { organizationNames } from "@/stores/nonReactiveStore";
-import { getProject, postProject, updateProject } from "@/API/requests";
+import { getProject, postProject, updateProject, putProjectState } from "@/API/requests";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
 import SubtractOutlineIcon from "@/components/icons/SubtractOutlineIcon.vue";
 import { rawProjectToProjectComplete } from "@/typing/conversions";
@@ -362,8 +416,13 @@ import type { ECOption } from "@/main";
 import { range, findLastIndex } from "../utilities/main";
 import dayjs from "dayjs";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import LockIcon from "@/components/icons/LockIcon.vue";
+import MultipleLockIcon from "@/components/icons/MultipleLockIcon.vue";
+import UnarchiveIcon from "@/components/icons/UnarchiveIcon.vue";
+import ArchiveIcon from "@/components/icons/ArchiveIcon.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
+import SunIcon from "@/components/icons/SunIcon.vue";
+import SnowIcon from "@/components/icons/SnowIcon.vue";
+import { initialization } from "@/utilities/initialization";
 const route = useRoute();
 const router = useRouter();
 const globalStore = useGlobalStore();
@@ -545,6 +604,31 @@ function updateForecast() {
         );
 }
 
+async function changeState(state: ProjectStatus) {
+    if (projectId.value !== undefined) {
+        putProjectState(projectId.value, state)
+            .then((response) => {
+                if (response.status === 200) {
+                    globalStore.notification.content = "Project state successfully updated";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "SUCCESS";
+                    initialization();
+                } else if (response.status === 400 && response.data.detail === "Project code already exists") {
+                    projectCodeValidation.value = "Project code already exists";
+                } else {
+                    globalStore.notification.content = "Oh no, there was an error";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "FAILURE";
+                    close();
+                }
+            })
+            .then(() => projectInit())
+            .then(() => (changeProjectStatusModal.value = false));
+    } else {
+        console.error("Should not happen, can't change a project state, if the project does not exist yet.");
+    }
+}
+
 const clickHandler = () => {
     loading.value = true;
     updateForecast();
@@ -662,22 +746,25 @@ watch(lineChartOption, () => {
 /**
  * Initialization
  */
+function projectInit() {
+    const find = projectStore.projects.find((p) => p.id === projectId.value);
 
-const find = projectStore.projects.find((p) => p.id === projectId.value);
-
-if (find === undefined) {
-    newProject.value = true;
-    done.value = true;
-} else {
-    loadingInitialRequest.value = true;
-    getProject(find.code).then((response) => {
-        project.value = rawProjectToProjectComplete(response.data);
-        editedProject.value = rawProjectToProjectComplete(response.data);
-        setTimeout(() => {
-            done.value = true;
-        }, 100);
-    });
+    if (find === undefined) {
+        newProject.value = true;
+        done.value = true;
+    } else {
+        loadingInitialRequest.value = true;
+        getProject(find.code).then((response) => {
+            project.value = rawProjectToProjectComplete(response.data);
+            editedProject.value = rawProjectToProjectComplete(response.data);
+            setTimeout(() => {
+                done.value = true;
+            }, 100);
+        });
+    }
 }
+
+projectInit();
 </script>
 
 <style>

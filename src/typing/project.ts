@@ -4,6 +4,7 @@ export interface UserProject {
     name: string;
     time_spent: number;
     favorite: boolean;
+    status: ProjectStatus;
 }
 
 export const divisions = ["ALL", "HOME", "PRO", "HEADPHONE", "MOTORITIES", "RESEARCH"] as const;

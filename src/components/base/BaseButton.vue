@@ -57,11 +57,6 @@ const props = withDefaults(
     cursor: pointer;
     min-height: 32px;
 }
-.white-button {
-    background-color: white;
-    color: #242424;
-    border: 1px solid #d1d1d1;
-}
 
 .white-button:hover:not(.disabled) {
     background-color: #f5f5f5;

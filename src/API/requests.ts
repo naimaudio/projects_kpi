@@ -17,6 +17,7 @@ import type {
     RawProject,
     RawProjectPhasesAndMonthlyInfos,
     RawProjectPhase,
+    ProjectStatus,
 } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 
@@ -272,6 +273,15 @@ export async function updateProject(project: CompleteProject): Promise<Simplifie
     return { status: response.status, data: await response.json() };
 }
 
+export async function putProjectState(projectId: number, status: ProjectStatus) {
+    const response = await fetcher(`${origin}/project/change_state?project_id=${projectId}&status=${status}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return { status: response.status, data: await response.json() };
+}
 export async function postProject(project: Omit<CompleteProject, "id">) {
     interface RequestBody {
         project: Omit<RawProject, "id">;

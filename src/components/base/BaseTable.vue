@@ -29,6 +29,7 @@
         <div
             v-for="cell in displayedItems"
             :key="cell.id"
+            :class="{ 'archived-color': cell.status === 'Closed', 'frozen-color': cell.status === 'Frozen' }"
             class="table-raw"
             :style="{
                 'grid-template-columns':
@@ -75,6 +76,23 @@
                         @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
                     />
                 </span>
+                <span
+                    v-else-if="header.id == 'status' && cell.status !== undefined && typeof cell.status === 'string'"
+                    class="cell-text"
+                >
+                    <ArchiveIcon
+                        v-if="cell.status === 'Closed'"
+                        clickable
+                        :checked="cell.favorite"
+                        @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
+                    />
+                    <SnowIcon
+                        v-if="cell.status === 'Frozen'"
+                        clickable
+                        :checked="cell.favorite"
+                        @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
+                    />
+                </span>
                 <span v-else-if="Array.isArray(cell[header.id as keyof T])" class="cell-text">
                     {{ (cell[header.id as keyof T] as string[]).join(", ") }}
                 </span>
@@ -98,7 +116,11 @@
     </div>
 </template>
 
-<script setup lang="ts" generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string}">
+<script
+    setup
+    lang="ts"
+    generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string, status ?: ProjectStatus}"
+>
 import StarOutlineIcon from "@/components/icons/StarOutlineIcon.vue";
 import type { ChangeEvent, Header } from "@/typing";
 import ArrowUpIcon from "@/components/icons/ArrowUpIcon.vue";
@@ -106,6 +128,9 @@ import ArrowDownIcon from "@/components/icons/ArrowDownIcon.vue";
 import PaginationTable from "@/components/PaginationTable.vue";
 import { computed, ref } from "vue";
 import { cloneDeep } from "lodash";
+import SnowIcon from "@/components/icons/SnowIcon.vue";
+import type { ProjectStatus } from "@/typing/project";
+import ArchiveIcon from "../icons/ArchiveIcon.vue";
 interface SortedColumn {
     index: number;
     value: "ASC" | "DESC";

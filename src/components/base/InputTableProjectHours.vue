@@ -17,7 +17,7 @@
             <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="header-cell table-cell">
                 <span> Project Code</span>
             </div>
-            <div style="position: sticky; top: 0px; background-color: white" class="header-cell table-cell">
+            <div style="background-color: white" class="header-cell table-cell">
                 <span :style="{ width: firstColumnWidth, display: 'inline-block' }">Project Name</span>
             </div>
             <div v-for="header in props.columnHeaders" :key="header.id" class="header-cell table-cell">
@@ -37,7 +37,7 @@
             <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
                 {{ rowHeader.code }}
             </div>
-            <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
+            <div style="padding-left: 10px; background-color: white" class="table-cell">
                 {{ rowHeader.name }}
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="table-cell">
