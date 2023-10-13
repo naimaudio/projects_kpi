@@ -28,6 +28,12 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true"
             >Refresh/reset to declared data</BaseButton
         >
+        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
+        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
+        <BaseButton style="margin-left: 15px" @click="exportsModal = true">Exports</BaseButton>
+
+        <!-- MODALS -->
+
         <MonthlyReportRowModal
             v-if="changeRowsModal"
             :selected-rows="
@@ -49,12 +55,6 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             @close="changeColumnsModal = false"
             @change="changeColumns"
         />
-        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
-        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
-        <BaseButton style="margin-left: 15px" @click="exportsModal = true">Exports</BaseButton>
-
-        <!-- MODALS -->
-
         <ModalComponent v-if="exportsModal" @close="exportsModal = false">
             <h2>Which exports ?</h2>
             <div style="display: flex; gap: 20px">
@@ -88,7 +88,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 
         <!-- TABLE -->
 
-        <InputTableItems
+        <InputTableProjectHours
             :key="inputTableKey"
             :items="
                 items.map((i) => {
@@ -176,7 +176,7 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import BaseButton from "@/components/base/BaseButton.vue";
 import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
 import { ref, watch, onMounted } from "vue";
-import InputTableItems from "@/components/base/InputTableItems.vue";
+import InputTableProjectHours from "@/components/base/InputTableProjectHours.vue";
 import {
     getMonthlyHours,
     putMonthlyHours,
@@ -206,7 +206,7 @@ const users = ref<Person[]>([]);
 const items = ref<MonthlyHoursItem[]>([]);
 const modifiedItems = ref<MonthlyHoursItem[]>([]);
 const columnHeaders = ref<MatrixHeaderExtended[]>([]);
-const rowHeaders = ref<MatrixHeader[]>([]);
+const rowHeaders = ref<MatrixHeaderExtended[]>([]);
 const loadingExportMonthlyReview = ref<boolean>(false);
 const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
@@ -298,7 +298,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
             }
             projectStore.projects.forEach((project) => {
                 if (projectIds.has(project.id)) {
-                    rowHeaders.value.push({ name: project.name, id: project.id });
+                    rowHeaders.value.push({ name: project.name, id: project.id, code: project.code });
                 }
             });
 
@@ -362,6 +362,7 @@ const changeRows = (projectIds: number[]) => {
             rowHeaders.value.push({
                 id: p.id,
                 name: p.name,
+                code: p.code,
             });
         }
     });

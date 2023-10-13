@@ -10,16 +10,16 @@
         <div
             class="table-raw"
             :style="{
-                'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} ${columnHeights}`;
-                }, firstColumnHeight),
+                'grid-template-columns': cssGridTemplateColumns,
             }"
             style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
         >
-            <div
-                style="position: sticky; top: 0px; left: -1px; background-color: white"
-                class="header-cell table-cell"
-            ></div>
+            <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="header-cell table-cell">
+                <span> Project Code</span>
+            </div>
+            <div style="position: sticky; top: 0px; background-color: white" class="header-cell table-cell">
+                <span :style="{ width: firstColumnWidth, display: 'inline-block' }">Project Name</span>
+            </div>
             <div v-for="header in props.columnHeaders" :key="header.id" class="header-cell table-cell">
                 <span style="margin-left: 5px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis">{{
                     header.name
@@ -31,11 +31,12 @@
             :key="rowHeader.id"
             class="table-raw"
             :style="{
-                'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} ${columnHeights}`;
-                }, firstColumnHeight),
+                'grid-template-columns': cssGridTemplateColumns,
             }"
         >
+            <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
+                {{ rowHeader.code }}
+            </div>
             <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
                 {{ rowHeader.name }}
             </div>
@@ -79,13 +80,12 @@
         <div
             class="table-raw"
             :style="{
-                'grid-template-columns': props.columnHeaders.reduce((str, header) => {
-                    return `${str} ${columnHeights}`;
-                }, firstColumnHeight),
+                'grid-template-columns': cssGridTemplateColumns,
             }"
             style="height: 75px"
         >
             <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell">Total</span>
+            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
@@ -94,17 +94,17 @@
 </template>
 
 <script setup lang="ts">
-import type { InputItem, MatrixHeader, MatrixHeaderExtended } from "@/typing";
+import type { InputItem, MatrixHeaderExtended } from "@/typing";
 import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
 
-const firstColumnHeight: string = "200px";
-const columnHeights: string = "90px";
+const firstColumnWidth: string = "200px";
+const columnWidths: string = "90px";
 
 const props = withDefaults(
     defineProps<{
         columnHeaders: MatrixHeaderExtended[];
-        rowHeaders: MatrixHeader[];
+        rowHeaders: MatrixHeaderExtended[];
         items: InputItem[];
         modifiedItems?: InputItem[];
     }>(),
@@ -121,7 +121,11 @@ watch(focused, (cellFocused) => {
         inputs.value[cellFocused].focus();
     }
 });
-
+const cssGridTemplateColumns = computed<string>(() => {
+    return props.columnHeaders.reduce((str, header) => {
+        return `${str} ${columnWidths}`;
+    }, `${columnWidths} ${firstColumnWidth}`);
+});
 const inputs = ref<HTMLElement[]>([]);
 function handleFocus(direction: "left" | "right" | "up" | "down") {
     if (direction === "left") {
@@ -225,7 +229,7 @@ const initialCells = computed<number[][]>(() => {
 }
 
 .header-cell:hover {
-    width: fit-content;
+    min-width: fit-content;
     overflow: visible;
     z-index: 1;
 }

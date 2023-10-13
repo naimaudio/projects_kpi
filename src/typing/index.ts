@@ -12,6 +12,7 @@ export interface MatrixHeader {
 export interface MatrixHeaderExtended {
     name: string;
     desc?: string;
+    code?: string;
     id: number;
 }
 export interface Preferences {
