@@ -359,7 +359,7 @@
             v-if="editedProject.status === 'Active'"
             class="archived-color"
             style="margin-right: 26.8px"
-            @click="changeState('Active')"
+            @click="changeState('Archive')"
         >
             <template #start>
                 <ArchiveIcon />
