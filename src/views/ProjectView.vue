@@ -10,10 +10,16 @@
             Projects
         </button>
         <span>></span>
-        <span class="breadcrumb-item">{{
-            project === undefined || newProject === true ? "New project" : project.name
-        }}</span>
-        <h2>{{ newProject ? "New project" : project?.name }}</h2>
+        <span class="breadcrumb-item">{{ project === undefined || newProject ? "New project" : project.name }}</span>
+        <div class="title-container">
+            <h2>{{ newProject ? "New project" : project?.name }}</h2>
+            <BaseButton v-if="!newProject" style="margin-right: 26.8px" @click="changeProjectStatusModal = true">
+                <template #start>
+                    <LockIcon />
+                </template>
+                <template #default> <span>Lock/archive the project</span></template></BaseButton
+            >
+        </div>
         <p v-if="editedProject?.subCategory === 'ABS'">This project will not be included in KPIs.</p>
 
         <!-- PROJECT PROPERTIES SECTION -->
@@ -156,12 +162,12 @@
                     <span class="prefix align-center italic">add forecast</span>
                 </div>
                 <div v-else class="icon-with-text">
-                    <SubtractOutlineIcon clickable @click="editedProject.forecast.splice(0)" />
+                    <SubtractOutlineIcon clickable @click="editedProject.monthly_informations.splice(0)" />
                     <span
                         class="prefix align-center italic"
                         @click="
                             () => {
-                                editedProject.forecast.splice(0);
+                                editedProject.monthly_informations.splice(0);
                             }
                         "
                         >remove forecast</span
@@ -316,6 +322,9 @@
         <br />
     </div>
     <div v-else class="centered"><fluent-progress-ring /></div>
+    <ModalComponent v-if="changeProjectStatusModal" @close="changeProjectStatusModal = false">
+        <span>Do you want to Lock project for modifications, or archive project ?</span>
+    </ModalComponent>
 </template>
 
 <script setup lang="ts">
@@ -333,7 +342,7 @@ import {
     type CompleteProject,
     expansionRenewalLabels,
     expansionRenewalArray,
-    type ForecastItem,
+    type ProjectMonthlyInformationItem,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { phases } from "@/stores/nonReactiveStore";
@@ -353,7 +362,8 @@ import type { ECOption } from "@/main";
 import { range, findLastIndex } from "../utilities/main";
 import dayjs from "dayjs";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-
+import LockIcon from "@/components/icons/LockIcon.vue";
+import ModalComponent from "@/components/ModalComponent.vue";
 const route = useRoute();
 const router = useRouter();
 const globalStore = useGlobalStore();
@@ -376,6 +386,8 @@ const months: string[] = [
     "December",
 ];
 
+const changeProjectStatusModal = ref(false);
+
 /**
  * Ref properties
  */
@@ -395,7 +407,8 @@ const editedProject = ref<BlankProject>({
     complexity: 0,
     phases: [],
     expansionRenewal: "",
-    forecast: [],
+    monthly_informations: [],
+    status: "Active",
 });
 
 const loading = ref<boolean>(false);
@@ -434,7 +447,7 @@ const user = computed<User>(() => {
     }
 });
 const thereIsForecast = computed<boolean>(() => {
-    return editedProject.value.forecast.length !== 0;
+    return editedProject.value.monthly_informations.length !== 0;
 });
 const projectId = computed<number | undefined>(() => {
     const pId: number = Number(route.params["projectId"]);
@@ -516,13 +529,13 @@ const wholeXAxis = computed(() =>
  */
 
 function updateForecast() {
-    editedProject.value.forecast = cells.value
-        .flatMap<ForecastItem>((cell, i) => {
-            return cell.map<ForecastItem>((item, j) => {
+    editedProject.value.monthly_informations = cells.value
+        .flatMap<ProjectMonthlyInformationItem>((cell, i) => {
+            return cell.map<ProjectMonthlyInformationItem>((item, j) => {
                 return {
                     month: j + 1,
                     year: Number(years.value[i]),
-                    hours: item || 0,
+                    forecast_hours: item || 0,
                 };
             });
         })
@@ -551,6 +564,7 @@ const clickHandler = () => {
             }
         });
     else {
+        editedProject.value.status = "Active";
         postProject(editedProject.value as CompleteProject).then((response) => {
             if (response.status === 200) {
                 globalStore.notification.content = "Project successfully updated";
@@ -620,8 +634,8 @@ watch([years, startDate, endDate], ([years, newStartDate, newEndDate], [oldYears
             cells.value[cells.value.length - 1][11 - i] = undefined;
         }
         if (done.value === false) {
-            editedProject.value.forecast.forEach((forecastItem) => {
-                cells.value[forecastItem.year - Number(years[0])][forecastItem.month - 1] = forecastItem.hours;
+            editedProject.value.monthly_informations.forEach((forecastItem) => {
+                cells.value[forecastItem.year - Number(years[0])][forecastItem.month - 1] = forecastItem.forecast_hours;
             });
         }
     }

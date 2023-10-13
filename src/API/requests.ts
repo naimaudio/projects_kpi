@@ -13,9 +13,9 @@ import type {
 } from "@/typing";
 import type {
     CompleteProject,
-    ForecastItem,
+    ProjectMonthlyInformationItem,
     RawProject,
-    RawProjectPhasesAndForecast,
+    RawProjectPhasesAndMonthlyInfos,
     RawProjectPhase,
 } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
@@ -63,7 +63,7 @@ export async function getProjects(): Promise<SimplifiedResponse<RawProject[]>> {
     return { status: response.status, data: await response.json() };
 }
 
-export async function getProject(projectCode: string): Promise<SimplifiedResponse<RawProjectPhasesAndForecast>> {
+export async function getProject(projectCode: string): Promise<SimplifiedResponse<RawProjectPhasesAndMonthlyInfos>> {
     const response = await fetcher(`${origin}/project?projectcode=${projectCode}`, {
         headers: {
             "Content-Type": "application/json",
@@ -239,7 +239,7 @@ export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
 }
 
 export async function updateProject(project: CompleteProject): Promise<SimplifiedResponse<{ detail: string }>> {
-    interface RequestBody extends RawProjectPhasesAndForecast {}
+    interface RequestBody extends RawProjectPhasesAndMonthlyInfos {}
     const requestBody: RequestBody = {
         project: {
             id: project.id,
@@ -255,11 +255,12 @@ export async function updateProject(project: CompleteProject): Promise<Simplifie
             end_date: project.endDate || null,
             start_cap_date: project.startCapDate || null,
             start_date: project.startDate || null,
+            status: project.status,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
         }),
-        forecasts: project.forecast,
+        monthly_informations: project.monthly_informations,
     };
     const response = await fetcher(`${origin}/project`, {
         method: "PUT",
@@ -275,7 +276,7 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
     interface RequestBody {
         project: Omit<RawProject, "id">;
         phases: RawProjectPhase[];
-        forecasts: ForecastItem[];
+        project_monthly_information: ProjectMonthlyInformationItem[];
     }
     const requestBody: RequestBody = {
         project: {
@@ -291,11 +292,12 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
             end_date: project.endDate || null,
             start_cap_date: project.startCapDate || null,
             start_date: project.startDate || null,
+            status: project.status,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
         }),
-        forecasts: project.forecast,
+        project_monthly_information: project.monthly_informations,
     };
     const response = await fetcher(`${origin}/project`, {
         method: "POST",

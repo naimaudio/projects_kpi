@@ -102,6 +102,7 @@ export interface Project {
     endCapDate?: string;
     startDate?: string;
     endDate?: string;
+    status: ProjectStatus;
 }
 
 export interface RawProject {
@@ -118,6 +119,7 @@ export interface RawProject {
     end_cap_date: string | null;
     start_date: string | null;
     end_date: string | null;
+    status: ProjectStatus;
 }
 
 export interface RawProjectPhase {
@@ -138,16 +140,19 @@ export interface BlankProjectPhase {
     endDate?: string;
 }
 
-export interface RawProjectPhasesAndForecast {
+export interface RawProjectPhasesAndMonthlyInfos {
     project: RawProject;
     phases: RawProjectPhase[];
-    forecasts: ForecastItem[];
+    monthly_informations: ProjectMonthlyInformationItem[];
 }
 
 export interface CompleteProject extends Project {
     phases: ProjectPhase[];
-    forecast: ForecastItem[];
+    monthly_informations: ProjectMonthlyInformationItem[];
 }
+
+export const projectStatus = ["Active", "Frozen", "Closed"] as const;
+export type ProjectStatus = (typeof projectStatus)[number];
 
 export interface BlankProject {
     code?: string;
@@ -159,11 +164,12 @@ export interface BlankProject {
     entity?: string;
     complexity?: number;
     phases: BlankProjectPhase[];
-    forecast: ForecastItem[];
+    monthly_informations: ProjectMonthlyInformationItem[];
     startCapDate?: string;
     endCapDate?: string;
     startDate?: string;
     endDate?: string;
+    status: ProjectStatus;
 }
 
 export interface SelectableUserProject extends UserProject {
@@ -184,11 +190,10 @@ export interface WeekInYearLabeled {
     label?: "error" | "success";
 }
 
-export interface ForecastItem {
+export interface ProjectMonthlyInformationItem {
     project_id?: number;
     month: number;
-
     year: number;
-
-    hours: number;
+    forecast_hours?: number;
+    capitalizable?: boolean;
 }

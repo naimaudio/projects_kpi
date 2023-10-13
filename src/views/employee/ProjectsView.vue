@@ -1,12 +1,13 @@
 <template>
     <div class="page-container">
         <div class="title-container">
-            <div>
+            <div style="margin-left: 26.8px">
                 <span class="title">Projects</span>
             </div>
             <BaseButton
                 v-if="userStore.userRoleGetter === 'Project Manager' || userStore.userRoleGetter === 'Business Manager'"
                 big
+                style="margin-right: 26.8px"
                 @click="router.push({ name: 'newProject', query: route.query })"
             >
                 <template #start>
@@ -72,14 +73,5 @@ function rowClickHandler(id: number) {
     display: block;
     margin-left: auto;
     width: fit-content;
-}
-
-.title-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-    line-height: 52px;
-    margin: 26.8px 0;
 }
 </style>

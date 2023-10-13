@@ -12,7 +12,7 @@ import type {
 import { domains } from "@/typing";
 import type {
     Project,
-    RawProjectPhasesAndForecast,
+    RawProjectPhasesAndMonthlyInfos,
     CompleteProject,
     RawProjectPhase,
     ProjectPhase,
@@ -65,6 +65,7 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             startCapDate: rawProject.start_cap_date === null ? undefined : rawProject.start_cap_date,
             startDate: rawProject.start_date === null ? undefined : rawProject.start_date,
             endDate: rawProject.end_date === null ? undefined : rawProject.end_date,
+            status: rawProject.status,
         };
     });
 }
@@ -139,7 +140,7 @@ export function rawPhasesToPhase(phases: RawProjectPhase[]): ProjectPhase[] {
     });
 }
 
-export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndForecast): CompleteProject {
+export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndMonthlyInfos): CompleteProject {
     return {
         id: projectPack.project.id,
         code: projectPack.project.project_code,
@@ -151,10 +152,11 @@ export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndFore
         name: projectPack.project.project_name,
         subCategory: projectPack.project.sub_category,
         phases: rawPhasesToPhase(projectPack.phases),
-        forecast: projectPack.forecasts,
+        monthly_informations: projectPack.monthly_informations,
         startDate: projectPack.project.start_date || undefined,
         endCapDate: projectPack.project.end_cap_date || undefined,
         endDate: projectPack.project.end_date || undefined,
         startCapDate: projectPack.project.start_cap_date || undefined,
+        status: projectPack.project.status,
     };
 }
