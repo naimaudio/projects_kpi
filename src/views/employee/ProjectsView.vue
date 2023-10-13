@@ -23,9 +23,9 @@
                 >Display archived projects</fluent-checkbox
             >
             <fluent-checkbox
-                :checked="lockedProjectsDisplay"
-                @change="(event: ChangeEvent) => lockedProjectsDisplay = event.target.currentChecked"
-                >Display locked projects</fluent-checkbox
+                :checked="frozenProjectsDisplay"
+                @change="(event: ChangeEvent) => frozenProjectsDisplay = event.target.currentChecked"
+                >Display frozen projects</fluent-checkbox
             >
         </div>
         <div v-if="declarationStore.getUserProjects.length !== 0">
@@ -58,7 +58,7 @@ const route = useRoute();
 const declarationStore = useDeclarationStore();
 const userStore = useUserStore();
 const archivedProjectsDisplay = ref<boolean>(false);
-const lockedProjectsDisplay = ref<boolean>(false);
+const frozenProjectsDisplay = ref<boolean>(false);
 const headers: Header[] = [
     { name: "", id: "status", filterable: false, width: "40px" },
     { name: "Code", id: "code", filterable: false, clickable: true, width: "80px" },
@@ -70,7 +70,7 @@ const items = computed<UserProject[]>(() =>
     declarationStore.getUserProjects.filter((p) => {
         return (
             p.status === "Active" ||
-            (lockedProjectsDisplay.value && !(lockedProjectsDisplay.value && p.status !== "Frozen")) ||
+            (frozenProjectsDisplay.value && !(frozenProjectsDisplay.value && p.status !== "Frozen")) ||
             (archivedProjectsDisplay.value && !(archivedProjectsDisplay.value && p.status !== "Closed"))
         );
     })

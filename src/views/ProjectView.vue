@@ -337,7 +337,7 @@
     <ModalComponent v-if="changeProjectStatusModal" @close="changeProjectStatusModal = false">
         <h2>Change project state</h2>
         <p v-if="editedProject.status === 'Active'">
-            Employees won't be able to input hours in a locked or an archived project. An archived project is concidered
+            Employees won't be able to input hours in a frozen or an archived project. An archived project is concidered
             as closed, and is not intended to be opened again. A frozen project is on an inactive state, and can be
             reopened later.
         </p>
