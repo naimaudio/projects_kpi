@@ -121,7 +121,7 @@
 <script
     setup
     lang="ts"
-    generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string, status ?: ProjectStatus}"
+    generic="T extends {id: number, favorite?: boolean, selected ?: boolean, code ?: string, status ?: ProjectStatus | string}"
 >
 import StarOutlineIcon from "@/components/icons/StarOutlineIcon.vue";
 import type { ChangeEvent, Header } from "@/typing";
