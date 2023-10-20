@@ -1,6 +1,7 @@
 <template>
     <ModalComponent @close="emits('close')">
         <span> Select the users you want to display </span>
+        <BaseButton @click="selectActiveUsers">Select only active users</BaseButton>
         <BaseTable style="width: 100%" :headers="headers" :items="users" @change="change" />
         <BaseButton
             @click="
@@ -50,17 +51,17 @@ const headers: Header[] = [
         width: "1fr",
     },
     {
-        id: "domain",
-        name: "Domain",
+        id: "status",
+        name: "Status",
         filterable: false,
-        width: "1fr",
+        width: "100px",
     },
 ];
 
 const selectedColumnsSet = ref<Set<number>>(new Set<number>(props.selectedColumns));
 const users = computed<Person[]>(() => {
-    return props.users.map((project) => {
-        return { ...project, selected: selectedColumnsSet.value.has(project.id) };
+    return props.users.map((user) => {
+        return { ...user, selected: selectedColumnsSet.value.has(user.id) };
     });
 });
 
@@ -73,4 +74,13 @@ const change = (id: number, field: string, value: string | number | boolean | un
         }
     }
 };
+
+function selectActiveUsers() {
+    selectedColumnsSet.value.clear();
+    users.value.forEach((user) => {
+        if (user.status === "Active") {
+            selectedColumnsSet.value.add(user.id);
+        }
+    });
+}
 </script>

@@ -10,7 +10,9 @@ import type {
     domain,
     Person,
     RawDeclarationMinified,
+    MonthlyReport,
 } from "@/typing";
+import { monthYeartoDate } from "@/typing/conversions";
 import type {
     CompleteProject,
     ProjectMonthlyInformationItem,
@@ -426,5 +428,44 @@ export async function postImportCsv(file: File): Promise<SimplifiedResponse<Blob
         method: "POST",
         body: data,
     });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function getMonthlyReport(date: {
+    year: number;
+    month: number;
+}): Promise<SimplifiedResponse<MonthlyReport>> {
+    const response = await fetcher(`${origin}/monthly_report?year=${date.year}&month=${date.month + 1}`);
+    return { status: response.status, data: await response.json() };
+}
+
+export async function postMonthlyReport(monthlyReport: MonthlyReport): Promise<SimplifiedResponse<MonthlyReport>> {
+    const response = await fetcher(`${origin}/monthly_report`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            month: monthYeartoDate(monthlyReport.month),
+            closed: monthlyReport.closed,
+            sync_date: monthlyReport.sync_date,
+        }),
+    });
+    return { status: response.status, data: await response.json() };
+}
+
+export async function closeOrOpenMonthlyReport(
+    date: {
+        year: number;
+        month: number;
+    },
+    close: boolean
+) {
+    const response = await fetcher(
+        `${origin}/monthly_report?year=${date.year}&month=${date.month + 1}&close=${close}`,
+        {
+            method: "PUT",
+        }
+    );
     return { status: response.status, data: await response.json() };
 }

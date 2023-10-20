@@ -53,7 +53,7 @@ const target = ref(null);
 const projects = declarationStore.getUserProjects;
 const selectionableProjects = ref<SelectableUserProject[]>(
     projects
-        .filter((project) => project.favorite === false)
+        .filter((project) => project.favorite === false && project.status === "Active")
         .map<SelectableUserProject>((project) => {
             return { ...project, selected: false };
         })

@@ -30,6 +30,7 @@ export function userFromRaw(rawUser: RawUser): User {
         id: rawUser.id,
         username: rawUser.username,
         role: stringToRole(rawUser.role),
+        status: rawUser.status,
     };
 }
 export const stringToDomain = (str: string): domain => {
@@ -159,4 +160,8 @@ export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndMont
         startCapDate: projectPack.project.start_cap_date || undefined,
         status: projectPack.project.status,
     };
+}
+
+export function monthYeartoDate(date: { month: number; year: number }) {
+    return `${date.year}-${date.month + 1}-01`;
 }

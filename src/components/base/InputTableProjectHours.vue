@@ -47,8 +47,11 @@
                     type="number"
                     class="input-cell"
                     min="0"
+                    :disabled="props.disabled"
                     style="background-color: #f6f6f6; padding-left: 8px"
-                    :style="{ 'background-color': modifiedCells[i][j] ? '#f6f6f6' : 'white' }"
+                    :style="{
+                        'background-color': modifiedCells[i][j] ? '#f6f6f6' : props.disabled ? '#f3f3f3' : 'white',
+                    }"
                     @change="
                         (e:Event) => {
                             if (Number((e.target as HTMLInputElement).value) === initialCells[i][j]) {
@@ -85,7 +88,7 @@
             style="height: 75px"
         >
             <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell">Total</span>
-            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
+            <span class="total-table-cell"></span>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
@@ -107,6 +110,7 @@ const props = withDefaults(
         rowHeaders: MatrixHeaderExtended[];
         items: InputItem[];
         modifiedItems?: InputItem[];
+        disabled: boolean;
     }>(),
     { modifiedItems: () => [] }
 );

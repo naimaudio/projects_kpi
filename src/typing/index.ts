@@ -103,6 +103,11 @@ export interface DeclRecord {
     projectCodes: string[];
 }
 
+export interface MonthlyReport {
+    sync_date?: Date;
+    closed: boolean;
+    month: { month: number; year: number };
+}
 export interface RawUser {
     date_entrance: string | null;
     domain: string;
@@ -111,6 +116,7 @@ export interface RawUser {
     role: string;
     username: string;
     view: boolean;
+    status: "Active" | "Inactive";
 }
 
 export interface User {
@@ -120,6 +126,7 @@ export interface User {
     firstDeclarationDay: Date;
     domain: domain;
     role: role;
+    status: "Active" | "Inactive";
 }
 
 export interface SimplifiedResponse<T> {
@@ -161,6 +168,7 @@ export interface Person {
     email: string;
     id: number;
     domain: domain;
+    status: "Active" | "Inactive";
 }
 
 export interface RawDeclarationMinified {

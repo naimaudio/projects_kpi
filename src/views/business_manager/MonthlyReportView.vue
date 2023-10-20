@@ -16,21 +16,47 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         <!-- BUTTONS -->
 
         <br />
-        <VueDatePicker
-            v-model="selectedDate"
-            month-picker
-            style="width: 300px"
-            format="MMMM yyyy"
-            :clearable="false"
-        ></VueDatePicker>
-
+        <div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between">
+            <div style="display: flex; flex-direction: row; align-items: center">
+                <VueDatePicker
+                    v-model="selectedDate"
+                    month-picker
+                    style="width: 300px"
+                    format="MMMM yyyy"
+                    :clearable="false"
+                ></VueDatePicker>
+                <span v-if="currentMonthlyReport?.closed" style="font-style: italic; margin-left: 10px">
+                    <div class="icon-with-text" style="align-items: center">
+                        <MultipleLockIcon />
+                        <span>closed</span>
+                    </div>
+                </span>
+                <span v-else style="font-style: italic; margin-left: 10px">
+                    {{
+                        currentMonthlyReport?.sync_date
+                            ? `last sync : ${dayjs(currentMonthlyReport?.sync_date).format("MMMM D, YYYY h:mm A")}`
+                            : ""
+                    }}</span
+                >
+            </div>
+            <BaseButton style="margin-left: 15px" accent @click="closeReportModal = true">
+                <div class="icon-with-text" style="align-items: center">
+                    <UnlockIcon v-if="currentMonthlyReport?.closed" color="white" />
+                    <MultipleLockIcon v-else color="white" />
+                    <span> {{ currentMonthlyReport?.closed ? "Reopen report" : "Close report" }}</span>
+                </div>
+            </BaseButton>
+        </div>
         <br />
-        <BaseButton v-if="selectedDate !== undefined" @click="refreshConfirmation = true"
+        <BaseButton
+            v-if="selectedDate !== undefined"
+            :disabled="currentMonthlyReport?.closed"
+            @click="refreshConfirmation = true"
             >Refresh/reset to declared data</BaseButton
         >
-        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Change rows</BaseButton>
-        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Change columns</BaseButton>
         <BaseButton style="margin-left: 15px" @click="exportsModal = true">Exports</BaseButton>
+        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Projects display</BaseButton>
+        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Users display</BaseButton>
 
         <!-- MODALS -->
 
@@ -80,6 +106,25 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 >Confirm</BaseButton
             >
         </ModalComponent>
+        <ModalComponent v-if="closeReportModal && selectedDate !== undefined" @close="closeReportModal = false">
+            <p>
+                This action will enable data from new declarations to be included in the
+                {{ dayjs((selectedDate.month + 1).toString(), "M").format("MMMM") }} {{ selectedDate.year }} report. It
+                can take some time.
+            </p>
+            <p>Closing a monthly report assure you there will be no unwanted modifications.</p>
+            <BaseButton
+                accent
+                style="margin-left: auto; display: block"
+                @click="closeMonthlyReport(!!!currentMonthlyReport?.closed)"
+            >
+                <div class="icon-with-text" style="align-items: center">
+                    <UnlockIcon v-if="currentMonthlyReport?.closed" color="white" />
+                    <MultipleLockIcon v-else color="white" />
+                    <span> {{ currentMonthlyReport?.closed ? "Reopen report" : "Close monthly report" }}</span>
+                </div>
+            </BaseButton>
+        </ModalComponent>
         <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
             <p>Are you sure of your modifications ?</p>
             <p>Keep in mind changing hours will have no effect in project management KPIs</p>
@@ -99,6 +144,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                     };
                 })
             "
+            :disabled="currentMonthlyReport === undefined || currentMonthlyReport.closed"
             :modified-items="
                 modifiedItems.map((i) => {
                     return {
@@ -184,21 +230,27 @@ import {
     getUsers,
     getExportMonthlyHours,
     getExportMonthlyOverallReview,
+    getMonthlyReport,
+    postMonthlyReport,
+    closeOrOpenMonthlyReport,
 } from "@/API/requests";
-import type { MonthlyHoursItem, Person } from "@/typing";
+import type { MonthlyHoursItem, MonthlyReport, Person } from "@/typing";
 import { useProjectStore } from "../../stores/projectStore";
-import type { MatrixHeader, MatrixHeaderExtended } from "@/typing";
+import type { MatrixHeaderExtended } from "@/typing";
 import ModalComponent from "@/components/ModalComponent.vue";
 import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import MonthlyReportColumnModal from "@/components/modals/MonthlyReportColumnModal.vue";
 import { useGlobalStore } from "@/stores/globalStore";
+import MultipleLockIcon from "@/components/icons/MultipleLockIcon.vue";
+import UnlockIcon from "@/components/icons/UnlockIcon.vue";
 
 const selectedDate = ref<{ month: number; year: number }>();
 const loading = ref<boolean>(false);
 const changeRowsModal = ref<boolean>(false);
 const changeColumnsModal = ref<boolean>(false);
+const closeReportModal = ref<boolean>(false);
 const exportsModal = ref<boolean>(false);
 const refreshConfirmation = ref<boolean>(false);
 const modifyConfirmation = ref<boolean>(false);
@@ -212,6 +264,7 @@ const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
 const inputTableKey = ref(9942154);
+const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -281,53 +334,93 @@ function refreshValues() {
         });
     }
 }
-
+async function closeMonthlyReport(close: boolean) {
+    if (selectedDate.value !== undefined) {
+        await closeOrOpenMonthlyReport(selectedDate.value, close);
+        closeReportModal.value = false;
+        updateReportMonth(selectedDate.value);
+    }
+}
 async function updateReportMonth(date: { month: number; year: number } | undefined) {
     items.value.splice(0);
     columnHeaders.value.splice(0);
     rowHeaders.value.splice(0);
     if (date !== undefined) {
         loading.value = true;
-        await getMonthlyHours(date).then((response) => {
-            const projectIds = new Set<number>();
-            const l = response.data.length;
-            for (let i = 0; i < l; i++) {
-                for (let j = 0; j < response.data[i].hours.length; j++) {
-                    projectIds.add(response.data[i].hours[j].project_id);
-                }
-            }
-            projectStore.projects.forEach((project) => {
-                if (projectIds.has(project.id)) {
-                    rowHeaders.value.push({ name: project.name, id: project.id, code: project.code });
-                }
+        let resp = await getMonthlyReport(date);
+        if (resp.status === 404) {
+            let resp2 = await postMonthlyReport({
+                closed: false,
+                month: date,
             });
+            if (resp2.status === 200) {
+                await updateReportMonth(date);
+                return;
+            }
+        } else {
+            currentMonthlyReport.value = resp.data;
+        }
+        let response = await getMonthlyHours(date);
+        const now = dayjs();
+        const projectIds = new Set<number>();
+        const l = response.data.length;
+        for (let i = 0; i < l; i++) {
+            for (let j = 0; j < response.data[i].hours.length; j++) {
+                projectIds.add(response.data[i].hours[j].project_id);
+            }
+        }
+        projectStore.projects.forEach((project) => {
+            if (projectIds.has(project.id)) {
+                rowHeaders.value.push({ name: project.name, id: project.id, code: project.code });
+            }
+        });
 
-            const userCount = response.data.length;
+        const userCount = response.data.length;
+        if (
+            currentMonthlyReport.value?.closed ||
+            date.year < now.get("year") ||
+            (date.year === now.get("year") && date.month < now.get("month"))
+        ) {
             for (let i = 0; i < userCount; i++) {
                 columnHeaders.value.push({
                     name: response.data[i].user_name || "",
                     id: response.data[i].user_id,
                 });
             }
-            items.value.push(
-                ...response.data.flatMap<MonthlyHoursItem>((value) => {
-                    return value.hours.map<MonthlyHoursItem>((val) => {
-                        return {
-                            hours: val.hours,
-                            project_id: val.project_id,
-                            name: value.user_name,
-                            user_id: value.user_id,
-                            domain: val.domain,
-                            user_name: value.user_name,
-                        };
+        }
+        items.value.push(
+            ...response.data.flatMap<MonthlyHoursItem>((value) => {
+                return value.hours.map<MonthlyHoursItem>((val) => {
+                    return {
+                        hours: val.hours,
+                        project_id: val.project_id,
+                        name: value.user_name,
+                        user_id: value.user_id,
+                        domain: val.domain,
+                        user_name: value.user_name,
+                    };
+                });
+            })
+        );
+        loading.value = false;
+
+        let response2 = await getUsers();
+        users.value = response2.data;
+        if (
+            date !== undefined &&
+            currentMonthlyReport.value !== undefined &&
+            !currentMonthlyReport.value.closed &&
+            (date.year > now.get("year") || (date.year === now.get("year") && date.month >= now.get("month")))
+        ) {
+            users.value.forEach((user) => {
+                if (user.status === "Active") {
+                    columnHeaders.value.push({
+                        name: user.name,
+                        id: user.id,
                     });
-                })
-            );
-            loading.value = false;
-        });
-        getUsers().then((response) => {
-            users.value = response.data;
-        });
+                }
+            });
+        }
     }
 }
 
@@ -421,9 +514,5 @@ onMounted(() => {
         month: new Date().getMonth(),
         year: new Date().getFullYear(),
     };
-});
-
-getUsers().then((response) => {
-    users.value = response.data;
 });
 </script>

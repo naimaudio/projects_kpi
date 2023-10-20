@@ -87,11 +87,13 @@
                         @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
                     />
                     <SnowIcon
-                        v-if="cell.status === 'Frozen'"
+                        v-else-if="cell.status === 'Frozen'"
                         clickable
                         :checked="cell.favorite"
                         @click="emitGlobal<'favorite'>('change', cell.id, 'favorite', !cell.favorite)"
                     />
+                    <span v-else-if="cell.status === 'Active'"></span>
+                    <span v-else>{{ cell.status }}</span>
                 </span>
                 <span v-else-if="Array.isArray(cell[header.id as keyof T])" class="cell-text">
                     {{ (cell[header.id as keyof T] as string[]).join(", ") }}

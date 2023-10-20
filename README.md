@@ -18,6 +18,7 @@ The Directory (tenant) ID can be found on the application overview in azure app 
 - ```VITE_CLIENT_ID```: The azure Client Id of the application
 - ```VITE_FAST_API_URI```: The fast api endpoint URI
 - ```VITE_ORGANIZATIONS='FOCAL NAIM'``` Names of the organisations working together separated with a space.
+- ```VITE_SUPPORT_LINK``` Link to a form for support purposes
 Names of the organisations working together separated with a space.
 - ```SSL_KEY_PATH='/certificates/project-kpi.verventaudio.com.key'```: SSL Key path for https
 - ```SSL_CERT_PATH='/certificates/project-kpi.verventaudio.com.cer'```: SSL Certificate path for https
