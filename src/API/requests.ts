@@ -469,3 +469,13 @@ export async function closeOrOpenMonthlyReport(
     );
     return { status: response.status, data: await response.json() };
 }
+
+export async function getProjectMonthlyInfo(date: {
+    year: number;
+    month: number;
+}): Promise<SimplifiedResponse<ProjectMonthlyInformationItem[]>> {
+    const response = await fetcher(`${origin}/projects/monthly-info?year=${date.year}&month=${date.month + 1}`, {
+        method: "GET",
+    });
+    return { status: response.status, data: await response.json() };
+}

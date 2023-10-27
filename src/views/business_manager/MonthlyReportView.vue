@@ -233,10 +233,10 @@ import {
     getMonthlyReport,
     postMonthlyReport,
     closeOrOpenMonthlyReport,
+    getProjectMonthlyInfo,
 } from "@/API/requests";
-import type { MonthlyHoursItem, MonthlyReport, Person } from "@/typing";
-import { useProjectStore } from "../../stores/projectStore";
-import type { MatrixHeaderExtended } from "@/typing";
+import type { MonthlyHoursItem, MonthlyReport, Person, MatrixHeaderExtended } from "@/typing";
+import { useProjectStore } from "@/stores/projectStore";
 import ModalComponent from "@/components/ModalComponent.vue";
 import MonthlyReportRowModal from "@/components/modals/MonthlyReportRowModal.vue";
 import dayjs from "dayjs";
@@ -245,6 +245,7 @@ import MonthlyReportColumnModal from "@/components/modals/MonthlyReportColumnMod
 import { useGlobalStore } from "@/stores/globalStore";
 import MultipleLockIcon from "@/components/icons/MultipleLockIcon.vue";
 import UnlockIcon from "@/components/icons/UnlockIcon.vue";
+import type { ProjectMatrixHeader, ProjectMonthlyInformationItem } from "@/typing/project";
 
 const selectedDate = ref<{ month: number; year: number }>();
 const loading = ref<boolean>(false);
@@ -258,13 +259,14 @@ const users = ref<Person[]>([]);
 const items = ref<MonthlyHoursItem[]>([]);
 const modifiedItems = ref<MonthlyHoursItem[]>([]);
 const columnHeaders = ref<MatrixHeaderExtended[]>([]);
-const rowHeaders = ref<MatrixHeaderExtended[]>([]);
+const rowHeaders = ref<ProjectMatrixHeader[]>([]);
 const loadingExportMonthlyReview = ref<boolean>(false);
 const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
 const inputTableKey = ref(9942154);
 const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
+const monthlyInfoFromId = ref<Record<number, ProjectMonthlyInformationItem>>({});
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -341,6 +343,7 @@ async function closeMonthlyReport(close: boolean) {
         updateReportMonth(selectedDate.value);
     }
 }
+
 async function updateReportMonth(date: { month: number; year: number } | undefined) {
     items.value.splice(0);
     columnHeaders.value.splice(0);
@@ -369,12 +372,6 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                 projectIds.add(response.data[i].hours[j].project_id);
             }
         }
-        projectStore.projects.forEach((project) => {
-            if (projectIds.has(project.id)) {
-                rowHeaders.value.push({ name: project.name, id: project.id, code: project.code });
-            }
-        });
-
         const userCount = response.data.length;
         if (
             currentMonthlyReport.value?.closed ||
@@ -402,10 +399,38 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                 });
             })
         );
-        loading.value = false;
 
-        let response2 = await getUsers();
-        users.value = response2.data;
+        loading.value = false;
+        let response2 = await getProjectMonthlyInfo(date);
+        response2.data.forEach((infos) => {
+            if (infos.project_id !== undefined) {
+                monthlyInfoFromId.value[infos.project_id] = {
+                    month: infos.month,
+                    year: infos.year,
+                    capitalizable: infos.capitalizable,
+                    forecast_hours: infos.forecast_hours,
+                    project_id: infos.project_id,
+                };
+            }
+        });
+
+        projectStore.projects.forEach((project) => {
+            if (projectIds.has(project.id)) {
+                rowHeaders.value.push({
+                    name: project.name,
+                    id: project.id,
+                    code: project.code,
+                    capitalizable:
+                        monthlyInfoFromId.value[project.id]?.capitalizable === null
+                            ? undefined
+                            : monthlyInfoFromId.value[project.id]?.capitalizable,
+                    status: project.status,
+                });
+            }
+        });
+
+        let response3 = await getUsers();
+        users.value = response3.data;
         if (
             date !== undefined &&
             currentMonthlyReport.value !== undefined &&
@@ -426,83 +451,43 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
 
 const changeRows = (projectIds: number[]) => {
     const projectIdSet = new Set<number>(projectIds);
-    const projectIdSetComplete = new Set<number>(projectIds);
     modifiedItems.value = modifiedItems.value.filter((item) => {
         return projectIdSet.has(item.project_id);
     });
-    rowHeaders.value.forEach((p) => {
-        if (!projectIdSet.has(p.id)) {
-            modifiedItems.value.push(
-                ...columnHeaders.value.map<MonthlyHoursItem>((user) => {
-                    return {
-                        hours: 0,
-                        project_id: p.id,
-                        user_id: user.id,
-                        user_name: user.name,
-                        domain:
-                            items.value.find((item) => item.user_id === user.id)?.domain ||
-                            users.value.find((u) => u.id === user.id)?.domain ||
-                            "General",
-                    };
-                })
-            );
-            projectIdSetComplete.add(p.id);
-        }
-    });
     rowHeaders.value.splice(0);
     projectStore.projects.forEach((p) => {
-        if (projectIdSetComplete.has(p.id)) {
+        if (projectIdSet.has(p.id)) {
             rowHeaders.value.push({
                 id: p.id,
                 name: p.name,
                 code: p.code,
+                status: p.status,
+                capitalizable:
+                    monthlyInfoFromId.value[p.id]?.capitalizable === null
+                        ? undefined
+                        : monthlyInfoFromId.value[p.id]?.capitalizable,
             });
         }
     });
-    Array.from(projectIdSet).forEach((projectId) => {
-        return projectId;
-    });
+    // update the report
     inputTableKey.value += 1;
 };
 
 const changeColumns = (userIds: number[]) => {
     const userIdSet = new Set<number>(userIds);
-    const userIdSetComplete = new Set<number>(userIds);
     modifiedItems.value = modifiedItems.value.filter((item) => {
         return userIdSet.has(item.user_id);
     });
-    columnHeaders.value.forEach((u) => {
-        if (!userIdSet.has(u.id)) {
-            modifiedItems.value.push(
-                ...rowHeaders.value.map<MonthlyHoursItem>((project) => {
-                    return {
-                        hours: 0,
-                        project_id: project.id,
-                        user_id: u.id,
-                        user_name: u.name,
-                        domain:
-                            items.value.find((item) => item.user_id === u.id)?.domain ||
-                            users.value.find((user) => user.id === u.id)?.domain ||
-                            "General",
-                    };
-                })
-            );
-            userIdSetComplete.add(u.id);
-        }
-    });
     columnHeaders.value.splice(0);
     users.value.forEach((user) => {
-        if (userIdSetComplete.has(user.id)) {
+        if (userIdSet.has(user.id)) {
             columnHeaders.value.push({
                 id: user.id,
                 name: user.name,
             });
         }
     });
-    Array.from(userIdSet).forEach((userId) => {
-        return userId;
-    });
-
+    // Update the table of user
     inputTableKey.value += 1;
 };
 

@@ -14,6 +14,12 @@
             }"
             style="position: sticky; top: 0px; padding-top: 10px; background-color: white; z-index: 10"
         >
+            <div style="background-color: white" class="header-cell table-cell">
+                <span>Current Project Status</span>
+            </div>
+            <div style="background-color: white" class="header-cell table-cell">
+                <span style="margin-left: 20px">Capital</span>
+            </div>
             <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="header-cell table-cell">
                 <span> Project Code</span>
             </div>
@@ -34,11 +40,24 @@
                 'grid-template-columns': cssGridTemplateColumns,
             }"
         >
-            <div style="position: sticky; left: -1px; padding-left: 10px; background-color: white" class="table-cell">
-                {{ rowHeader.code }}
+            <div style="background-color: white" class="table-cell">
+                <SnowIcon v-if="rowHeader.status === 'Frozen'" style="margin: auto" />
+                <ArchiveIcon v-else-if="rowHeader.status === 'Closed'" style="margin: auto" />
             </div>
-            <div style="padding-left: 10px; background-color: white" class="table-cell">
-                {{ rowHeader.name }}
+            <div style="background-color: white" class="table-cell">
+                <span style="margin: auto">
+                    {{ rowHeader.capitalizable === undefined ? "N/A" : rowHeader.capitalizable ? "Yes" : "No" }}
+                </span>
+            </div>
+            <div style="position: sticky; left: -1px; background-color: white" class="table-cell">
+                <span style="margin-left: 15px; margin-top: auto; margin-bottom: auto">
+                    {{ rowHeader.code }}
+                </span>
+            </div>
+            <div style="background-color: white" class="table-cell">
+                <span style="margin-left: 10px; margin-top: auto; margin-bottom: auto">
+                    {{ rowHeader.name }}
+                </span>
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="table-cell">
                 <input
@@ -100,6 +119,9 @@
 import type { InputItem, MatrixHeaderExtended } from "@/typing";
 import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
+import SnowIcon from "@/components/icons/SnowIcon.vue";
+import ArchiveIcon from "@/components/icons/ArchiveIcon.vue";
+import type { ProjectMatrixHeader } from "@/typing/project";
 
 const firstColumnWidth: string = "200px";
 const columnWidths: string = "90px";
@@ -107,7 +129,7 @@ const columnWidths: string = "90px";
 const props = withDefaults(
     defineProps<{
         columnHeaders: MatrixHeaderExtended[];
-        rowHeaders: MatrixHeaderExtended[];
+        rowHeaders: ProjectMatrixHeader[];
         items: InputItem[];
         modifiedItems?: InputItem[];
         disabled: boolean;
@@ -128,7 +150,7 @@ watch(focused, (cellFocused) => {
 const cssGridTemplateColumns = computed<string>(() => {
     return props.columnHeaders.reduce((str, header) => {
         return `${str} ${columnWidths}`;
-    }, `${columnWidths} ${firstColumnWidth}`);
+    }, `${columnWidths} ${columnWidths} ${columnWidths} ${firstColumnWidth}`);
 });
 const inputs = ref<HTMLElement[]>([]);
 function handleFocus(direction: "left" | "right" | "up" | "down") {
@@ -202,10 +224,16 @@ const initialCells = computed<number[][]>(() => {
         .map(() => {
             return Array(props.columnHeaders.length).fill(0);
         });
-    props.items.forEach((val) => {
-        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] =
-            val.value + (a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] | 0);
-    });
+    if (a.length !== 0) {
+        props.items
+            .filter(
+                (val) =>
+                    rowIndexGetter.value[val.row_id] < a.length && columnIndexGetter.value[val.column_id] < a[0].length
+            )
+            .forEach((val) => {
+                a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] += val.value;
+            });
+    }
     return a;
 });
 </script>

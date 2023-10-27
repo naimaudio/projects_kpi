@@ -198,3 +198,12 @@ export interface ProjectMonthlyInformationItem {
     forecast_hours?: number;
     capitalizable?: boolean;
 }
+
+export interface ProjectMatrixHeader {
+    name: string;
+    desc?: string;
+    code?: string;
+    status: ProjectStatus;
+    capitalizable: boolean | undefined;
+    id: number;
+}

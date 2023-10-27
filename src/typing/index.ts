@@ -15,6 +15,7 @@ export interface MatrixHeaderExtended {
     code?: string;
     id: number;
 }
+
 export interface Preferences {
     preferedMethod: InputMethod;
 }
