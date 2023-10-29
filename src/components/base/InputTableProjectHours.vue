@@ -44,10 +44,30 @@
                 <SnowIcon v-if="rowHeader.status === 'Frozen'" style="margin: auto" />
                 <ArchiveIcon v-else-if="rowHeader.status === 'Closed'" style="margin: auto" />
             </div>
-            <div style="background-color: white" class="table-cell">
-                <span style="margin: auto">
-                    {{ rowHeader.capitalizable === undefined ? "N/A" : rowHeader.capitalizable ? "Yes" : "No" }}
-                </span>
+            <div style="background-color: white" class="table-cell-select">
+                <fluent-select
+                    ref="capitalizables"
+                    :value="rowHeader.capitalizable === undefined ? 'N/A' : rowHeader.capitalizable ? 'Yes' : 'No'"
+                    style="
+                        min-width: 30px !important;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 0px;
+                        background-color: var(--border-color);
+                    "
+                    @change="
+                        (event: Event) => {
+                            (event.target as HTMLInputElement).value
+                        }
+                    "
+                >
+                    <fluent-option v-for="label in Object.keys(capitalizableOptionToValue)" :key="label">
+                        {{ label }}
+                    </fluent-option>
+                    <span slot="selected-value">{{
+                        rowHeader.capitalizable === undefined ? "N/A" : rowHeader.capitalizable ? "Yes" : "No"
+                    }}</span>
+                </fluent-select>
             </div>
             <div style="position: sticky; left: -1px; background-color: white" class="table-cell">
                 <span style="margin-left: 15px; margin-top: auto; margin-bottom: auto">
@@ -65,12 +85,13 @@
                     :value="cells[i][j] || undefined"
                     type="number"
                     class="input-cell"
+                    :class="{
+                        'modified-cell': modifiedCells[i][j],
+                        'disabled-cell': props.disabled,
+                    }"
                     min="0"
                     :disabled="props.disabled"
-                    style="background-color: #f6f6f6; padding-left: 8px"
-                    :style="{
-                        'background-color': modifiedCells[i][j] ? '#f6f6f6' : props.disabled ? '#f3f3f3' : 'white',
-                    }"
+                    style="padding-left: 8px"
                     @change="
                         (e:Event) => {
                             if (Number((e.target as HTMLInputElement).value) === initialCells[i][j]) {
@@ -128,18 +149,26 @@ import type { ProjectMatrixHeader } from "@/typing/project";
 const firstColumnWidth: string = "200px";
 const columnWidths: string = "90px";
 
+const capitalizableOptionToValue: Record<string, boolean | undefined> = {
+    "N/A": undefined,
+    Yes: true,
+    No: false,
+} as const;
+
 const props = withDefaults(
     defineProps<{
         columnHeaders: MatrixHeaderExtended[];
         rowHeaders: ProjectMatrixHeader[];
         items: InputItem[];
         modifiedItems?: InputItem[];
+        modifiedRawItems?: { project_id: number; type: "capitalizable"; value: boolean | undefined }[];
         disabled: boolean;
     }>(),
-    { modifiedItems: () => [] }
+    { modifiedItems: () => [], modifiedRawItems: () => [] }
 );
 const emit = defineEmits<{
     (e: "change", rowId: number, columnId: number, index: number, value: number): void;
+    (e: "change-row", rowId: number, index: number, capitalizable: boolean | undefined): void;
     (e: "remove", index: number): void;
 }>();
 
@@ -149,12 +178,29 @@ watch(focused, (cellFocused) => {
         inputs.value[cellFocused].focus();
     }
 });
+
+watch(props.modifiedRawItems, (mri) => {
+    mri.forEach((mr) => console.log(mr));
+});
+
 const cssGridTemplateColumns = computed<string>(() => {
     return props.columnHeaders.reduce((str, header) => {
         return `${str} ${columnWidths}`;
     }, `${columnWidths} ${columnWidths} ${columnWidths} ${firstColumnWidth}`);
 });
 const inputs = ref<HTMLElement[]>([]);
+const capitalizables = ref<HTMLElement[]>([]);
+
+// watch(capitalizables, () => {
+//     const item = capitalizables.value[0].querySelector(".control") as HTMLElement | null;
+//     console.log("dododo");
+//     if (item !== null) {
+//         item.style.background = "blue";
+//     } else {
+//         console.log("nanana");
+//     }
+// });
+
 function handleFocus(direction: "left" | "right" | "up" | "down") {
     if (direction === "left") {
         if (focused.value % props.columnHeaders.length !== 0) {
@@ -176,6 +222,12 @@ function handleFocus(direction: "left" | "right" | "up" | "down") {
             focused.value = focused.value - props.columnHeaders.length;
         }
     }
+    const item = capitalizables.value[0].shadowRoot?.querySelector(".control") as HTMLElement | null;
+    if (item !== null) {
+        item.style.background = "blue";
+    } else {
+        console.log("nanana");
+    }
 }
 const columnIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
@@ -192,6 +244,13 @@ const modifiedItemsIndexGetter = computed<Record<string, number>>(() => {
     return rec;
 });
 
+const modifiedRowIndexGetter = computed<Record<string, number>>(() => {
+    const rec: Record<string, number> = {};
+    props.modifiedItems.forEach((item, i) => {
+        rec[`${item.row_id}_${item.column_id}`] = i;
+    });
+    return rec;
+});
 const rowIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
     props.rowHeaders.forEach((col, i) => {
@@ -246,6 +305,16 @@ const initialCells = computed<number[][]>(() => {
     width: fit-content;
 }
 
+fluent-select::part(control) {
+    border-radius: 0;
+    /* background: var(--modified-cell-color); */
+    border: 1px var(--border-color) solid;
+}
+
+.disabled-cell {
+    background-color: var(--disabled-cell-color);
+}
+
 .table-raw {
     display: grid;
     grid-column-gap: 0px;
@@ -254,6 +323,14 @@ const initialCells = computed<number[][]>(() => {
 }
 
 .header-cell {
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    height: 66px !important;
+    overflow: hidden;
+    background-color: white;
+}
+.header-cell-bottomless {
     align-items: center;
     gap: 4px;
     text-align: center;
@@ -276,7 +353,23 @@ const initialCells = computed<number[][]>(() => {
     border-right: 1px #e0e0e0 solid;
     border-bottom: 1px #e0e0e0 solid;
 }
+.table-cell-bottomless {
+    padding: 0px 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    border-right: 1px #e0e0e0 solid;
+}
+.table-cell-select {
+    padding: 0px 0px;
+    height: 45px;
+    display: flex;
+    border-right: 1px #e0e0e0 solid;
+}
 
+.modified-cell {
+    background-color: var(--modified-cell-color);
+}
 .total-table-cell {
     padding: 8px 8px;
     height: 50px;

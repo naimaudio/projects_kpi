@@ -156,6 +156,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             "
             :column-headers="columnHeaders"
             :row-headers="rowHeaders"
+            :modified-raw-items="modifiedRawItems"
             @change="
                 (rowId, columnId, index, value) => {
                     if (index !== undefined) {
@@ -177,6 +178,21 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                                 items.find((item) => item.user_id === columnId)?.domain ||
                                 users.find((user) => user.id === columnId)?.domain ||
                                 'General',
+                        });
+                    }
+                }
+            "
+            @change-row="
+                (rowId, index, capitalizable) => {
+                    if (index !== undefined) {
+                        modifiedRawItems[index] = {
+                            project_id: rowId,
+                            capitalizable: capitalizable,
+                        };
+                    } else {
+                        modifiedRawItems.push({
+                            project_id: rowId,
+                            capitalizable: capitalizable,
                         });
                     }
                 }
@@ -265,6 +281,7 @@ const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
 const inputTableKey = ref(9942154);
+const modifiedRawItems = ref<{ project_id: number; capitalizable: boolean | undefined }[]>([]);
 const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
 const monthlyInfoFromId = ref<Record<number, ProjectMonthlyInformationItem>>({});
 watch(selectedDate, (date) => {
