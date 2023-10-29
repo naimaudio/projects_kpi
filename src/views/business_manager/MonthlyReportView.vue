@@ -401,18 +401,18 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
         );
 
         loading.value = false;
-        let response2 = await getProjectMonthlyInfo(date);
-        response2.data.forEach((infos) => {
-            if (infos.project_id !== undefined) {
-                monthlyInfoFromId.value[infos.project_id] = {
-                    month: infos.month,
-                    year: infos.year,
-                    capitalizable: infos.capitalizable,
-                    forecast_hours: infos.forecast_hours,
-                    project_id: infos.project_id,
-                };
-            }
-        });
+        // let response2 = await getProjectMonthlyInfo(date);
+        // response2.data.forEach((infos) => {
+        //     if (infos.project_id !== undefined) {
+        //         monthlyInfoFromId.value[infos.project_id] = {
+        //             month: infos.month,
+        //             year: infos.year,
+        //             capitalizable: infos.capitalizable,
+        //             forecast_hours: infos.forecast_hours,
+        //             project_id: infos.project_id,
+        //         };
+        //     }
+        // });
 
         projectStore.projects.forEach((project) => {
             if (projectIds.has(project.id)) {
@@ -421,9 +421,21 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                     id: project.id,
                     code: project.code,
                     capitalizable:
-                        monthlyInfoFromId.value[project.id]?.capitalizable === null
-                            ? undefined
-                            : monthlyInfoFromId.value[project.id]?.capitalizable,
+                        project.startCapDate !== undefined &&
+                        project.startCapDate !== null &&
+                        dayjs(project.startCapDate).isBefore(
+                            dayjs(`${date.year}-${date.month + 1}-15`, "YYYY-M-DD"),
+                            "month"
+                        ) &&
+                        (project.endCapDate === null ||
+                            project.endCapDate === undefined ||
+                            dayjs(project.endCapDate, "YYYY-MM-DD").isAfter(
+                                dayjs(`${date.year}-${date.month + 1}-15`, "YYYY-M-DD"),
+                                "month"
+                            )),
+                    // monthlyInfoFromId.value[project.id]?.capitalizable === null
+                    //     ? undefined
+                    //     : monthlyInfoFromId.value[project.id]?.capitalizable,
                     status: project.status,
                 });
             }

@@ -17,8 +17,8 @@
             <div style="background-color: white" class="header-cell table-cell">
                 <span>Current Project Status</span>
             </div>
-            <div style="background-color: white" class="header-cell-bottomless table-cell">
-                <span style="margin: auto; transform: rotate(-30deg)">Capitalizable</span>
+            <div style="background-color: white" class="header-cell table-cell">
+                <span style="transform: rotate(-30deg)">Capitalizable</span>
             </div>
             <div style="position: sticky; top: 0px; left: -1px; background-color: white" class="header-cell table-cell">
                 <span> Project Code</span>
