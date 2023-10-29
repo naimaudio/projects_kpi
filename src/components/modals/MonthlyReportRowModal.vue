@@ -39,6 +39,12 @@ const headers: Header[] = [
         width: "60px",
     },
     {
+        id: "status",
+        name: "Status",
+        filterable: false,
+        width: "70px",
+    },
+    {
         id: "code",
         name: "Project code",
         filterable: false,
