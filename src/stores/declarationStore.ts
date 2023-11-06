@@ -67,10 +67,14 @@ export const useDeclarationStore = defineStore("declaration", () => {
                     projectId: d.projectId,
                 }))
         );
-        return elementaryDeclarationGetter.value.map((elDec) => ({
-            ...elDec,
-            hours: alreadyRegisteredDeclaration.find((dec) => dec.projectId === elDec.projectId)?.hours || 0,
-        }));
+        return elementaryDeclarationGetter.value.map((elDec) => {
+            const declarationGet = alreadyRegisteredDeclaration.find((dec) => dec.projectId === elDec.projectId);
+            return {
+                ...elDec,
+                hours: declarationGet?.hours || 0,
+                domain: declarationGet?.domain || elDec.domain,
+            };
+        });
     }
     const getUserProjects = computed<UserProject[]>(() => {
         const sortedDeclarations = cloneDeep(declarations.value).sort((decl1, decl2) =>
