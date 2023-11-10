@@ -109,7 +109,7 @@
             <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell">Total</span>
             <span class="total-table-cell"></span>
             <span class="total-table-cell"></span>
-            <span class="total-table-cell"></span>
+            <span style="position: sticky; left: 89px; background-color: white" class="total-table-cell"></span>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
             </div>
