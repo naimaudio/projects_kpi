@@ -4,29 +4,38 @@
             <div style="margin-left: 26.8px">
                 <span class="title">Projects</span>
             </div>
-            <BaseButton
-                v-if="userStore.userRoleGetter === 'Project Manager' || userStore.userRoleGetter === 'Business Manager'"
-                big
-                style="margin-right: 26.8px"
-                @click="router.push({ name: 'newProject', query: route.query })"
-            >
-                <template #start>
-                    <AddOutlineIcon big />
-                </template>
-                <template #default> <span>New project</span></template></BaseButton
-            >
         </div>
-        <div style="margin: 9px 0">
-            <fluent-checkbox
-                :checked="archivedProjectsDisplay"
-                @change="(event: ChangeEvent) => archivedProjectsDisplay = event.target.currentChecked"
-                >Display archived projects</fluent-checkbox
-            >
-            <fluent-checkbox
-                :checked="frozenProjectsDisplay"
-                @change="(event: ChangeEvent) => frozenProjectsDisplay = event.target.currentChecked"
-                >Display frozen projects</fluent-checkbox
-            >
+        <div style="margin: 9px 0; display: flex; justify-content: space-between">
+            <span>
+                <fluent-checkbox
+                    :checked="archivedProjectsDisplay"
+                    @change="(event: ChangeEvent) => archivedProjectsDisplay = event.target.currentChecked"
+                    >Display archived projects</fluent-checkbox
+                >
+                <fluent-checkbox
+                    :checked="frozenProjectsDisplay"
+                    @change="(event: ChangeEvent) => frozenProjectsDisplay = event.target.currentChecked"
+                    >Display frozen projects</fluent-checkbox
+                >
+            </span>
+            <span style="display: flex; align-items: center">
+                <BaseButton @click="getXLSX">
+                    <template #start> <BookDatabaseIcon /> Export projects </template>
+                </BaseButton>
+                <BaseButton
+                    v-if="
+                        userStore.userRoleGetter === 'Project Manager' ||
+                        userStore.userRoleGetter === 'Business Manager'
+                    "
+                    style="margin-left: 10px"
+                    @click="router.push({ name: 'newProject', query: route.query })"
+                >
+                    <template #start>
+                        <AddOutlineIcon />
+                    </template>
+                    <template #default> <span style="font-weight: 600">New project</span></template></BaseButton
+                >
+            </span>
         </div>
         <div v-if="declarationStore.getUserProjects.length !== 0">
             <BaseTable :headers="headers" :items="items" clickable-row @change="change" @raw-click="rowClickHandler" />
@@ -50,7 +59,9 @@ import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import BaseButton from "@/components/base/BaseButton.vue";
 import AddOutlineIcon from "@/components/icons/AddOutlineIcon.vue";
+import BookDatabaseIcon from "@/components/icons/BookDatabaseIcon.vue";
 import { computed, ref } from "vue";
+import { getProjectsExport } from "@/API/requests";
 
 const router = useRouter();
 const route = useRoute();
@@ -83,6 +94,14 @@ function change<K extends keyof UserProject>(id: number, field: K, value: UserPr
 }
 function rowClickHandler(id: number) {
     router.push({ name: "project", params: { projectId: id }, query: route.query });
+}
+
+async function getXLSX() {
+    const response = await getProjectsExport();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(response.data);
+    link.download = "projects master list";
+    link.click();
 }
 </script>
 <style>

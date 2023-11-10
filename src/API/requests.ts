@@ -236,7 +236,7 @@ export async function getBufferTable(
     return { status: response.status, data: await response.json() };
 }
 
-export async function getCSVFile(): Promise<SimplifiedResponse<any>> {
+export async function getCSVFile(): Promise<SimplifiedResponse<Blob>> {
     const response = await fetcher(`${origin}/export-records-csv`, { method: "POST" });
     return { status: response.status, data: await response.blob() };
 }
@@ -478,4 +478,11 @@ export async function getProjectMonthlyInfo(date: {
         method: "GET",
     });
     return { status: response.status, data: await response.json() };
+}
+
+export async function getProjectsExport(): Promise<SimplifiedResponse<Blob>> {
+    const response = await fetcher(`${origin}/projects/export`, {
+        method: "GET",
+    });
+    return { status: response.status, data: await response.blob() };
 }
