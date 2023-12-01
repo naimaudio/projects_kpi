@@ -24,6 +24,13 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                     style="width: 300px"
                     format="MMMM yyyy"
                     :clearable="false"
+                    @update:model-value="(month: MonthInYear) => { 
+                        router.push({...route,
+                                query: {
+                                    reportDate: month.month === new Date().getMonth() && month.year === new Date().getFullYear() 
+                                        ? undefined
+                                        : `${month.month}-${month.year}`}})
+                        }"
                 ></VueDatePicker>
                 <span v-if="currentMonthlyReport?.closed" style="font-style: italic; margin-left: 10px">
                     <div class="icon-with-text" style="align-items: center">
@@ -47,6 +54,22 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                 </div>
             </BaseButton>
         </div>
+        <br />
+        <span v-if="selectedDate !== undefined"
+            >From
+            {{
+                getFirstWednesdayOfMonth(selectedDate.year, selectedDate.month + 1)
+                    .subtract(2, "day")
+                    .format("dddd, MMMM D, YYYY")
+            }}
+            to
+            {{
+                getLastWednesdayOfMonth(selectedDate.year, selectedDate.month + 1)
+                    .add(2, "day")
+                    .format("dddd, MMMM D, YYYY")
+            }}.
+        </span>
+        <br />
         <br />
         <BaseButton
             v-if="selectedDate !== undefined"
@@ -156,6 +179,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             "
             :column-headers="columnHeaders"
             :row-headers="rowHeaders"
+            :modified-row-items="modifiedRowItems"
             @change="
                 (rowId, columnId, index, value) => {
                     if (index !== undefined) {
@@ -181,15 +205,35 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                     }
                 }
             "
+            @change-row="
+                (rowId, index, capitalizable) => {
+                    if (index !== undefined) {
+                        modifiedRowItems[index] = {
+                            project_id: rowId,
+                            capitalizable: capitalizable,
+                        };
+                    } else {
+                        modifiedRowItems.push({
+                            project_id: rowId,
+                            capitalizable: capitalizable,
+                        });
+                    }
+                }
+            "
             @remove="
                 (index) => {
                     modifiedItems.splice(index, 1);
                 }
             "
+            @remove-row="
+                (index) => {
+                    modifiedRowItems.splice(index, 1);
+                }
+            "
         />
         <div v-if="columnHeaders.length === 0 && rowHeaders.length === 0 && !loading">
             <p class="big" style="display: flex">
-                No declared or modified hours for this month have been saved.
+                No declared or modified hours for this month have been saved. You can try to refresh the data !
                 <img
                     src="@/assets/icons/thinking_face_3d.png"
                     style="margin-left: 15px"
@@ -205,14 +249,14 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 
     <Teleport to=".global">
         <BaseButton
-            v-if="modifiedItems.length >= 1"
+            v-if="modifiedItems.length >= 1 || modifiedRowItems.length >= 1"
             accent
             style="position: absolute; right: 50px; bottom: 50px; z-index: 13"
             @click="modifyConfirmation = true"
         >
             <div class="icon-with-text" style="align-items: center">
                 <CheckmarkLineIcon />
-                <span> Validate modified hours</span>
+                <span> Validate</span>
             </div>
         </BaseButton>
     </Teleport>
@@ -245,9 +289,13 @@ import MonthlyReportColumnModal from "@/components/modals/MonthlyReportColumnMod
 import { useGlobalStore } from "@/stores/globalStore";
 import MultipleLockIcon from "@/components/icons/MultipleLockIcon.vue";
 import UnlockIcon from "@/components/icons/UnlockIcon.vue";
-import type { ProjectMatrixHeader, ProjectMonthlyInformationItem } from "@/typing/project";
+import type { MonthInYear, ProjectMatrixHeader, ProjectMonthlyInformationItem } from "@/typing/project";
+import { getFirstWednesdayOfMonth, getLastWednesdayOfMonth } from "@/utilities/main";
+import { useRouter, useRoute } from "vue-router";
 
-const selectedDate = ref<{ month: number; year: number }>();
+const route = useRoute();
+const router = useRouter();
+const selectedDate = ref<MonthInYear>();
 const loading = ref<boolean>(false);
 const changeRowsModal = ref<boolean>(false);
 const changeColumnsModal = ref<boolean>(false);
@@ -265,6 +313,7 @@ const loadingExportMonthly = ref<boolean>(false);
 const projectStore = useProjectStore();
 const globalStore = useGlobalStore();
 const inputTableKey = ref(9942154);
+const modifiedRowItems = ref<{ project_id: number; capitalizable: boolean | undefined }[]>([]);
 const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
 const monthlyInfoFromId = ref<Record<number, ProjectMonthlyInformationItem>>({});
 watch(selectedDate, (date) => {
@@ -304,10 +353,9 @@ async function exportMonthlyReview() {
 
 function modifyHours() {
     if (selectedDate.value !== undefined) {
-        putMonthlyHours(selectedDate.value, modifiedItems.value).then((response) => {
+        putMonthlyHours(selectedDate.value, modifiedItems.value, modifiedRowItems.value).then((response) => {
             if (response.status === 200) {
                 updateReportMonth(selectedDate.value);
-                modifiedItems.value.splice(0);
                 globalStore.notification = {
                     content: "Hours succesfully modified",
                     display: true,
@@ -458,6 +506,8 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
                 }
             });
         }
+        modifiedItems.value.splice(0);
+        modifiedRowItems.value.splice(0);
     }
 }
 
@@ -507,9 +557,13 @@ const changeColumns = (userIds: number[]) => {
  * Initialization
  */
 onMounted(() => {
-    selectedDate.value = {
-        month: new Date().getMonth(),
-        year: new Date().getFullYear(),
-    };
+    const date = route.query.reportDate;
+    selectedDate.value =
+        !Array.isArray(date) && date !== null && date !== undefined
+            ? { month: Number(date?.split("-")[0]), year: Number(date?.split("-")[1]) }
+            : {
+                  month: new Date().getMonth(),
+                  year: new Date().getFullYear(),
+              };
 });
 </script>

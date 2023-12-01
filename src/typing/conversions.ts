@@ -17,6 +17,7 @@ import type {
     RawProjectPhase,
     ProjectPhase,
     RawProject,
+    MonthInYear,
 } from "@/typing/project";
 import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
@@ -162,6 +163,6 @@ export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndMont
     };
 }
 
-export function monthYeartoDate(date: { month: number; year: number }) {
+export function monthYeartoDate(date: MonthInYear) {
     return `${date.year}-${date.month + 1}-01`;
 }

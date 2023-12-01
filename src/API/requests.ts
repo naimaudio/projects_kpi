@@ -20,6 +20,8 @@ import type {
     RawProjectPhasesAndMonthlyInfos,
     RawProjectPhase,
     ProjectStatus,
+    IncompleteProjectMonthlyInformationItem,
+    MonthInYear,
 } from "@/typing/project";
 import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
 
@@ -321,10 +323,7 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
     return { status: response.status, data: await response.json() };
 }
 
-export async function getMonthlyHours(date: {
-    year: number;
-    month: number;
-}): Promise<SimplifiedResponse<MonthlyHours[]>> {
+export async function getMonthlyHours(date: MonthInYear): Promise<SimplifiedResponse<MonthlyHours[]>> {
     const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {});
     return { status: response.status, data: await response.json() };
 }
@@ -335,35 +334,45 @@ export async function getUsers(): Promise<SimplifiedResponse<Person[]>> {
 }
 
 export async function putMonthlyHours(
-    date: {
-        year: number;
-        month: number;
-    },
-    monthlyHoursItems: MonthlyHoursItem[]
+    date: MonthInYear,
+    monthlyHoursItems: MonthlyHoursItem[],
+    projectMonthlyInformations: { project_id: number; capitalizable: boolean | undefined }[]
 ): Promise<SimplifiedResponse<MonthlyHours[]>> {
     interface RequestBody {
-        user_id: number;
-        user_name?: string;
-        hours: { project_id: number; hours: number; domain: string }[];
+        hours_items: {
+            user_id: number;
+            user_name?: string;
+            hours: { project_id: number; hours: number; domain: string }[];
+        }[];
+        project_monthly_informations: IncompleteProjectMonthlyInformationItem[];
     }
-    const monthlyHours: RequestBody[] = [];
+    const monthlyHours: RequestBody = {
+        hours_items: [],
+        project_monthly_informations: [],
+    };
     monthlyHoursItems.forEach((mhItem) => {
-        const index = monthlyHours.findIndex((val) => {
+        const index = monthlyHours.hours_items.findIndex((val) => {
             val.user_id === mhItem.user_id;
         });
         if (index !== -1) {
-            monthlyHours[index].hours.push({
+            monthlyHours.hours_items[index].hours.push({
                 project_id: mhItem.project_id,
                 hours: mhItem.hours,
                 domain: mhItem.domain,
             });
         } else {
-            monthlyHours.push({
+            monthlyHours.hours_items.push({
                 hours: [{ project_id: mhItem.project_id, hours: mhItem.hours, domain: mhItem.domain }],
                 user_id: mhItem.user_id,
                 user_name: mhItem.user_name,
             });
         }
+    });
+    projectMonthlyInformations.forEach((mi) => {
+        monthlyHours.project_monthly_informations.push({
+            capitalizable: mi.capitalizable,
+            project_id: mi.project_id,
+        });
     });
     const response = await fetcher(`${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`, {
         method: "PUT",
@@ -375,10 +384,7 @@ export async function putMonthlyHours(
     return { status: response.status, data: await response.json() };
 }
 
-export async function postMonthlyHours(date: {
-    year: number;
-    month: number;
-}): Promise<SimplifiedResponse<MonthlyHours[]>> {
+export async function postMonthlyHours(date: MonthInYear): Promise<SimplifiedResponse<MonthlyHours[]>> {
     const response = await fetcher(
         `${origin}/monthlyhours?year=${date.year}&month=${date.month + 1}`,
         {
@@ -400,17 +406,14 @@ export async function getDeclarationData(projectIds: number[]): Promise<Simplifi
     return { status: response.status, data: await response.json() };
 }
 
-export async function getExportMonthlyHours(date: { year: number; month: number }): Promise<SimplifiedResponse<Blob>> {
+export async function getExportMonthlyHours(date: MonthInYear): Promise<SimplifiedResponse<Blob>> {
     const response = await fetcher(`${origin}/export_monthly?year=${date.year}&month=${date.month + 1}`, {
         method: "GET",
     });
     return { status: response.status, data: await response.blob() };
 }
 
-export async function getExportMonthlyOverallReview(date: {
-    year: number;
-    month: number;
-}): Promise<SimplifiedResponse<Blob>> {
+export async function getExportMonthlyOverallReview(date: MonthInYear): Promise<SimplifiedResponse<Blob>> {
     const response = await fetcher(
         `${origin}/export/monthly_project_capitalization?year=${date.year}&month=${date.month + 1}`,
         {
@@ -431,10 +434,7 @@ export async function postImportCsv(file: File): Promise<SimplifiedResponse<Blob
     return { status: response.status, data: await response.json() };
 }
 
-export async function getMonthlyReport(date: {
-    year: number;
-    month: number;
-}): Promise<SimplifiedResponse<MonthlyReport>> {
+export async function getMonthlyReport(date: MonthInYear): Promise<SimplifiedResponse<MonthlyReport>> {
     const response = await fetcher(`${origin}/monthly_report?year=${date.year}&month=${date.month + 1}`);
     return { status: response.status, data: await response.json() };
 }
@@ -454,13 +454,7 @@ export async function postMonthlyReport(monthlyReport: MonthlyReport): Promise<S
     return { status: response.status, data: await response.json() };
 }
 
-export async function closeOrOpenMonthlyReport(
-    date: {
-        year: number;
-        month: number;
-    },
-    close: boolean
-) {
+export async function closeOrOpenMonthlyReport(date: MonthInYear, close: boolean) {
     const response = await fetcher(
         `${origin}/monthly_report?year=${date.year}&month=${date.month + 1}&close=${close}`,
         {
@@ -470,10 +464,9 @@ export async function closeOrOpenMonthlyReport(
     return { status: response.status, data: await response.json() };
 }
 
-export async function getProjectMonthlyInfo(date: {
-    year: number;
-    month: number;
-}): Promise<SimplifiedResponse<ProjectMonthlyInformationItem[]>> {
+export async function getProjectMonthlyInfo(
+    date: MonthInYear
+): Promise<SimplifiedResponse<ProjectMonthlyInformationItem[]>> {
     const response = await fetcher(`${origin}/projects/monthly-info?year=${date.year}&month=${date.month + 1}`, {
         method: "GET",
     });
