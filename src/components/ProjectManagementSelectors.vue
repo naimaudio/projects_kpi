@@ -136,6 +136,7 @@ import { useProjectStore } from "@/stores/projectStore";
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from "@headlessui/vue";
 import { computed, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { type MonthInYear } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import BaseTooltip from "./base/BaseTooltip.vue";
 // import { isArray } from "lodash";
@@ -194,7 +195,7 @@ const cummulated = computed<string>(() => {
 });
 const router = useRouter();
 const route = useRoute();
-const period = computed<{ month: number; year: number }[] | undefined>(() => {
+const period = computed<MonthInYear[] | undefined>(() => {
     const val = route.query.period;
     if (Array.isArray(val) && val.length === 2 && val.every((v) => v !== null)) {
         return [
@@ -232,7 +233,7 @@ function onProjectChange(pCode: string) {
 //         query: { ...route.query, projectIds: pCodes.map((pCode) => projectStore.projectCodeIds[pCode]) },
 //     });
 // }
-function onDateRangeChange(period: { month: number; year: number }[] | null) {
+function onDateRangeChange(period: MonthInYear[] | null) {
     if (period !== null) {
         router.push({
             ...route,

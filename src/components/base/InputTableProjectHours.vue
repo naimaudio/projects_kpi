@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-deprecated-slot-attribute -->
 <template>
     <div
         v-if="props.columnHeaders.length !== 0"
@@ -46,8 +47,7 @@
             </div>
             <div style="background-color: white" class="table-cell-select">
                 <fluent-select
-                    ref="capitalizables"
-                    :value="rowHeader.capitalizable === undefined ? 'N/A' : rowHeader.capitalizable ? 'Yes' : 'No'"
+                    :value="projectCells[i]"
                     style="
                         min-width: 30px !important;
                         width: 100%;
@@ -55,18 +55,19 @@
                         border-radius: 0px;
                         background-color: var(--border-color);
                     "
+                    :disabled="props.disabled"
+                    :class="{ modified: whichProjectCellsAreModified[i] }"
                     @change="
                         (event: Event) => {
-                            (event.target as HTMLInputElement).value
-                        }
-                    "
+                            if ((event.target as HTMLInputElement).value === initialProjectCells[i]) {
+                                emit('remove-row', modifiedProjectIndexGetter[rowHeader.id]);
+                            } else {
+                             emit('change-row', rowHeader.id, modifiedProjectIndexGetter[rowHeader.id], capitalizableOptionToValue[(event.target as HTMLInputElement).value])
+                        }}"
                 >
                     <fluent-option v-for="label in Object.keys(capitalizableOptionToValue)" :key="label">
                         {{ label }}
                     </fluent-option>
-                    <span slot="selected-value">{{
-                        rowHeader.capitalizable === undefined ? "N/A" : rowHeader.capitalizable ? "Yes" : "No"
-                    }}</span>
                 </fluent-select>
             </div>
             <div style="position: sticky; left: -1px; background-color: white" class="table-cell">
@@ -86,7 +87,7 @@
                     type="number"
                     class="input-cell"
                     :class="{
-                        'modified-cell': modifiedCells[i][j],
+                        'modified-cell': whichCellsAreModified[i][j],
                         'disabled-cell': props.disabled,
                     }"
                     min="0"
@@ -148,7 +149,7 @@ import type { ProjectMatrixHeader } from "@/typing/project";
 
 const firstColumnWidth: string = "200px";
 const columnWidths: string = "90px";
-
+type capitalizableOptions = "N/A" | "Yes" | "No";
 const capitalizableOptionToValue: Record<string, boolean | undefined> = {
     "N/A": undefined,
     Yes: true,
@@ -161,15 +162,16 @@ const props = withDefaults(
         rowHeaders: ProjectMatrixHeader[];
         items: InputItem[];
         modifiedItems?: InputItem[];
-        modifiedRawItems?: { project_id: number; type: "capitalizable"; value: boolean | undefined }[];
+        modifiedRowItems?: { project_id: number; capitalizable: boolean | undefined }[];
         disabled: boolean;
     }>(),
-    { modifiedItems: () => [], modifiedRawItems: () => [] }
+    { modifiedItems: () => [], modifiedRowItems: () => [] }
 );
 const emit = defineEmits<{
     (e: "change", rowId: number, columnId: number, index: number, value: number): void;
     (e: "change-row", rowId: number, index: number, capitalizable: boolean | undefined): void;
     (e: "remove", index: number): void;
+    (e: "remove-row", index: number): void;
 }>();
 
 const focused = ref<number>(0);
@@ -179,7 +181,7 @@ watch(focused, (cellFocused) => {
     }
 });
 
-watch(props.modifiedRawItems, (mri) => {
+watch(props.modifiedRowItems, (mri) => {
     mri.forEach((mr) => console.log(mr));
 });
 
@@ -189,17 +191,6 @@ const cssGridTemplateColumns = computed<string>(() => {
     }, `${columnWidths} ${columnWidths} ${columnWidths} ${firstColumnWidth}`);
 });
 const inputs = ref<HTMLElement[]>([]);
-const capitalizables = ref<HTMLElement[]>([]);
-
-// watch(capitalizables, () => {
-//     const item = capitalizables.value[0].querySelector(".control") as HTMLElement | null;
-//     console.log("dododo");
-//     if (item !== null) {
-//         item.style.background = "blue";
-//     } else {
-//         console.log("nanana");
-//     }
-// });
 
 function handleFocus(direction: "left" | "right" | "up" | "down") {
     if (direction === "left") {
@@ -222,13 +213,8 @@ function handleFocus(direction: "left" | "right" | "up" | "down") {
             focused.value = focused.value - props.columnHeaders.length;
         }
     }
-    const item = capitalizables.value[0].shadowRoot?.querySelector(".control") as HTMLElement | null;
-    if (item !== null) {
-        item.style.background = "blue";
-    } else {
-        console.log("nanana");
-    }
 }
+
 const columnIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
     props.columnHeaders.forEach((col, i) => {
@@ -236,21 +222,7 @@ const columnIndexGetter = computed<Record<number, number>>(() => {
     });
     return rec;
 });
-const modifiedItemsIndexGetter = computed<Record<string, number>>(() => {
-    const rec: Record<string, number> = {};
-    props.modifiedItems.forEach((item, i) => {
-        rec[`${item.row_id}_${item.column_id}`] = i;
-    });
-    return rec;
-});
 
-const modifiedRowIndexGetter = computed<Record<string, number>>(() => {
-    const rec: Record<string, number> = {};
-    props.modifiedItems.forEach((item, i) => {
-        rec[`${item.row_id}_${item.column_id}`] = i;
-    });
-    return rec;
-});
 const rowIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = {};
     props.rowHeaders.forEach((col, i) => {
@@ -259,24 +231,15 @@ const rowIndexGetter = computed<Record<number, number>>(() => {
     return rec;
 });
 
-const cells = computed<number[][]>(() => {
-    const a = cloneDeep(initialCells.value);
-    props.modifiedItems.forEach((val) => {
-        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = val.value;
-    });
-    return a;
-});
+// Computed values for hours modification
 
-const modifiedCells = computed<boolean[][]>(() => {
-    const a = Array(props.rowHeaders.length)
-        .fill(false)
-        .map(() => {
-            return Array(props.columnHeaders.length).fill(false);
-        });
-    props.modifiedItems.forEach((val) => {
-        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = true;
+// Used in modification event
+const modifiedItemsIndexGetter = computed<Record<string, number>>(() => {
+    const rec: Record<string, number> = {};
+    props.modifiedItems.forEach((item, i) => {
+        rec[`${item.row_id}_${item.column_id}`] = i;
     });
-    return a;
+    return rec;
 });
 
 const initialCells = computed<number[][]>(() => {
@@ -297,6 +260,68 @@ const initialCells = computed<number[][]>(() => {
     }
     return a;
 });
+
+const cells = computed<number[][]>(() => {
+    const a = cloneDeep(initialCells.value);
+    props.modifiedItems.forEach((val) => {
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = val.value;
+    });
+    return a;
+});
+
+// used to color cells
+const whichCellsAreModified = computed<boolean[][]>(() => {
+    const a = Array(props.rowHeaders.length)
+        .fill(false)
+        .map(() => {
+            return Array(props.columnHeaders.length).fill(false);
+        });
+    props.modifiedItems.forEach((val) => {
+        a[rowIndexGetter.value[val.row_id]][columnIndexGetter.value[val.column_id]] = true;
+    });
+    return a;
+});
+
+// Computed values for Project informations modification
+
+const modifiedProjectIndexGetter = computed<Record<number, number>>(() => {
+    const rec: Record<string, number> = {};
+    props.modifiedRowItems.forEach((item, i) => {
+        rec[item.project_id] = i;
+    });
+    return rec;
+});
+
+function capitalizableValueToOption(val: boolean | undefined) {
+    return val === undefined ? "N/A" : val ? "Yes" : "No";
+}
+
+const initialProjectCells = computed<capitalizableOptions[]>(() => {
+    const a = Array(props.rowHeaders.length).fill("N/A");
+    if (a.length !== 0) {
+        props.rowHeaders.map((rowHeader) => {
+            a[rowIndexGetter.value[rowHeader.id]] = capitalizableValueToOption(rowHeader.capitalizable);
+        });
+    }
+    return a;
+});
+
+const projectCells = computed<string[]>(() => {
+    const a = cloneDeep(initialProjectCells.value);
+    props.modifiedRowItems.forEach((val) => {
+        a[rowIndexGetter.value[val.project_id]] = capitalizableValueToOption(val.capitalizable);
+    });
+    return a;
+});
+
+// used to color cells
+const whichProjectCellsAreModified = computed<boolean[]>(() => {
+    const a = Array(props.rowHeaders.length).fill(false);
+    props.modifiedRowItems.forEach((val) => {
+        a[rowIndexGetter.value[val.project_id]] = true;
+    });
+    return a;
+});
 </script>
 
 <style scoped>
@@ -305,9 +330,9 @@ const initialCells = computed<number[][]>(() => {
     width: fit-content;
 }
 
-fluent-select::part(control) {
+.modified::part(control) {
     border-radius: 0;
-    /* background: var(--modified-cell-color); */
+    background: var(--modified-cell-color);
     border: 1px var(--border-color) solid;
 }
 

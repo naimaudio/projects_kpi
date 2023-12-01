@@ -1,7 +1,7 @@
 const now = new Date();
 import type { dayNb } from "@/typing";
 import { parse, format } from "date-fns";
-
+import dayjs, { Dayjs } from "dayjs";
 /**
  * Parse weekNumber, year to human readable date
  * @param weekNumber week Number (starting at one)
@@ -109,4 +109,36 @@ export function findLastIndex<T>(arr: T[], fn: (value: T, index?: number, array?
         .map<[number, T]>((val, i) => [i, val])
         .filter(([i, val]) => fn(val, i, arr))
         .pop() || [-1])[0];
+}
+
+export function getFirstWednesdayOfMonth(year: number, month: number): Dayjs {
+    // Create a Day.js object for the first day of the month
+    const firstDayOfMonth = dayjs(`${year}-${month}-01`);
+
+    // Find the day of the week for the first day of the month (0 is Sunday, 1 is Monday, and so on)
+    const dayOfWeek = firstDayOfMonth.day();
+
+    // Calculate the number of days to add to reach Wednesday (3)
+    const daysToAdd = (3 - dayOfWeek + 7) % 7;
+
+    // Add the calculated days to get the first Wednesday of the month
+    const firstWednesdayOfMonth = firstDayOfMonth.add(daysToAdd, "day");
+
+    return firstWednesdayOfMonth;
+}
+
+export function getLastWednesdayOfMonth(year: number, month: number) {
+    // Create a Day.js object for the last day of the month
+    const lastDayOfMonth = dayjs(`${year}-${month + 1}-01`).subtract(1, "day");
+
+    // Find the day of the week for the last day of the month (0 is Sunday, 1 is Monday, and so on)
+    const dayOfWeek = lastDayOfMonth.day();
+
+    // Calculate the number of days to subtract to reach Wednesday (3)
+    const daysToSubtract = (dayOfWeek - 3 + 7) % 7;
+
+    // Subtract the calculated days to get the last Wednesday of the month
+    const lastWednesdayOfMonth = lastDayOfMonth.subtract(daysToSubtract, "day");
+
+    return lastWednesdayOfMonth;
 }

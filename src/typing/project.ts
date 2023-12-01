@@ -185,6 +185,11 @@ export interface WeekInYear {
     year: number;
 }
 
+export interface MonthInYear {
+    month: number;
+    year: number;
+}
+
 export interface WeekInYearLabeled {
     week: number;
     year: number;
@@ -195,6 +200,12 @@ export interface ProjectMonthlyInformationItem {
     project_id?: number;
     month: number;
     year: number;
+    forecast_hours?: number;
+    capitalizable?: boolean;
+}
+
+export interface IncompleteProjectMonthlyInformationItem {
+    project_id: number;
     forecast_hours?: number;
     capitalizable?: boolean;
 }
