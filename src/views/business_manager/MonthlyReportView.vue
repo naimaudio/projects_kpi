@@ -233,7 +233,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         />
         <div v-if="columnHeaders.length === 0 && rowHeaders.length === 0 && !loading">
             <p class="big" style="display: flex">
-                No declared or modified hours for this month have been saved.
+                No declared or modified hours for this month have been saved. You can try to refresh the data !
                 <img
                     src="@/assets/icons/thinking_face_3d.png"
                     style="margin-left: 15px"
