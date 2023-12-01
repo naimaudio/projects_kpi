@@ -108,6 +108,7 @@ export interface MonthlyReport {
     sync_date?: Date;
     closed: boolean;
     month: { month: number; year: number };
+    overtime_threshold: number;
 }
 export interface RawUser {
     date_entrance: string | null;

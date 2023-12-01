@@ -27,7 +27,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
                     @update:model-value="(month: MonthInYear) => { 
                         router.push({...route,
                                 query: {
-                                    reportDate: month.month === new Date().getMonth() && month.year === new Date().getFullYear() 
+                                    reportDate: month.month === getWednesdayOfCurrentDate().getMonth() && month.year === getWednesdayOfCurrentDate().getFullYear() 
                                         ? undefined
                                         : `${month.month}-${month.year}`}})
                         }"
@@ -55,19 +55,12 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             </BaseButton>
         </div>
         <br />
-        <span v-if="selectedDate !== undefined"
+        <span v-if="firstWednesday !== undefined && lastWednesday !== undefined"
             >From
-            {{
-                getFirstWednesdayOfMonth(selectedDate.year, selectedDate.month + 1)
-                    .subtract(2, "day")
-                    .format("dddd, MMMM D, YYYY")
-            }}
+            {{ firstWednesday.format("dddd, MMMM D, YYYY") }}
             to
-            {{
-                getLastWednesdayOfMonth(selectedDate.year, selectedDate.month + 1)
-                    .add(2, "day")
-                    .format("dddd, MMMM D, YYYY")
-            }}.
+            {{ lastWednesday.format("dddd, MMMM D, YYYY") }}. (
+            {{ countWeeksBetween(firstWednesday, lastWednesday) }} weeks )
         </span>
         <br />
         <br />
@@ -180,6 +173,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             :column-headers="columnHeaders"
             :row-headers="rowHeaders"
             :modified-row-items="modifiedRowItems"
+            :threshold="currentMonthlyReport?.overtime_threshold || 1000"
+            :modified-threshold="modifiedThreshold"
+            @change-threshold="(thresholdValue) => (modifiedThreshold = thresholdValue)"
             @change="
                 (rowId, columnId, index, value) => {
                     if (index !== undefined) {
@@ -249,7 +245,11 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 
     <Teleport to=".global">
         <BaseButton
-            v-if="modifiedItems.length >= 1 || modifiedRowItems.length >= 1"
+            v-if="
+                modifiedItems.length >= 1 ||
+                modifiedRowItems.length >= 1 ||
+                modifiedThreshold !== currentMonthlyReport?.overtime_threshold
+            "
             accent
             style="position: absolute; right: 50px; bottom: 50px; z-index: 13"
             @click="modifyConfirmation = true"
@@ -265,7 +265,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import VueDatePicker from "@vuepic/vue-datepicker";
 import BaseButton from "@/components/base/BaseButton.vue";
 import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import InputTableProjectHours from "@/components/base/InputTableProjectHours.vue";
 import {
     getMonthlyHours,
@@ -277,7 +277,6 @@ import {
     getMonthlyReport,
     postMonthlyReport,
     closeOrOpenMonthlyReport,
-    getProjectMonthlyInfo,
 } from "@/API/requests";
 import type { MonthlyHoursItem, MonthlyReport, Person, MatrixHeaderExtended } from "@/typing";
 import { useProjectStore } from "@/stores/projectStore";
@@ -290,7 +289,12 @@ import { useGlobalStore } from "@/stores/globalStore";
 import MultipleLockIcon from "@/components/icons/MultipleLockIcon.vue";
 import UnlockIcon from "@/components/icons/UnlockIcon.vue";
 import type { MonthInYear, ProjectMatrixHeader, ProjectMonthlyInformationItem } from "@/typing/project";
-import { getFirstWednesdayOfMonth, getLastWednesdayOfMonth } from "@/utilities/main";
+import {
+    countWeeksBetween,
+    getFirstWednesdayOfMonth,
+    getLastWednesdayOfMonth,
+    getWednesdayOfCurrentDate,
+} from "@/utilities/main";
 import { useRouter, useRoute } from "vue-router";
 
 const route = useRoute();
@@ -316,6 +320,17 @@ const inputTableKey = ref(9942154);
 const modifiedRowItems = ref<{ project_id: number; capitalizable: boolean | undefined }[]>([]);
 const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
 const monthlyInfoFromId = ref<Record<number, ProjectMonthlyInformationItem>>({});
+const firstWednesday = computed(() =>
+    selectedDate.value !== undefined
+        ? getFirstWednesdayOfMonth(selectedDate.value.year, selectedDate.value.month + 1).subtract(2, "day")
+        : undefined
+);
+const lastWednesday = computed(() =>
+    selectedDate.value
+        ? getLastWednesdayOfMonth(selectedDate.value.year, selectedDate.value.month + 1).add(2, "day")
+        : undefined
+);
+const modifiedThreshold = ref(1000);
 watch(selectedDate, (date) => {
     updateReportMonth(date);
 });
@@ -403,6 +418,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
             let resp2 = await postMonthlyReport({
                 closed: false,
                 month: date,
+                overtime_threshold: modifiedThreshold.value,
             });
             if (resp2.status === 200) {
                 await updateReportMonth(date);
@@ -410,6 +426,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
             }
         } else {
             currentMonthlyReport.value = resp.data;
+            modifiedThreshold.value = resp.data.overtime_threshold;
         }
         let response = await getMonthlyHours(date);
         const now = dayjs();
@@ -562,8 +579,8 @@ onMounted(() => {
         !Array.isArray(date) && date !== null && date !== undefined
             ? { month: Number(date?.split("-")[0]), year: Number(date?.split("-")[1]) }
             : {
-                  month: new Date().getMonth(),
-                  year: new Date().getFullYear(),
+                  month: getWednesdayOfCurrentDate().getMonth(),
+                  year: getWednesdayOfCurrentDate().getFullYear(),
               };
 });
 </script>

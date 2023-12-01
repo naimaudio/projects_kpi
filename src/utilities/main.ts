@@ -142,3 +142,26 @@ export function getLastWednesdayOfMonth(year: number, month: number) {
 
     return lastWednesdayOfMonth;
 }
+
+export function countWeeksBetween(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) {
+    // Calculate the difference in milliseconds between the two dates
+    const diffInDays = Math.abs(endDate.diff(startDate, "day"));
+    console.log(diffInDays);
+    // Calculate the number of weeks, rounding up to include partial weeks
+
+    return Math.ceil(diffInDays / 7);
+}
+
+export function getWednesdayOfCurrentDate() {
+    // Create a Date object for the current date
+    const currentDate = new Date();
+
+    // Get the current day of the week (0 is Sunday, 1 is Monday, and so on)
+    const currentDayOfWeek = currentDate.getDay();
+    // Calculate the number of days to add to reach Wednesday (3)
+    const daysToAdd = 3 - currentDayOfWeek;
+
+    // Set the Date object to the Wednesday of the current week
+    currentDate.setDate(currentDate.getDate() + daysToAdd);
+    return currentDate;
+}

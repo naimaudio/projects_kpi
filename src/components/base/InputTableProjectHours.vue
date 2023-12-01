@@ -121,19 +121,62 @@
                 />
             </div>
         </div>
+        <div class="table-raw" style="grid-template-columns: 1fr">
+            <span class="table-line-break"></span>
+        </div>
         <div
             class="table-raw"
             :style="{
                 'grid-template-columns': cssGridTemplateColumns,
             }"
-            style="height: 75px"
         >
-            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell">Total</span>
             <span class="total-table-cell"></span>
             <span class="total-table-cell"></span>
-            <span style="position: sticky; left: 89px; background-color: white" class="total-table-cell"></span>
+            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
+            <div style="position: sticky; left: 89px; background-color: white" class="total-table-cell">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Total</span>
+            </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
-                <span>{{ cells.reduce((cel, sum) => Number(sum[j]) + cel, 0) }}</span>
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">{{ totals[j] }}</span>
+            </div>
+        </div>
+        <div
+            class="table-raw"
+            :style="{
+                'grid-template-columns': cssGridTemplateColumns,
+            }"
+        >
+            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
+            <div class="total-table-cell">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Threshold</span>
+            </div>
+            <span class="total-table-cell">
+                <input
+                    type="number"
+                    class="input-cell"
+                    :value="props.modifiedThreshold"
+                    :class="{
+                        'modified-cell': props.threshold != props.modifiedThreshold,
+                        'disabled-cell': props.disabled,
+                    }"
+                    min="0"
+                    :disabled="props.disabled"
+                    style="padding-left: 8px"
+                    @change="
+                        (e:Event) => {
+                                emit(
+                                    'change-threshold',
+                                    Number((e.target as HTMLInputElement).value)
+                                );
+                        }
+                    "
+                />
+            </span>
+            <div class="total-table-cell" style="position: sticky; left: 89px; background-color: white">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Overtime</span>
+            </div>
+            <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">{{ overtimes[j] }}</span>
             </div>
         </div>
     </div>
@@ -164,6 +207,8 @@ const props = withDefaults(
         modifiedItems?: InputItem[];
         modifiedRowItems?: { project_id: number; capitalizable: boolean | undefined }[];
         disabled: boolean;
+        threshold: number;
+        modifiedThreshold: number;
     }>(),
     { modifiedItems: () => [], modifiedRowItems: () => [] }
 );
@@ -172,9 +217,15 @@ const emit = defineEmits<{
     (e: "change-row", rowId: number, index: number, capitalizable: boolean | undefined): void;
     (e: "remove", index: number): void;
     (e: "remove-row", index: number): void;
+    (e: "change-threshold", threshold: number): void;
 }>();
 
 const focused = ref<number>(0);
+
+/**
+ *  WATCHERS
+ */
+
 watch(focused, (cellFocused) => {
     if (cellFocused !== undefined && document.activeElement !== inputs.value[cellFocused]) {
         inputs.value[cellFocused].focus();
@@ -185,8 +236,11 @@ watch(props.modifiedRowItems, (mri) => {
     mri.forEach((mr) => console.log(mr));
 });
 
+/**
+ *  METHODS
+ */
 const cssGridTemplateColumns = computed<string>(() => {
-    return props.columnHeaders.reduce((str, header) => {
+    return props.columnHeaders.reduce((str) => {
         return `${str} ${columnWidths}`;
     }, `${columnWidths} ${columnWidths} ${columnWidths} ${firstColumnWidth}`);
 });
@@ -231,9 +285,10 @@ const rowIndexGetter = computed<Record<number, number>>(() => {
     return rec;
 });
 
-// Computed values for hours modification
+/**
+ *  Computed values for hours modification
+ */
 
-// Used in modification event
 const modifiedItemsIndexGetter = computed<Record<string, number>>(() => {
     const rec: Record<string, number> = {};
     props.modifiedItems.forEach((item, i) => {
@@ -281,8 +336,25 @@ const whichCellsAreModified = computed<boolean[][]>(() => {
     });
     return a;
 });
+/**
+ * COMPUTED
+ */
 
-// Computed values for Project informations modification
+const totals = computed(() => {
+    return Array.from(props.columnHeaders, (_v, j) => {
+        return cells.value.reduce((sum, cel) => Number(cel[j]) + sum, 0);
+    });
+});
+
+const overtimes = computed(() => {
+    return Array.from(totals.value, (total) => {
+        return Math.max(total - props.modifiedThreshold, 0);
+    });
+});
+
+/**
+ *  Computed values for Project informations modification
+ */
 
 const modifiedProjectIndexGetter = computed<Record<number, number>>(() => {
     const rec: Record<string, number> = {};
@@ -395,8 +467,14 @@ const whichProjectCellsAreModified = computed<boolean[]>(() => {
 .modified-cell {
     background-color: var(--modified-cell-color);
 }
+
+.table-line-break {
+    border-right: 1px #e0e0e0 solid;
+    border-bottom: 1px #e0e0e0 solid;
+    height: 15px;
+}
 .total-table-cell {
-    padding: 8px 8px;
+    padding: 0px 0px;
     height: 50px;
     display: flex;
     overflow-y: auto;
