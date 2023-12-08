@@ -210,7 +210,7 @@
             <!-- PHASES SECTION -->
 
             <h3>Project phases</h3>
-            <div v-if="editedProject.phases.length < phases.length" class="icon-with-text">
+            <div v-if="editedProject.phases.length < phasesDefinition.length" class="icon-with-text">
                 <AddOutlineIcon
                     clickable
                     @click="
@@ -242,7 +242,7 @@
                 <span>Phase name</span>
                 <span>Phase start date</span>
                 <span>Phase end date</span>
-                <template v-for="(projectPhase, i) in phases" :key="i">
+                <template v-for="(projectPhase, i) in phasesDefinition" :key="i">
                     <SubtractOutlineIcon
                         v-if="editedProject.phases[jGetter[i]] !== undefined"
                         clickable
@@ -399,7 +399,7 @@ import {
     type ProjectStatus,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { phases } from "@/stores/nonReactiveStore";
+import { phasesDefinition } from "@/stores/nonReactiveStore";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useGlobalStore } from "@/stores/globalStore";
