@@ -16,8 +16,7 @@
                     <span>Total</span>
                     <div></div>
                     <div>
-                        <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
-                        <span> / 35</span>
+                        <span>{{ sumProjectHours }} </span>
                     </div>
                 </div>
                 <div class="table-raw-gap" />
@@ -30,12 +29,7 @@
         </div>
         <div class="table-raw-gap" />
         <div v-if="confirmation" class="footer-buttons-block">
-            <BaseButton
-                :loading="loading"
-                accent
-                :disabled="sumProjectHours != 35 || loading"
-                @click="emits('confirm')"
-            >
+            <BaseButton :loading="loading" accent :disabled="loading" @click="emits('confirm')">
                 <span> Validate</span>
             </BaseButton>
         </div>
@@ -105,10 +99,5 @@ const emits = defineEmits<{
     flex-direction: column;
     gap: 6px;
     width: 100%;
-}
-
-.error-validation {
-    color: red;
-    font-weight: 600;
 }
 </style>

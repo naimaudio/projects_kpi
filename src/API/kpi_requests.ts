@@ -1,5 +1,5 @@
 import { fetcher, origin } from "./requests";
-import { phases } from "@/stores/nonReactiveStore";
+import { phasesDefinition } from "@/stores/nonReactiveStore";
 import { type chartType } from "@/typing";
 import type { ECOption } from "@/main";
 import type { PieSeriesOption } from "echarts/charts";
@@ -37,9 +37,9 @@ export async function getKPI(
     if (type === "bar" && fetch_uri === "kpi/stackedbar/hour_expenditure_by_project") {
         return {
             series: data.series.map((value) => {
-                return { ...value, stack: "y", name: phases[Number(value.name)].code, type: "bar" };
+                return { ...value, stack: "y", name: phasesDefinition[Number(value.name)].code, type: "bar" };
             }),
-            legend: { data: data.legend?.data.map((n) => phases[Number(n)].code) },
+            legend: { data: data.legend?.data.map((n) => phasesDefinition[Number(n)].code) },
         };
     } else if (type === "yBar") {
         return {

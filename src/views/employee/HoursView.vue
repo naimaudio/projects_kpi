@@ -76,8 +76,7 @@
                         <div class="table-raw-container">
                             <span class="prefix align-center">Total</span>
                             <div class="prefix">
-                                <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
-                                <span> / 35</span>
+                                <span>{{ sumProjectHours }}</span>
                             </div>
                         </div>
                         <div class="table-raw-gap" />
@@ -87,7 +86,7 @@
                         </div>
                         <div class="table-raw-gap" />
                         <div class="footer-buttons">
-                            <BaseButton accent :disabled="sumProjectHours != 35" @click="confirmationModal = true">
+                            <BaseButton accent @click="confirmationModal = true">
                                 <span> {{ isNewDeclaration ? "Validate" : "Change declaration" }}</span>
                             </BaseButton>
                         </div>
@@ -158,8 +157,7 @@
                     <div class="table-raw-container">
                         <span class="prefix align-center">Total</span>
                         <div class="prefix">
-                            <span :class="{ 'error-validation': sumProjectHours > 35 }">{{ sumProjectHours }}</span>
-                            <span> / 35</span>
+                            <span>{{ sumProjectHours }}</span>
                         </div>
                     </div>
                     <div class="table-raw-gap" />
@@ -169,7 +167,7 @@
                     </div>
                     <div class="table-raw-gap" />
                     <div class="footer-buttons">
-                        <BaseButton accent :disabled="sumProjectHours != 35" @click="confirmationModal = true">
+                        <BaseButton accent @click="confirmationModal = true">
                             <span> {{ isNewDeclaration ? "Validate" : "Change declaration" }}</span>
                         </BaseButton>
                     </div>

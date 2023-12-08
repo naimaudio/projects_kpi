@@ -107,8 +107,7 @@ function uploadFile() {
                 } else {
                     globalStore.notification.display = true;
                     globalStore.notification.type = "FAILURE";
-                    globalStore.notification.content =
-                        "An error occurred during import, please check that each week declared by the user has a sum of hours equal to 35 hours.";
+                    globalStore.notification.content = "An error occurred during import";
                 }
                 importLoading.value = false;
             })

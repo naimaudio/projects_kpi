@@ -4,7 +4,7 @@ if (organizationNames.length === 0) {
     throw Error("Setup error : Please provide at least one organization in environement variables");
 }
 
-export const phases: { code: string; name: string }[] = [
+export const phasesDefinition: { code: string; name: string }[] = [
     { code: "NPI", name: "Phase 0" },
     { code: "POC/Spec", name: "concept" },
     { code: "Feasability", name: "feasability" },
@@ -12,10 +12,10 @@ export const phases: { code: string; name: string }[] = [
     { code: "Dev/EVT", name: "Development 2" },
     { code: "DVT", name: "Pre-production" },
     { code: "PVT", name: "Mass production" },
-];
+] as const;
 
 export const phasesRecord: Record<string, string> = {};
-phases.forEach((ph) => {
+phasesDefinition.forEach((ph) => {
     phasesRecord[ph.code] = ph.name;
 });
 
