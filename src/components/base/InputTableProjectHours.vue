@@ -72,14 +72,20 @@
                 </fluent-select>
             </div>
             <div style="position: sticky; left: -1px; background-color: white" class="table-cell">
-                <span style="margin-left: 15px; margin-top: auto; margin-bottom: auto">
+                <RouterLink
+                    style="margin-left: 15px; margin-top: auto; margin-bottom: auto"
+                    :to="{ name: 'project', params: { projectId: rowHeader.id }, query: route.query }"
+                >
                     {{ rowHeader.code }}
-                </span>
+                </RouterLink>
             </div>
             <div style="position: sticky; left: 89px; background-color: white" class="table-cell">
-                <span style="margin-left: 10px; margin-top: auto; margin-bottom: auto">
+                <RouterLink
+                    style="margin-left: 10px; margin-top: auto; margin-bottom: auto"
+                    :to="{ name: 'project', params: { projectId: rowHeader.id }, query: route.query }"
+                >
                     {{ rowHeader.name }}
-                </span>
+                </RouterLink>
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="table-cell">
                 <input
@@ -191,9 +197,12 @@ import SnowIcon from "@/components/icons/SnowIcon.vue";
 import ArchiveIcon from "@/components/icons/ArchiveIcon.vue";
 import { type ProjectMatrixHeader, capitalizableOptionToValue, type capitalizableLiteral } from "@/typing/project";
 import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
+import { useRoute } from "vue-router";
 
 const firstColumnWidth: string = "200px";
 const columnWidths: string = "90px";
+
+const route = useRoute();
 
 const props = withDefaults(
     defineProps<{
@@ -393,6 +402,16 @@ const whichProjectCellsAreModified = computed<boolean[]>(() => {
 </script>
 
 <style scoped>
+a {
+    color: black;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0078d4;
+    text-decoration: underline;
+}
+
 .table {
     display: grid;
     width: fit-content;
