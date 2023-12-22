@@ -42,7 +42,9 @@
                             :class="{ active: active, selected: selected }"
                         >
                             <span style="font-weight: 300">{{ project.name }}</span>
-                            <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px">{{ project.code }}</span>
+                            <span style="color: var(--option-secondary-color); font-size: 12px; margin-left: 4px">{{
+                                project.code
+                            }}</span>
                         </button>
                     </ComboboxOption>
                 </ComboboxOptions>

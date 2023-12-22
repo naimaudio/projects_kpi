@@ -1,6 +1,10 @@
 <template>
     <div ref="infoIcon" style="display: inline-block" :style="props.iconStyle">
-        <InfoOutlineIcon @mouseover="mouseover = true" @mouseleave="mouseover = false" />
+        <InfoOutlineIcon
+            :svg-container-bypass="props.svgContainerBypass"
+            @mouseover="mouseover = true"
+            @mouseleave="mouseover = false"
+        />
     </div>
     <div v-if="mouseover" ref="tooltip" :style="floatingStyles" class="tooltip">
         <slot></slot>
@@ -18,7 +22,10 @@ const { floatingStyles } = useFloating(infoIcon, tooltip, {
     placement: "bottom-end",
     middleware: [offset(0), flip(), shift()],
 });
-const props = defineProps<{ iconStyle?: string }>();
+const props = withDefaults(defineProps<{ iconStyle?: string; svgContainerBypass?: boolean }>(), {
+    svgContainerBypass: false,
+    iconStyle: "",
+});
 </script>
 
 <style scoped>
@@ -36,5 +43,6 @@ const props = defineProps<{ iconStyle?: string }>();
     border-radius: var(--button-border-radius);
     font-size: 15px;
     font-weight: 400;
+    font-style: normal;
 }
 </style>

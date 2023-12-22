@@ -68,6 +68,7 @@ export function projectsFromRaw(rawProjects: RawProject[]): Project[] {
             startDate: rawProject.start_date === null ? undefined : rawProject.start_date,
             endDate: rawProject.end_date === null ? undefined : rawProject.end_date,
             status: rawProject.status,
+            defaultCapitalization: rawProject.default_cap === null ? undefined : rawProject.default_cap,
         };
     });
 }
@@ -160,6 +161,7 @@ export function rawProjectToProjectComplete(projectPack: RawProjectPhasesAndMont
         endDate: projectPack.project.end_date || undefined,
         startCapDate: projectPack.project.start_cap_date || undefined,
         status: projectPack.project.status,
+        defaultCapitalization: projectPack.project.default_cap === null ? undefined : projectPack.project.default_cap,
     };
 }
 

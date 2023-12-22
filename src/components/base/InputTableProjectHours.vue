@@ -45,29 +45,30 @@
                 <SnowIcon v-if="rowHeader.status === 'Frozen'" style="margin: auto" />
                 <ArchiveIcon v-else-if="rowHeader.status === 'Closed'" style="margin: auto" />
             </div>
-            <div style="background-color: white" class="table-cell-select">
+            <div class="table-cell-select">
                 <fluent-select
                     :value="projectCells[i]"
-                    style="
-                        min-width: 30px !important;
-                        width: 100%;
-                        height: 100%;
-                        border-radius: 0px;
-                        background-color: var(--border-color);
-                    "
+                    style="min-width: 30px !important; width: 100%; height: 100%"
                     :disabled="props.disabled"
-                    :class="{ modified: whichProjectCellsAreModified[i] }"
+                    :class="{ modified: whichProjectCellsAreModified[i], 'disabled-select': props.disabled }"
                     @change="
                         (event: Event) => {
                             if ((event.target as HTMLInputElement).value === initialProjectCells[i]) {
                                 emit('remove-row', modifiedProjectIndexGetter[rowHeader.id]);
                             } else {
-                             emit('change-row', rowHeader.id, modifiedProjectIndexGetter[rowHeader.id], capitalizableOptionToValue[(event.target as HTMLInputElement).value])
+                             emit('change-row', rowHeader.id, modifiedProjectIndexGetter[rowHeader.id], capitalizableOptionToValue[(event.target as HTMLInputElement).value as capitalizableLiteral])
                         }}"
                 >
                     <fluent-option v-for="label in Object.keys(capitalizableOptionToValue)" :key="label">
                         {{ label }}
                     </fluent-option>
+                    <span slot="selected-value">
+                        <div class="icon-with-text">
+                            <CheckmarkLineIcon v-if="projectCells[i] == 'Yes'" color="black" :size="16" />
+                            <div v-else color="black" style="width: 16px"></div>
+                            <span style="color: var(--option-secondary-color)">{{ projectCells[i] }}</span>
+                        </div>
+                    </span>
                 </fluent-select>
             </div>
             <div style="position: sticky; left: -1px; background-color: white" class="table-cell">
@@ -188,16 +189,11 @@ import { computed, ref, watch } from "vue";
 import { cloneDeep } from "lodash";
 import SnowIcon from "@/components/icons/SnowIcon.vue";
 import ArchiveIcon from "@/components/icons/ArchiveIcon.vue";
-import type { ProjectMatrixHeader } from "@/typing/project";
+import { type ProjectMatrixHeader, capitalizableOptionToValue, type capitalizableLiteral } from "@/typing/project";
+import CheckmarkLineIcon from "@/components/icons/CheckmarkLineIcon.vue";
 
 const firstColumnWidth: string = "200px";
 const columnWidths: string = "90px";
-type capitalizableOptions = "N/A" | "Yes" | "No";
-const capitalizableOptionToValue: Record<string, boolean | undefined> = {
-    "N/A": undefined,
-    Yes: true,
-    No: false,
-} as const;
 
 const props = withDefaults(
     defineProps<{
@@ -368,7 +364,7 @@ function capitalizableValueToOption(val: boolean | undefined) {
     return val === undefined ? "N/A" : val ? "Yes" : "No";
 }
 
-const initialProjectCells = computed<capitalizableOptions[]>(() => {
+const initialProjectCells = computed<capitalizableLiteral[]>(() => {
     const a = Array(props.rowHeaders.length).fill("N/A");
     if (a.length !== 0) {
         props.rowHeaders.map((rowHeader) => {
@@ -378,7 +374,7 @@ const initialProjectCells = computed<capitalizableOptions[]>(() => {
     return a;
 });
 
-const projectCells = computed<string[]>(() => {
+const projectCells = computed<capitalizableLiteral[]>(() => {
     const a = cloneDeep(initialProjectCells.value);
     props.modifiedRowItems.forEach((val) => {
         a[rowIndexGetter.value[val.project_id]] = capitalizableValueToOption(val.capitalizable);
@@ -402,10 +398,18 @@ const whichProjectCellsAreModified = computed<boolean[]>(() => {
     width: fit-content;
 }
 
+fluent-select::part(control) {
+    border-radius: 0px;
+}
+
 .modified::part(control) {
     border-radius: 0;
     background: var(--modified-cell-color);
     border: 1px var(--border-color) solid;
+}
+
+.disabled-select {
+    background: var(--disabled-cell-color);
 }
 
 .disabled-cell {

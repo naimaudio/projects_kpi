@@ -7,6 +7,61 @@ export interface UserProject {
     status: ProjectStatus;
 }
 
+export interface Project {
+    id: number;
+    code: string;
+    division: Division;
+    subCategory: SubCategory;
+    classification: Classification;
+    expansionRenewal: ExpansionRenewal;
+    name: string;
+    entity: string;
+    complexity: number;
+    startCapDate?: string;
+    endCapDate?: string;
+    startDate?: string;
+    endDate?: string;
+    status: ProjectStatus;
+    defaultCapitalization?: boolean;
+}
+
+export interface RawProject {
+    id: number;
+    project_code: string;
+    division: Division;
+    sub_category: SubCategory;
+    classification: Classification;
+    type: ExpansionRenewal;
+    project_name: string;
+    entity: string;
+    complexity: number;
+    start_cap_date: string | null;
+    end_cap_date: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    status: ProjectStatus;
+    default_cap: boolean | null;
+}
+
+export interface BlankProject {
+    code?: string;
+    division?: Division;
+    subCategory?: SubCategory;
+    classification?: Classification;
+    expansionRenewal?: ExpansionRenewal;
+    name?: string;
+    entity?: string;
+    complexity?: number;
+    phases: BlankProjectPhase[];
+    monthly_informations: ProjectMonthlyInformationItem[];
+    startCapDate?: string;
+    endCapDate?: string;
+    startDate?: string;
+    endDate?: string;
+    status: ProjectStatus;
+    defaultCapitalization?: boolean;
+}
+
 export const divisions = ["ALL", "HOME", "PRO", "HEADPHONE", "MOTORITIES", "RESEARCH"] as const;
 export type Division = (typeof divisions)[number];
 export type SubCategory =
@@ -89,40 +144,6 @@ export const expansionRenewalLabels: { [key in ExpansionRenewal]: string } = {
     "": "",
 } as const;
 
-export interface Project {
-    id: number;
-    code: string;
-    division: Division;
-    subCategory: SubCategory;
-    classification: Classification;
-    expansionRenewal: ExpansionRenewal;
-    name: string;
-    entity: string;
-    complexity: number;
-    startCapDate?: string;
-    endCapDate?: string;
-    startDate?: string;
-    endDate?: string;
-    status: ProjectStatus;
-}
-
-export interface RawProject {
-    id: number;
-    project_code: string;
-    division: Division;
-    sub_category: SubCategory;
-    classification: Classification;
-    type: ExpansionRenewal;
-    project_name: string;
-    entity: string;
-    complexity: number;
-    start_cap_date: string | null;
-    end_cap_date: string | null;
-    start_date: string | null;
-    end_date: string | null;
-    status: ProjectStatus;
-}
-
 export interface RawProjectPhase {
     project_phase: number;
     start_date: string;
@@ -136,7 +157,7 @@ export interface ProjectPhase {
 }
 
 export interface BlankProjectPhase {
-    projectPhase?: number;
+    projectPhase: number;
     startDate?: string;
     endDate?: string;
 }
@@ -154,24 +175,6 @@ export interface CompleteProject extends Project {
 
 export const projectStatus = ["Active", "Frozen", "Closed"] as const;
 export type ProjectStatus = (typeof projectStatus)[number];
-
-export interface BlankProject {
-    code?: string;
-    division?: Division;
-    subCategory?: SubCategory;
-    classification?: Classification;
-    expansionRenewal?: ExpansionRenewal;
-    name?: string;
-    entity?: string;
-    complexity?: number;
-    phases: BlankProjectPhase[];
-    monthly_informations: ProjectMonthlyInformationItem[];
-    startCapDate?: string;
-    endCapDate?: string;
-    startDate?: string;
-    endDate?: string;
-    status: ProjectStatus;
-}
 
 export interface SelectableUserProject extends UserProject {
     selected: boolean;
@@ -218,3 +221,16 @@ export interface ProjectMatrixHeader {
     capitalizable: boolean | undefined;
     id: number;
 }
+
+export const capitalizableOptions = ["N/A", "Yes", "No"] as const;
+
+export type capitalizableLiteral = (typeof capitalizableOptions)[number];
+
+export const capitalizableOptionToValue: Record<capitalizableLiteral, boolean | undefined> = {
+    "N/A": undefined,
+    Yes: true,
+    No: false,
+} as const;
+
+export const capitalizableValueToOption = (val: boolean | undefined): capitalizableLiteral[number] =>
+    val === true ? "Yes" : val === undefined ? "N/A" : "No";

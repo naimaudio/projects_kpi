@@ -55,25 +55,44 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             </BaseButton>
         </div>
         <br />
-        <span v-if="firstWednesday !== undefined && lastWednesday !== undefined"
+        <span v-if="firstDayOfFirstWeek !== undefined && lastDayOfLastWeek !== undefined"
             >From
-            {{ firstWednesday.format("dddd, MMMM D, YYYY") }}
+            {{ firstDayOfFirstWeek.format("dddd, MMMM D, YYYY") }}
             to
-            {{ lastWednesday.format("dddd, MMMM D, YYYY") }}. (
-            {{ countWeeksBetween(firstWednesday, lastWednesday) }} weeks )
+            {{ lastDayOfLastWeek.format("dddd, MMMM D, YYYY") }}. (
+            {{ countWeeksBetween(firstDayOfFirstWeek, lastDayOfLastWeek) }} weeks )
         </span>
         <br />
         <br />
-        <BaseButton
-            v-if="selectedDate !== undefined"
-            :disabled="currentMonthlyReport?.closed"
-            @click="refreshConfirmation = true"
-            >Refresh/reset to declared data</BaseButton
-        >
-        <BaseButton style="margin-left: 15px" @click="exportsModal = true">Exports</BaseButton>
-        <BaseButton style="margin-left: 15px" @click="changeRowsModal = true">Projects display</BaseButton>
-        <BaseButton style="margin-left: 15px" @click="changeColumnsModal = true">Users display</BaseButton>
-
+        <div style="display: flex; justify-content: end; align-items: center">
+            <span style="font-weight: 500">Actions</span>
+            <BaseButton style="margin-left: 15px; font-style: italic" @click="changeColumnsModal = true"
+                >Users display</BaseButton
+            >
+            <BaseButton style="margin-left: 15px; font-style: italic" @click="changeRowsModal = true"
+                >Projects display</BaseButton
+            >
+            <BaseButton
+                v-if="selectedDate !== undefined"
+                :disabled="currentMonthlyReport?.closed"
+                style="margin-left: 15px; font-style: italic"
+                @click="refreshConfirmation = true"
+                >Refresh/reset to declared data</BaseButton
+            >
+            <BaseButton
+                :disabled="currentMonthlyReport?.closed"
+                style="margin-left: 15px; font-style: italic"
+                @click="setDefaultCapitalization"
+                >Set default capitalization
+                <BaseTooltip :svg-container-bypass="true">
+                    <div style="max-width: 300px">
+                        This action will replace all N/A capitalization flag to No or Yes depending on the default
+                        capitalization flag of the project.
+                    </div>
+                </BaseTooltip>
+            </BaseButton>
+            <BaseButton style="margin-left: 15px; font-style: italic" @click="exportsModal = true">Exports</BaseButton>
+        </div>
         <!-- MODALS -->
 
         <MonthlyReportRowModal
@@ -278,6 +297,7 @@ import {
     postMonthlyReport,
     closeOrOpenMonthlyReport,
     getProjectMonthlyInfo,
+    getProjectsDefaultCapitalization,
 } from "@/API/requests";
 import type { MonthlyHoursItem, MonthlyReport, Person, MatrixHeaderExtended } from "@/typing";
 import { useProjectStore } from "@/stores/projectStore";
@@ -321,12 +341,12 @@ const inputTableKey = ref(9942154);
 const modifiedRowItems = ref<{ project_id: number; capitalizable: boolean | undefined }[]>([]);
 const currentMonthlyReport = ref<MonthlyReport | undefined>(undefined);
 const monthlyInfoFromId = ref<Record<number, ProjectMonthlyInformationItem>>({});
-const firstWednesday = computed(() =>
+const firstDayOfFirstWeek = computed(() =>
     selectedDate.value !== undefined
         ? getFirstWednesdayOfMonth(selectedDate.value.year, selectedDate.value.month + 1).subtract(2, "day")
         : undefined
 );
-const lastWednesday = computed(() =>
+const lastDayOfLastWeek = computed(() =>
     selectedDate.value
         ? getLastWednesdayOfMonth(selectedDate.value.year, selectedDate.value.month + 1).add(2, "day")
         : undefined
@@ -340,6 +360,34 @@ watch(selectedDate, (date) => {
  * Methods
  */
 
+async function setDefaultCapitalization() {
+    const capitalizationResponse: { project_id: number; capitalizable: boolean | undefined }[] = (
+        await getProjectsDefaultCapitalization(
+            rowHeaders.value.map((item) => {
+                return item.id;
+            })
+        )
+    ).data.map((item) => {
+        return {
+            capitalizable: item.capitalizable === null ? undefined : item.capitalizable,
+            project_id: item.project_id,
+        };
+    });
+    capitalizationResponse
+        .filter((cap) => {
+            return !modifiedRowItems.value.some((rowItem) => rowItem.project_id === cap.project_id);
+        })
+        .filter((cap) => {
+            return !rowHeaders.value.some(
+                (rowItem) => rowItem.id === cap.project_id && rowItem.capitalizable !== undefined
+            );
+        })
+        .forEach((cap) => {
+            if (cap.capitalizable !== undefined) {
+                modifiedRowItems.value.push({ project_id: cap.project_id, capitalizable: cap.capitalizable });
+            }
+        });
+}
 async function exportMonthly() {
     if (selectedDate.value !== undefined) {
         loadingExportMonthly.value = true;
@@ -369,7 +417,9 @@ async function exportMonthlyReview() {
 
 function modifyHours() {
     if (selectedDate.value !== undefined) {
-        putMonthlyHours(selectedDate.value, modifiedItems.value, modifiedRowItems.value).then((response) => {
+        putMonthlyHours(selectedDate.value, modifiedItems.value, modifiedRowItems.value, {
+            overtime_threshold: modifiedThreshold.value,
+        }).then((response) => {
             if (response.status === 200) {
                 updateReportMonth(selectedDate.value);
                 globalStore.notification = {
@@ -412,6 +462,7 @@ async function updateReportMonth(date: { month: number; year: number } | undefin
     items.value.splice(0);
     columnHeaders.value.splice(0);
     rowHeaders.value.splice(0);
+    monthlyInfoFromId.value = {};
     if (date !== undefined) {
         loading.value = true;
         let resp = await getMonthlyReport(date);

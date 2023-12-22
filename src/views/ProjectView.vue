@@ -36,7 +36,7 @@
 
         <!-- PROJECT PROPERTIES SECTION -->
 
-        <h3>Project properties</h3>
+        <h3>Properties</h3>
         <div v-if="user.role === 'Project Manager' || user.role === 'Business Manager'" class="parent">
             <span>* Name</span>
             <fluent-text-field v-model="editedProject.name" required></fluent-text-field>
@@ -72,7 +72,9 @@
             <fluent-select :key="selectKey" v-model="editedProject.subCategory">
                 <fluent-option v-for="subCategory in subDivisions" :key="subCategory" :value="subCategory">
                     <span>{{ subCategoryLabels[subCategory] }}</span>
-                    <span style="color: #8f8f8f; font-size: 12px; margin-left: 4px"> {{ subCategory }}</span>
+                    <span style="color: var(--option-secondary-color); font-size: 12px; margin-left: 4px">
+                        {{ subCategory }}</span
+                    >
                 </fluent-option>
                 <span slot="selected-value">{{ editedProject.subCategory }}</span>
             </fluent-select>
@@ -110,7 +112,28 @@
             <span>Organization</span>
             <span>{{ editedProject?.entity }}</span>
         </div>
+        <!-- CAPITALIZATION SECTION -->
 
+        <h3>Capitalization</h3>
+        <div class="parent">
+            <span>Default capitalization</span>
+            <fluent-select
+                :value="capitalizableValueToOption(editedProject.defaultCapitalization)"
+                @change="
+                    (event: any) => {
+                        editedProject.defaultCapitalization = capitalizableOptionToValue[event.target.value as capitalizableLiteral];
+                    }
+                "
+            >
+                <fluent-option
+                    v-for="capitalizableOption in capitalizableOptions"
+                    :key="capitalizableOption"
+                    :value="capitalizableOption"
+                >
+                    <span>{{ capitalizableOption }}</span>
+                </fluent-option>
+            </fluent-select>
+        </div>
         <template
             v-if="
                 editedProject?.subCategory !== 'ABS' &&
@@ -119,7 +142,7 @@
         >
             <!-- DATES SECTION -->
 
-            <h3>Project dates</h3>
+            <h3>Dates</h3>
             <div class="parent">
                 <span>Start date</span>
                 <VueDatePicker
@@ -132,22 +155,6 @@
                 <span>End date</span>
                 <VueDatePicker
                     v-model="editedProject.endDate"
-                    format="dd/MM/yyyy"
-                    model-type="yyyy-MM-dd"
-                    :auto-apply="true"
-                    :enable-time-picker="false"
-                ></VueDatePicker>
-                <span>Capitalization start</span>
-                <VueDatePicker
-                    v-model="editedProject.startCapDate"
-                    format="dd/MM/yyyy"
-                    model-type="yyyy-MM-dd"
-                    :auto-apply="true"
-                    :enable-time-picker="false"
-                ></VueDatePicker>
-                <span>Capitalization end</span>
-                <VueDatePicker
-                    v-model="editedProject.endCapDate"
                     format="dd/MM/yyyy"
                     model-type="yyyy-MM-dd"
                     :auto-apply="true"
@@ -209,26 +216,24 @@
 
             <!-- PHASES SECTION -->
 
-            <h3>Project phases</h3>
+            <h3>Phases</h3>
             <div v-if="editedProject.phases.length < phasesDefinition.length" class="icon-with-text">
                 <AddOutlineIcon
                     clickable
                     @click="
-                        (event) => {
-                            const k = editedProject.phases.findIndex((p, l) => p.projectPhase !== l);
-                            if (k === -1) {
-                                editedProject.phases.push({
-                                    projectPhase: editedProject.phases.length,
-                                    startDate: undefined,
-                                    endDate: undefined,
-                                });
-                            } else {
-                                editedProject.phases.splice(k, 0, {
-                                    projectPhase: k,
-                                    startDate: undefined,
-                                    endDate: undefined,
-                                });
-                            }
+                        (_event) => {
+                            const boolTable = new Array(7).fill(false);
+                            editedProject.phases.forEach((phase) => {
+                                if (phase.projectPhase !== undefined) {
+                                    boolTable[phase.projectPhase] = true;
+                                }
+                            });
+                            const k = boolTable.findIndex((item) => !item);
+                            editedProject.phases.splice(k, 0, {
+                                projectPhase: k,
+                                startDate: undefined,
+                                endDate: undefined,
+                            });
                         }
                     "
                 />
@@ -244,75 +249,65 @@
                 <span>Phase end date</span>
                 <template v-for="(projectPhase, i) in phasesDefinition" :key="i">
                     <SubtractOutlineIcon
-                        v-if="editedProject.phases[jGetter[i]] !== undefined"
+                        v-if="editedProject.phases[phaseIndexGeter[i]] !== undefined"
                         clickable
                         @click="
                             (event) => {
-                                editedProject.phases.splice(jGetter[i], 1);
+                                editedProject.phases.splice(phaseIndexGeter[i], 1);
                             }
                         "
                     />
                     <span v-else></span>
-                    <span :class="{ 'disabled-phase': jGetter[i] === undefined }">{{ projectPhase.code }}</span>
-                    <span :class="{ 'disabled-phase': jGetter[i] === undefined }">{{ projectPhase.name }} </span>
-                    <VueDatePicker
-                        v-if="editedProject.phases[jGetter[i]] !== undefined"
-                        :model-value="editedProject.phases[jGetter[i]].startDate"
-                        :min-date="
-                            jGetter[i] !== 0
-                                ? dayjs(editedProject.phases[jGetter[i] - 1].startDate, 'YYYY-MM-DD')
-                                      .add(1, 'month')
-                                      .format('YYYY-MM-DD')
-                                : undefined
-                        "
-                        :max-date="editedProject.phases[jGetter[i]].endDate"
-                        ignore-time-validation
-                        format="dd/MM/yyyy"
-                        month-picker
-                        model-type="yyyy-MM-dd"
-                        :auto-apply="true"
-                        :enable-time-picker="false"
-                        @update:model-value="
-                            (val) => {
-                                if (val === null) {
-                                    editedProject.phases[jGetter[i]].startDate = undefined;
-                                    if (i !== 0) {
-                                        editedProject.phases[jGetter[i] - 1].endDate = undefined;
-                                    }
-                                } else {
-                                    let val2 = dayjs(val);
-                                    editedProject.phases[jGetter[i]].startDate = val2
-                                        .startOf('month')
-                                        .format('YYYY-MM-DD');
-                                    if (i !== 0) {
-                                        editedProject.phases[jGetter[i] - 1].endDate = val2
-                                            .subtract(1, 'month')
-                                            .endOf('month')
+                    <span :class="{ 'disabled-phase': phaseIndexGeter[i] === undefined }">{{ projectPhase.code }}</span>
+                    <span :class="{ 'disabled-phase': phaseIndexGeter[i] === undefined }"
+                        >{{ projectPhase.name }}
+                    </span>
+                    <div v-if="editedProject.phases[phaseIndexGeter[i]] !== undefined" class="field-with-validation">
+                        <VueDatePicker
+                            :model-value="editedProject.phases[phaseIndexGeter[i]].startDate"
+                            format="dd/MM/yyyy"
+                            month-picker
+                            model-type="yyyy-MM-dd"
+                            :auto-apply="true"
+                            :enable-time-picker="false"
+                            @update:model-value="
+                                (val) => {
+                                    if (val === null) {
+                                        editedProject.phases[phaseIndexGeter[i]].startDate = undefined;
+                                    } else {
+                                        let val2 = dayjs(val);
+                                        editedProject.phases[phaseIndexGeter[i]].startDate = val2
+                                            .startOf('month')
                                             .format('YYYY-MM-DD');
                                     }
                                 }
-                            }
-                        "
-                    ></VueDatePicker>
-                    <span v-else></span
-                    ><VueDatePicker
-                        v-if="editedProject.phases[jGetter[i]] !== undefined"
-                        :model-value="editedProject.phases[jGetter[i]].endDate"
-                        :min-date="i !== 0 ? editedProject.phases[jGetter[i]].startDate : undefined"
-                        ignore-time-validation
-                        format="dd/MM/yyyy"
-                        month-picker
-                        model-type="yyyy-MM-dd"
-                        :auto-apply="true"
-                        :enable-time-picker="false"
-                        @update:model-value="
-                            (val) => {
-                                editedProject.phases[jGetter[i]].endDate = dayjs(val)
-                                    .endOf('month')
-                                    .format('YYYY-MM-DD');
-                            }
-                        "
-                    ></VueDatePicker>
+                            "
+                        ></VueDatePicker>
+                        <span v-if="isDateValid[phaseIndexGeter[i]]?.start === false" class="validation-text"
+                            >Interferes with another phase / invalid</span
+                        >
+                    </div>
+                    <span v-else></span>
+                    <div v-if="editedProject.phases[phaseIndexGeter[i]] !== undefined">
+                        <VueDatePicker
+                            :model-value="editedProject.phases[phaseIndexGeter[i]].endDate"
+                            format="dd/MM/yyyy"
+                            month-picker
+                            model-type="yyyy-MM-dd"
+                            :auto-apply="true"
+                            :enable-time-picker="false"
+                            @update:model-value="
+                                (val) => {
+                                    editedProject.phases[phaseIndexGeter[i]].endDate = dayjs(val)
+                                        .endOf('month')
+                                        .format('YYYY-MM-DD');
+                                }
+                            "
+                        ></VueDatePicker>
+                        <span v-if="isDateValid[phaseIndexGeter[i]]?.end === false" class="validation-text"
+                            >Interferes with another phase / invalid</span
+                        >
+                    </div>
                     <span v-else></span>
                 </template>
             </div>
@@ -397,6 +392,10 @@ import {
     expansionRenewalArray,
     type ProjectMonthlyInformationItem,
     type ProjectStatus,
+    capitalizableOptions,
+    capitalizableOptionToValue,
+    capitalizableValueToOption,
+    type capitalizableLiteral,
 } from "@/typing/project";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { phasesDefinition } from "@/stores/nonReactiveStore";
@@ -453,7 +452,7 @@ const changeProjectStatusModal = ref(false);
 
 // A key in order to hard reload a select component.
 const selectKey = ref(1294821749);
-
+const isDateValid = ref<Record<number, { start: boolean | undefined; end: boolean | undefined }>>({});
 const loadingInitialRequest = ref<boolean>(false);
 const project = ref<CompleteProject | undefined>();
 const done = ref<boolean>(false);
@@ -517,7 +516,7 @@ const subDivisions = computed<SubCategory[]>(() => {
     return division !== undefined ? divisionOptions[division].subDivisions : [];
 });
 
-const jGetter = computed<Record<number, number>>(() => {
+const phaseIndexGeter = computed<Record<number, number>>(() => {
     const rec: Record<number, number> = [];
     editedProject.value.phases.forEach((val, index) => {
         if (val.projectPhase !== undefined) {
@@ -630,43 +629,144 @@ async function changeState(state: ProjectStatus) {
 }
 
 const clickHandler = () => {
-    loading.value = true;
-    updateForecast();
-    if (!newProject.value && "id" in editedProject.value)
-        updateProject(editedProject.value as CompleteProject).then((response) => {
-            if (response.status === 200) {
-                globalStore.notification.content = "Project successfully updated";
-                globalStore.notification.display = true;
-                globalStore.notification.type = "SUCCESS";
-            } else if (response.status === 400 && response.data.detail === "Project code already exists") {
-                projectCodeValidation.value = "Project code already exists";
-            } else {
-                globalStore.notification.content = "Oh no, there was an error";
-                globalStore.notification.display = true;
-                globalStore.notification.type = "FAILURE";
-                close();
-            }
-        });
-    else {
-        editedProject.value.status = "Active";
-        postProject(editedProject.value as CompleteProject).then((response) => {
-            if (response.status === 200) {
-                globalStore.notification.content = "Project successfully updated";
-                globalStore.notification.display = true;
-                globalStore.notification.type = "SUCCESS";
-            } else if (response.status === 400 && response.data.detail === "Project code already exists") {
-                projectCodeValidation.value = "Project code already exists";
-            } else {
-                globalStore.notification.content = "Oh no, there was an error";
-                globalStore.notification.display = true;
-                globalStore.notification.type = "FAILURE";
-                close();
-            }
-        });
+    const datesAreValid = validateDates();
+    if (!datesAreValid) {
+        globalStore.notification.content = "Oh ! It seems there is a validation error.";
+        globalStore.notification.display = true;
+        globalStore.notification.type = "FAILURE";
+    } else {
+        loading.value = true;
+        updateForecast();
+        if (!newProject.value && "id" in editedProject.value)
+            updateProject(editedProject.value as CompleteProject).then((response) => {
+                if (response.status === 200) {
+                    globalStore.notification.content = "Project successfully updated";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "SUCCESS";
+                } else if (response.status === 400 && response.data.detail === "Project code already exists") {
+                    projectCodeValidation.value = "Project code already exists";
+                } else {
+                    globalStore.notification.content = "Oh no, there was an error";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "FAILURE";
+                    close();
+                }
+            });
+        else {
+            editedProject.value.status = "Active";
+            postProject(editedProject.value as CompleteProject).then((response) => {
+                if (response.status === 200) {
+                    globalStore.notification.content = "Project successfully updated";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "SUCCESS";
+                } else if (response.status === 400 && response.data.detail === "Project code already exists") {
+                    projectCodeValidation.value = "Project code already exists";
+                } else {
+                    globalStore.notification.content = "Oh no, there was an error";
+                    globalStore.notification.display = true;
+                    globalStore.notification.type = "FAILURE";
+                    close();
+                }
+            });
+        }
+        loading.value = false;
     }
-    loading.value = false;
 };
 
+function longestIncreasingSubsequence(dates: date[]) {
+    const N = dates.length;
+    const P = new Array(N);
+    const M = new Array(N + 1);
+
+    M[0] = -1; // undefined so can be set to any value
+    let L = 0;
+
+    for (let i = 0; i < N; i++) {
+        let lo = 1;
+        let hi = L + 1;
+
+        while (lo < hi) {
+            const mid = lo + Math.floor((hi - lo) / 2);
+
+            if (dates[M[mid]] >= dates[i]) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+
+        const newL = lo;
+        P[i] = M[newL - 1];
+        M[newL] = i;
+
+        if (newL > L) {
+            L = newL;
+        }
+    }
+
+    const S = new Array(L);
+    let k = M[L];
+
+    for (let j = L - 1; j >= 0; j--) {
+        S[j] = dates[k];
+        k = P[k];
+    }
+
+    return S;
+}
+function stringToDate(dateString: string): Date {
+    // Split the string into day, month, and year components
+    const [year, month, day] = dateString.split("-");
+
+    // JavaScript months are 0-based, so we subtract 1 from the month
+    const jsMonth = parseInt(month, 10) - 1;
+
+    // Create a new Date object using the components
+    const resultDate = new Date(Number(year), jsMonth, Number(day));
+
+    return resultDate;
+}
+
+function validateDates(): boolean {
+    const phasesInOrder = editedProject.value.phases.sort((a, b) => a.projectPhase - b.projectPhase);
+    isDateValid.value = {};
+
+    phasesInOrder.forEach((phase) => {
+        isDateValid.value[phase.projectPhase] = { start: true, end: true };
+    });
+    const dates = phasesInOrder.reduce<(Date | undefined)[]>((prevValue, currentValue) => {
+        prevValue.push(currentValue.startDate === undefined ? undefined : stringToDate(currentValue.startDate));
+        prevValue.push(currentValue.endDate === undefined ? undefined : stringToDate(currentValue.endDate));
+        return prevValue;
+    }, []);
+    function isDate(value: Date | undefined): value is Date {
+        return value !== undefined;
+    }
+    function isNumber(value: number | undefined): value is number {
+        return value !== undefined;
+    }
+    function findIndexesWithCondition<T>(arr: T[], condition: (value: T) => boolean) {
+        return arr.map((value, index) => (condition(value) ? index : undefined)).filter<number>(isNumber);
+    }
+    const largestDates = longestIncreasingSubsequence(dates.filter<Date>(isDate));
+    const wrongIndexes = findIndexesWithCondition(dates, (date: Date | undefined) => {
+        return date === undefined || !largestDates.includes(date);
+    });
+    wrongIndexes.forEach((index) => {
+        if (index % 2 === 0) {
+            isDateValid.value[Math.floor(index / 2)] = {
+                start: false,
+                end: isDateValid.value[Math.floor(index / 2)]?.end,
+            };
+        } else {
+            isDateValid.value[Math.floor(index / 2)] = {
+                start: isDateValid.value[Math.floor(index / 2)]?.start,
+                end: false,
+            };
+        }
+    });
+    return wrongIndexes.length === 0;
+}
 /**
  * Watchers
  */
@@ -768,6 +868,11 @@ projectInit();
 </script>
 
 <style>
+.validation-text {
+    color: red;
+    font-style: italic;
+    font-size: small;
+}
 .centered {
     position: absolute;
     left: 50%;
@@ -790,9 +895,8 @@ projectInit();
 .parent-phases {
     display: grid;
     grid-template-columns: 1fr 2fr 4fr 4fr 4fr;
-    grid-template-rows: repeat(8, 39px);
+    grid-auto-rows: minmax(39px, auto);
     grid-column-gap: 0px;
-    grid-template-rows: repeat(40px, 7);
     grid-row-gap: 10px;
     max-width: 1000px;
 }

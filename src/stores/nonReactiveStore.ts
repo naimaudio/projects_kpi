@@ -4,7 +4,7 @@ if (organizationNames.length === 0) {
     throw Error("Setup error : Please provide at least one organization in environement variables");
 }
 
-export const phasesDefinition: { code: string; name: string }[] = [
+export const phasesDefinition = [
     { code: "NPI", name: "Phase 0" },
     { code: "POC/Spec", name: "concept" },
     { code: "Feasability", name: "feasability" },

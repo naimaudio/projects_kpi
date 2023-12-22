@@ -11,6 +11,7 @@ import type {
     Person,
     RawDeclarationMinified,
     MonthlyReport,
+    MonthlyReportInformation,
 } from "@/typing";
 import { monthYeartoDate } from "@/typing/conversions";
 import type {
@@ -23,7 +24,13 @@ import type {
     IncompleteProjectMonthlyInformationItem,
     MonthInYear,
 } from "@/typing/project";
-import { dayNumberToDayDate, envVariableWithValidation } from "@/utilities/main";
+import {
+    countWeeksBetween,
+    dayNumberToDayDate,
+    envVariableWithValidation,
+    getFirstWednesdayOfMonth,
+    getLastWednesdayOfMonth,
+} from "@/utilities/main";
 
 export const origin = envVariableWithValidation("VITE_FAST_API_URI");
 
@@ -261,6 +268,10 @@ export async function updateProject(project: CompleteProject): Promise<Simplifie
             start_cap_date: project.startCapDate || null,
             start_date: project.startDate || null,
             status: project.status,
+            default_cap:
+                project.defaultCapitalization === false
+                    ? project.defaultCapitalization
+                    : project.defaultCapitalization || null,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
@@ -307,6 +318,7 @@ export async function postProject(project: Omit<CompleteProject, "id">) {
             start_cap_date: project.startCapDate || null,
             start_date: project.startDate || null,
             status: project.status,
+            default_cap: project.defaultCapitalization || null,
         },
         phases: project.phases.map<RawProjectPhase>((p) => {
             return { end_date: p.endDate, start_date: p.startDate, project_phase: p.projectPhase };
@@ -336,7 +348,8 @@ export async function getUsers(): Promise<SimplifiedResponse<Person[]>> {
 export async function putMonthlyHours(
     date: MonthInYear,
     monthlyHoursItems: MonthlyHoursItem[],
-    projectMonthlyInformations: { project_id: number; capitalizable: boolean | undefined }[]
+    projectMonthlyInformations: { project_id: number; capitalizable: boolean | undefined }[],
+    monthlyInformations: MonthlyReportInformation
 ): Promise<SimplifiedResponse<MonthlyHours[]>> {
     interface RequestBody {
         hours_items: {
@@ -345,10 +358,12 @@ export async function putMonthlyHours(
             hours: { project_id: number; hours: number; domain: string }[];
         }[];
         project_monthly_informations: IncompleteProjectMonthlyInformationItem[];
+        report_informations: MonthlyReportInformation;
     }
     const monthlyHours: RequestBody = {
         hours_items: [],
         project_monthly_informations: [],
+        report_informations: monthlyInformations,
     };
     monthlyHoursItems.forEach((mhItem) => {
         const index = monthlyHours.hours_items.findIndex((val) => {
@@ -449,6 +464,14 @@ export async function postMonthlyReport(monthlyReport: MonthlyReport): Promise<S
             month: monthYeartoDate(monthlyReport.month),
             closed: monthlyReport.closed,
             sync_date: monthlyReport.sync_date,
+            overtime_threshold:
+                countWeeksBetween(
+                    getFirstWednesdayOfMonth(monthlyReport.month.year, monthlyReport.month.month + 1).subtract(
+                        2,
+                        "day"
+                    ),
+                    getLastWednesdayOfMonth(monthlyReport.month.year, monthlyReport.month.month + 1).add(2, "day")
+                ) * 35,
         }),
     });
     return { status: response.status, data: await response.json() };
@@ -478,4 +501,17 @@ export async function getProjectsExport(): Promise<SimplifiedResponse<Blob>> {
         method: "GET",
     });
     return { status: response.status, data: await response.blob() };
+}
+
+export async function getProjectsDefaultCapitalization(
+    projectIds: number[]
+): Promise<SimplifiedResponse<{ project_id: number; capitalizable: boolean | null }[]>> {
+    const response = await fetcher(`${origin}/projects/capitalization/get`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projectIds),
+    });
+    return { status: response.status, data: await response.json() };
 }

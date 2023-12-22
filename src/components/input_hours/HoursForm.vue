@@ -29,7 +29,7 @@
                 <fluent-number-field
                     :value="String(declaration.hours)"
                     :min="0"
-                    :max="35"
+                    :max="70"
                     style="width: 100%"
                     @change="(event: ChangeEvent) => emits('update:modelValue','hours', index, Number(event.target.value))"
                 />
