@@ -673,7 +673,7 @@ const clickHandler = () => {
     }
 };
 
-function longestIncreasingSubsequence(dates: date[]) {
+function longestIncreasingSubsequence(dates: Date[]) {
     const N = dates.length;
     const P = new Array(N);
     const M = new Array(N + 1);
