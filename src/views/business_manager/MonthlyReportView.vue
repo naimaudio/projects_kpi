@@ -162,7 +162,6 @@ import VueDatePicker from '@vuepic/vue-datepicker';
         </ModalComponent>
         <ModalComponent v-if="modifyConfirmation && selectedDate !== undefined" @close="modifyConfirmation = false">
             <p>Are you sure of your modifications ?</p>
-            <p>Keep in mind changing hours will have no effect in project management KPIs</p>
             <BaseButton accent style="margin-left: auto; display: block" @click="modifyHours">Confirm</BaseButton>
         </ModalComponent>
 
@@ -612,6 +611,8 @@ const changeColumns = (userIds: number[]) => {
 
 /**
  * Initialization
+ *
+ * Set current month depending on route query
  */
 onMounted(() => {
     const date = route.query.reportDate;

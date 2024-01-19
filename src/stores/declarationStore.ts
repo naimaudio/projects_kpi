@@ -16,7 +16,7 @@ export const useDeclarationStore = defineStore("declaration", () => {
     const records = ref<DeclRecord[]>([]);
 
     const weeksDeclared = computed<WeekInYear[]>(() => {
-        const sortedDeclarations = declarations.value.sort((decl1, decl2) =>
+        const sortedDeclarations = records.value.sort((decl1, decl2) =>
             decl2.year !== decl1.year ? decl1.year - decl2.year : decl1.week - decl2.week
         );
         return sortedDeclarations.reduce<WeekInYear[]>((previousValue, currentValue) => {

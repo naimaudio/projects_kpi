@@ -105,6 +105,7 @@ const options = ref<Record<string, ECOption>>({
     lineOption: {
         title: {
             text: "Total hours spent",
+            subtext: "without ABS",
         },
         tooltip: {
             trigger: "axis",

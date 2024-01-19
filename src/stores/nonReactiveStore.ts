@@ -7,7 +7,7 @@ if (organizationNames.length === 0) {
 export const phasesDefinition = [
     { code: "NPI", name: "Phase 0" },
     { code: "POC/Spec", name: "concept" },
-    { code: "Feasability", name: "feasability" },
+    { code: "Feasibility", name: "feasibility" },
     { code: "Dev/ES", name: "Development 1" },
     { code: "Dev/EVT", name: "Development 2" },
     { code: "DVT", name: "Pre-production" },
