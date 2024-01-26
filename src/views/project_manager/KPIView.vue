@@ -37,6 +37,7 @@
         </div>
     </div>
 </template>
+
 <script setup lang="ts">
 import * as echarts from "echarts/core";
 import { computed, ref, watch, onMounted } from "vue";
@@ -296,6 +297,7 @@ onMounted(() => {
     }
 });
 </script>
+
 <style scoped>
 .graph-container {
     padding: 10px;

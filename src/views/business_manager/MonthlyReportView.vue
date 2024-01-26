@@ -59,8 +59,8 @@ import VueDatePicker from '@vuepic/vue-datepicker';
             >From
             {{ firstDayOfFirstWeek.format("dddd, MMMM D, YYYY") }}
             to
-            {{ lastDayOfLastWeek.format("dddd, MMMM D, YYYY") }}. (
-            {{ countWeeksBetween(firstDayOfFirstWeek, lastDayOfLastWeek) }} weeks )
+            {{ lastDayOfLastWeek.format("dddd, MMMM D, YYYY") }} (
+            {{ countWeeksBetween(firstDayOfFirstWeek, lastDayOfLastWeek) }} weeks ).
         </span>
         <br />
         <br />

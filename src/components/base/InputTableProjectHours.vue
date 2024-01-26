@@ -139,9 +139,13 @@
         >
             <span class="total-table-cell"></span>
             <span class="total-table-cell"></span>
-            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
-            <div style="position: sticky; left: 89px; background-color: white" class="total-table-cell">
+            <div style="position: sticky; left: -1px; background-color: white" class="total-table-cell">
                 <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Total</span>
+            </div>
+            <div class="total-table-cell" style="position: sticky; left: 89px; background-color: white">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">
+                    {{ totals.reduce((sum, val) => sum + val, 0) }}
+                </span>
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">{{ totals[j] }}</span>
@@ -153,7 +157,6 @@
                 'grid-template-columns': cssGridTemplateColumns,
             }"
         >
-            <span style="position: sticky; left: -1px; background-color: white" class="total-table-cell"></span>
             <div class="total-table-cell">
                 <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Threshold</span>
             </div>
@@ -179,8 +182,13 @@
                     "
                 />
             </span>
-            <div class="total-table-cell" style="position: sticky; left: 89px; background-color: white">
+            <div class="total-table-cell" style="position: sticky; left: -1px; background-color: white">
                 <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">Overtime</span>
+            </div>
+            <div class="total-table-cell" style="position: sticky; left: 89px; background-color: white">
+                <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">
+                    {{ overtimes.reduce((sum, val) => sum + val, 0) }}
+                </span>
             </div>
             <div v-for="(header, j) in props.columnHeaders" :key="header.id" class="total-table-cell">
                 <span style="padding-left: 8px; margin-top: auto; margin-bottom: auto">{{ overtimes[j] }}</span>
